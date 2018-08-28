@@ -13,7 +13,7 @@ class Container extends Component {
 
 
   render() {
-    const { children, navigation } = this.props;
+    const { children, navigation, footer } = this.props;
 
     return (
       <View style={styles.container}>
@@ -27,7 +27,9 @@ class Container extends Component {
         </ScrollView>
         <Flex>
           <FlexItem><Button><Icon type={'\ue616'} size='md' /></Button></FlexItem>
-          <FlexItem style={styles.spacer}></FlexItem>
+          <FlexItem style={styles.spacer}>
+            {footer}
+          </FlexItem>
           <FlexItem><Button><Icon type={'\ue629'} size='md' /></Button></FlexItem>
         </Flex>
       </View>
@@ -69,10 +71,15 @@ class Container extends Component {
 
 }
 
+
+Container.defaultProps = {
+  footer: null
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 5
+    padding: 5,
   },
   spacer: {
     flex: 3

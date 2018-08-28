@@ -29,19 +29,27 @@ class Root extends Component{
 
     state = {
         config: [],
-        roteiro: null
+        roteiro: null,
+        modoInteracao: {
+            tipoConteudo: '',
+            modoAprendizagem: '',
+            sentidoIdentificacao: '',
+        }
     }
 
     render(){
 
-        const {config} = this.state;
+        const {config, modoInteracao, roteiro} = this.state;
 
         return <Nav 
             {...this.props} 
             screenProps={{
                 config, 
+                roteiro, 
+                modoInteracao,
                 onChangeConfig: this.onChangeConfig,
                 onSelectRoteiro: this.onSelectRoteiro,
+                onChangeModoInteracao: this.onChangeModoInteracao
             }} 
         />
     }
@@ -58,6 +66,8 @@ class Root extends Component{
     onSelectRoteiro = roteiro => {
         this.setState({roteiro});
     }
+
+    onChangeModoInteracao = (field, value) => this.setState({modoInteracao: {...this.state.modoInteracao, [field]: value}})
 
 }
 
