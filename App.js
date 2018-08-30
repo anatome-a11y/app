@@ -77,19 +77,19 @@ class App extends Component {
       <Container navigation={navigation}>
           <List renderHeader={() => 'Roteiros de aprendizagem'}>
             {
-              anatomps.map(({roteiro}) => (
+              anatomps.map(anatomp => (
                 <ListItem
-                onClick={this.onSelectRoteiro}
-                key={roteiro._id}
+                onClick={this.onSelectRoteiro(anatomp)}
+                key={anatomp.roteiro._id}
                 wrap
                 multipleLine
                 align="center"
                 arrow="horizontal"
               >
-                {roteiro.nome}
-                <Brief>{roteiro.curso}</Brief>
-                <Brief>{roteiro.disciplina}</Brief>
-                <Brief>{roteiro.resumoMidias.map(getMediaIcon)}</Brief>
+                {anatomp.nome}
+                <Brief>{anatomp.roteiro.curso}</Brief>
+                <Brief>{anatomp.roteiro.disciplina}<Text> - </Text>{anatomp.instituicao}</Brief>
+                <Brief>{anatomp.roteiro.resumoMidias.map(getMediaIcon)}</Brief>
               </ListItem>                
               ))
             }
@@ -98,7 +98,7 @@ class App extends Component {
     );
   }
 
-  onSelectRoteiro = roteiro => {
+  onSelectRoteiro = roteiro => () => {
     const { navigation, screenProps } = this.props;    
     screenProps.onSelectRoteiro(roteiro);
     navigation.navigate('Roteiro')

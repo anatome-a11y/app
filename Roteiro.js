@@ -9,20 +9,50 @@ import Button from 'antd-mobile-rn/lib/button';
 import Flex from 'antd-mobile-rn/lib/flex';
 
 import Checkbox from 'antd-mobile-rn/lib/checkbox';
+const ListItem = List.Item;
 
 const { CheckboxItem } = Checkbox;
 const { Panel } = Accordion;
 
 class Roteiro extends Component {
+
+    state = {
+        active: '0'
+    }
+
+
+    componentWillReceiveProps(next) {
+        const { tipoConteudo, modoAprendizagem, sentidoIdentificacao } = this.props.screenProps.modoInteracao;
+
+        if (tipoConteudo != next.screenProps.modoInteracao.tipoConteudo) {
+            this.setState({ active: '1' })
+        }
+
+        if (modoAprendizagem != next.screenProps.modoInteracao.modoAprendizagem) {
+            this.setState({ active: '2' })
+        }
+    }
+
+
     render() {
+        const { active } = this.state;
         const { navigation, screenProps } = this.props;
         const { tipoConteudo, modoAprendizagem, sentidoIdentificacao } = screenProps.modoInteracao;
 
-        const isComplete = tipoConteudo != '' &&  modoAprendizagem != '' && sentidoIdentificacao != '';
+        const { anatomp } = screenProps;
+        const isComplete = tipoConteudo != '' && modoAprendizagem != '' && sentidoIdentificacao != '';
 
         return (
             <Container navigation={navigation}>
-                <Accordion style={{backgroundColor: '#f5f5f9'}} onChange={this.onChange} defaultActiveKey="0">
+                <List style={{marginBottom: 10}}>
+                    <ListItem
+                        wrap
+                        multipleLine
+                    >
+                        {anatomp.nome}
+                    </ListItem>
+                </List>
+                <Accordion style={{ backgroundColor: '#f5f5f9' }} onChange={active => this.setState({ active })} activeKey={active}>
                     <Panel header="Tipo de conteúdo">
                         <List>
                             <CheckboxItem checked={tipoConteudo == 'pratico'} onChange={this.onChange('tipoConteudo', 'pratico')}>
@@ -53,33 +83,33 @@ class Roteiro extends Component {
                             </CheckboxItem>
                         </List>
                     </Panel>
-                </Accordion> 
-                <Flex style={{marginTop: 15}}>
-                    <Button onPressOut={() => navigation.goBack()} style={{flex: 1}}><Text>Voltar</Text></Button>
-                    <Button onPressOut={this.onStart} style={{flex: 1}} disabled={!isComplete} type='primary'><Text>Iniciar</Text></Button>
-                </Flex>                                   
+                </Accordion>
+                <Flex style={{ marginTop: 15 }}>
+                    <Button onPressOut={() => navigation.goBack()} style={{ flex: 1 }}><Text>Voltar</Text></Button>
+                    <Button onPressOut={this.onStart} style={{ flex: 1 }} disabled={!isComplete} type='primary'><Text>Iniciar</Text></Button>
+                </Flex>
             </Container>
         )
     }
 
     onStart = () => {
-        const {navigation, screenProps} = this.props;
+        const { navigation, screenProps } = this.props;
         const { tipoConteudo, modoAprendizagem, sentidoIdentificacao } = screenProps.modoInteracao;
-    
-        const key = tipoConteudo +'-'+ modoAprendizagem +'-'+ sentidoIdentificacao;
-        switch(key){
+
+        const key = tipoConteudo + '-' + modoAprendizagem + '-' + sentidoIdentificacao;
+        switch (key) {
             case 'pratico-estudo-localizar': break;
             case 'pratico-estudo-nomear': break;
             case 'pratico-treinamento-localizar': break;
             case 'pratico-treinamento-nomear': break;
             case 'teorico-estudo-localizar': break;
             case 'teorico-estudo-nomear': break;
-            case 'teorico-treinamento-localizar': 
+            case 'teorico-treinamento-localizar':
                 navigation.navigate('TeoTreLoc')
-            break;
+                break;
             case 'teorico-treinamento-nomear': break;
         }
-    
+
     }
 
     onChange = (field, value) => () => this.props.screenProps.onChangeModoInteracao(field, value)
