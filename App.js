@@ -3,6 +3,7 @@ import { StyleSheet, ScrollView, View, Text, Image } from 'react-native';
 
 import Icon from 'antd-mobile-rn/lib/icon';
 import List from 'antd-mobile-rn/lib/list';
+import Toast from 'antd-mobile-rn/lib/toast';
 
 import Container from './Container'
 
@@ -11,37 +12,8 @@ const ListItem = List.Item;
 const Brief = ListItem.Brief;
 
 
-const _roteiro = [
-  {
-    id: 1,
-    nome: 'Este é o roteiro 1',
-    curso: 'Engenharia de computação',
-    disciplina: 'Engenharia de Software',
-    midias: [
-      {type: 'video/mp4'},    
-    ]
-  },
-  {
-    id: 2,
-    nome: 'Meu roteiro 2 especial',
-    curso: 'Massoterapia',
-    disciplina: 'Anatomia 1',
-    midias: [
-      {type: 'audio/mp3'},
-      {type: 'application/pdf'},
-    ]
-  },
-  {
-    id: 3,
-    nome: 'Roteiro prático 5',
-    curso: 'Engenharia de software',
-    disciplina: 'IHC',
-    midias: []
-  },
-]
-
 const getMediaIcon = (media, idx) => {
-  const [main, type] = media.type.split('/');
+  const [main, type] = media.split('/');
 
   let code = null;
   switch (type) {
@@ -67,30 +39,57 @@ const getMediaIcon = (media, idx) => {
 class App extends Component {
 
   state = {
-    roteiros: _roteiro
+    anatomps: [],
+    loading: true
   }
 
+  componentDidMount() {
+    Toast.loading('Aguarde...', 0)
+    fetch('https://frozen-thicket-97625.herokuapp.com/anatomp', {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+    })
+    .then(r => r.json())
+    .then(r => {
+      Toast.hide()
+      if(r.status == 200){
+        this.setState({anatomps: r.data})
+      }else{
+        throw r.error
+      }
+    })
+    .catch(e => {
+      const msg = typeof e == 'string' ? e : 'Não foi possível obter os roteiros de aprendizagem'
+      Toast.hide()
+      Toast.fail(msg)
+    })
+    .finally(() => this.setState({loading: false}))
+    
+  }  
+
   render() {
-    const { roteiros } = this.state;
+    const { anatomps } = this.state;
     const { navigation } = this.props;
 
     return (
       <Container navigation={navigation}>
           <List renderHeader={() => 'Roteiros de aprendizagem'}>
             {
-              roteiros.map(rot => (
+              anatomps.map(({roteiro}) => (
                 <ListItem
                 onClick={this.onSelectRoteiro}
-                key={rot.id}
+                key={roteiro._id}
                 wrap
                 multipleLine
                 align="center"
                 arrow="horizontal"
               >
-                {rot.nome}
-                <Brief>{rot.curso}</Brief>
-                <Brief>{rot.disciplina}</Brief>
-                <Brief>{rot.midias.map(getMediaIcon)}</Brief>
+                {roteiro.nome}
+                <Brief>{roteiro.curso}</Brief>
+                <Brief>{roteiro.disciplina}</Brief>
+                <Brief>{roteiro.resumoMidias.map(getMediaIcon)}</Brief>
               </ListItem>                
               ))
             }

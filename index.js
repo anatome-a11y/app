@@ -5,6 +5,7 @@ import App from './App';
 import Ajuda from './Ajuda';
 import Config from './Config';
 import Roteiro from './Roteiro';
+import TeoTreLoc from './interacao/TeoTreLoc';
 import {name as appName} from './app.json';
 
 import { createStackNavigator } from 'react-navigation';
@@ -14,6 +15,7 @@ const Nav = createStackNavigator({
     Ajuda: { screen: Ajuda },
     Config: { screen: Config },
     Roteiro: { screen: Roteiro },
+    TeoTreLoc: { screen: TeoTreLoc },
 },
 {
   headerMode: 'none',
