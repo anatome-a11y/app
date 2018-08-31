@@ -85,7 +85,7 @@ class Roteiro extends Component {
                     </Panel>
                 </Accordion>
                 <Flex style={{ marginTop: 15 }}>
-                    <Button onPressOut={() => navigation.goBack()} style={{ flex: 1 }}><Text>Voltar</Text></Button>
+                    {/* <Button onPressOut={() => navigation.goBack()} style={{ flex: 1 }}><Text>Voltar</Text></Button> */}
                     <Button onPressOut={this.onStart} style={{ flex: 1 }} disabled={!isComplete} type='primary'><Text>Iniciar</Text></Button>
                 </Flex>
             </Container>
