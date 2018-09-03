@@ -5,6 +5,7 @@ import Icon from 'antd-mobile-rn/lib/icon';
 import List from 'antd-mobile-rn/lib/list';
 import Toast from 'antd-mobile-rn/lib/toast';
 import Flex from 'antd-mobile-rn/lib/flex';
+import Modal from 'antd-mobile-rn/lib/modal';
 
 import Container from './Container'
 
@@ -76,11 +77,11 @@ class App extends Component {
 
   state = {
     anatomps: [],
-    loading: true
+    loading: true,
+    open: true
   }
 
   componentDidMount() {
-    Toast.loading(<Text importantForAccessibility='yes' accessibilityLabel='Aguarde. Carregando Roteiros.' >Aguarde...</Text>, 0)
     fetch('https://frozen-thicket-97625.herokuapp.com/anatomp', {
       headers: {
         'Accept': 'application/json',
@@ -89,7 +90,7 @@ class App extends Component {
     })
     .then(r => r.json())
     .then(r => {
-      Toast.hide()
+      this.onCloseModal()
       if(r.status == 200){
         this.setState({anatomps: r.data})
       }else{
@@ -98,7 +99,7 @@ class App extends Component {
     })
     .catch(e => {
       const msg = typeof e == 'string' ? e : 'Não foi possível obter os roteiros de aprendizagem'
-      Toast.hide()
+      this.onCloseModal()
       Toast.fail(msg)
     })
     .finally(() => this.setState({loading: false}))
@@ -125,14 +126,24 @@ class App extends Component {
                 <Text style={styles.listItemTitle} accessibilityLabel={'Roteiro. '+anatomp.nome}>{anatomp.nome}</Text>                
                 <Brief>{anatomp.roteiro.curso}</Brief>
                 <Brief>{anatomp.roteiro.disciplina}<Text> - </Text>{anatomp.instituicao}</Brief>
+                <Text accessibilityLabel='Toque duas vezes para selecionar.'></Text>
                 <Midias value={anatomp.roteiro.resumoMidias} />
               </ListItem>                
               ))
             }
           </List>
+          <Modal
+          visible={this.state.open}
+          transparent
+          maskClosable={false}
+          onClose={this.onCloseModal}
+          title="Carregando..."
+        />    
       </Container>
     );
   }
+
+  onCloseModal = () => this.setState({open: false})
 
   onSelectRoteiro = roteiro => () => {
     const { navigation, screenProps } = this.props;    

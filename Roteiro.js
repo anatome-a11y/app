@@ -14,6 +14,8 @@ const ListItem = List.Item;
 const { CheckboxItem } = Checkbox;
 const { Panel } = Accordion;
 
+
+
 class Roteiro extends Component {
 
     state = {
@@ -50,11 +52,14 @@ class Roteiro extends Component {
                     </ListItem>
                 </List>
                 <Accordion style={{ backgroundColor: '#f5f5f9' }} onChange={active => this.setState({ active })} activeKey={active}>
-                    <Panel header="Tipo de conteúdo">
+                    <Panel
+                        style={{ justifyContent: 'space-between', padding: 10, color: '#000' }}
+                        header={<Text accessibilityLabel={`Seleção do Tipo de conteúdo. ${active == '0' ? 'Expandido' : 'Toque duas vezes para expandir'}`}>Tipo de conteúdo</Text>}
+                    >
                         <List>
                             <List.Item wrap multipleLine>
                                 <View>
-                                    <Text accessibilityLabel={`Tipo de conteúdo. prático`} style={{ fontWeight: 'bold'}}>Prático: </Text><Text>Identificação anatômica por nome</Text>
+                                    <Text accessibilityLabel={`Tipo de conteúdo. prático`} style={{ fontWeight: 'bold' }}>Prático: </Text><Text>Identificação anatômica por nome</Text>
                                     <Switch accessibilityLabel={`Tipo de conteúdo prático`} value={tipoConteudo == 'pratico'} onValueChange={this.onChange('tipoConteudo', 'pratico')} />
                                 </View>
                             </List.Item>
@@ -66,7 +71,10 @@ class Roteiro extends Component {
                             </List.Item>
                         </List>
                     </Panel>
-                    <Panel accessibilityLabel={`Etapa 2. Modo de aprendizagem`} header="Modo de aprendizagem">
+                    <Panel
+                        style={{ justifyContent: 'space-between', padding: 10, color: '#000' }}
+                        header={<Text accessibilityLabel={`Seleção do Modo de aprendizagem. ${active == '1' ? 'Expandido' : 'Toque duas vezes para expandir'}`}>Modo de aprendizagem</Text>}
+                    >
                         <List>
                             <List.Item>
                                 <View>
@@ -76,32 +84,35 @@ class Roteiro extends Component {
                             </List.Item>
                             <List.Item>
                                 <View>
-                                    <Text style={{ fontWeight: 'bold'}}>Treinamento: </Text><Text>O sistema te informa um conteúdo e você indica a parte anatômica correspondente.</Text>
+                                    <Text style={{ fontWeight: 'bold' }}>Treinamento: </Text><Text>O sistema te informa um conteúdo e você indica a parte anatômica correspondente.</Text>
                                     <Switch value={modoAprendizagem == 'treinamento'} onValueChange={this.onChange('modoAprendizagem', 'treinamento')} />
                                 </View>
                             </List.Item>
                         </List>
                     </Panel>
-                    <Panel accessibilityLabel={`Etapa 3. Sentido de identificação`} header="Sentido de identificação">
+                    <Panel
+                        style={{ justifyContent: 'space-between', padding: 10, color: '#000' }}
+                        header={<Text accessibilityLabel={`Seleção do Sentido de identificação. ${active == '2' ? 'Expandido' : 'Toque duas vezes para expandir'}`}>Sentido de identificação</Text>}
+                    >
                         <List>
                             <List.Item>
                                 <View>
-                                    <Text style={{ fontWeight: 'bold' }}>Localizar: </Text><Text>Sentido: Nome/teoria -> Localização</Text>
+                                    <Text accessibilityLabel='Localizar.' style={{ fontWeight: 'bold' }}>Localizar: </Text><Text accessibilityLabel='Partindo-se do nome ou teoria, encontra-se a localização da parte' >Sentido: Nome/teoria -> Localização</Text>
                                     <Switch value={sentidoIdentificacao == 'localizar'} onValueChange={this.onChange('sentidoIdentificacao', 'localizar')} />
-                                </View>                                
+                                </View>
                             </List.Item>
                             <List.Item>
                                 <View>
-                                    <Text style={{ fontWeight: 'bold' }}>Nomear: </Text><Text>Sentido: Localização -> Nome/teoria</Text>
+                                    <Text accessibilityLabel='Nomear.' style={{ fontWeight: 'bold' }}>Nomear: </Text><Text accessibilityLabel='Partindo-se da localização da parte define-se o nome ou a informação teórica correta'>Sentido: Localização -> Nome/teoria</Text>
                                     <Switch value={sentidoIdentificacao == 'nomear'} onValueChange={this.onChange('sentidoIdentificacao', 'nomear')} />
-                                </View>                                
+                                </View>
                             </List.Item>
                         </List>
                     </Panel>
                 </Accordion>
                 <Flex style={{ marginTop: 15 }}>
                     {/* <Button onPressOut={() => navigation.goBack()} style={{ flex: 1 }}><Text>Voltar</Text></Button> */}
-                    <Button onPressOut={this.onStart} style={{ flex: 1 }} disabled={!isComplete} type='primary'><Text>Iniciar</Text></Button>
+                    <Button accessibilityLabel='Iniciar interação. Botão. Pressione duas vezes para iniciar.' onPressOut={this.onStart} style={{ flex: 1 }} disabled={!isComplete} type='primary'><Text>Iniciar</Text></Button>
                 </Flex>
             </Container>
         )

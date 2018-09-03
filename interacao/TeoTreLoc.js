@@ -230,22 +230,22 @@ class TeoTreLoc extends Component {
 
         return (data.length > 0 && (
             <View>
-                <List renderHeader={() => anatomp.nome} style={{ marginBottom: 10 }}>
+                <List accessibilityLabel={'Roteiro. '+ anatomp.nome} renderHeader={() => anatomp.nome} style={{ marginBottom: 10 }}>
                     <ListItem
                         wrap
                         multipleLine
                         align="center"
                     >
-                        <Flex>
-                            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                                <Text>Número</Text>
+                        <Flex accessible={true}>
+                            <View accessibilityLabel={`Etapa ${count + 1} de ${total}.`} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                                <Text>Etapa</Text>
                                 <Tag><Text>{`${count + 1}/${total}`}</Text></Tag>
                             </View>
-                            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                            <View accessibilityLabel={`Tentativa ${tentativas + 1} de ${_maxTentativa}.`} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                                 <Text>Tentativas</Text>
                                 <Tag><Text>{tentativas}/{_maxTentativa}</Text></Tag>
                             </View>
-                            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                            <View accessibilityLabel={`Tempo restante ${timer} segundos`} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                                 <Text>Tempo</Text>
                                 <Tag><Text>{timer}</Text></Tag>
                             </View>
