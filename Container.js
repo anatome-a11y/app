@@ -18,9 +18,9 @@ class Container extends Component {
     return (
       <View style={styles.container}>
         <Flex>
-          <FlexItem><Button onPressOut={this.onNavigate('Ajuda')} ><Icon type={this.getIcone('Ajuda', '\ue63c')} size='md' /></Button></FlexItem>
-          <FlexItem style={styles.spacer}><Text style={styles.title}>{this.getTitle()}</Text></FlexItem>
-          <FlexItem><Button onPressOut={this.onNavigate('Config')}><Icon type={this.getIcone('Config', '\ue672')} size='md' /></Button></FlexItem>
+          <FlexItem><Button accessibilityLabel={this.getAcc('Ajuda')} onPressOut={this.onNavigate('Ajuda')} ><Icon type={this.getIcone('Ajuda', '\ue63c')} size='md' /></Button></FlexItem>
+          <FlexItem style={styles.spacer}>{this.getTitle()}</FlexItem>
+          <FlexItem><Button accessibilityLabel={this.getAcc('Config')}  onPressOut={this.onNavigate('Config')}><Icon type={this.getIcone('Config', '\ue672')} size='md' /></Button></FlexItem>
         </Flex>
         <KeyboardAvoidingView style={styles.scroll}>
           <ScrollView contentContainerStyle={{flexGrow: 1}}>
@@ -28,11 +28,11 @@ class Container extends Component {
             {children}
             </View>
             <Flex>
-              <FlexItem><Button><Icon type={'\ue616'} size='md' /></Button></FlexItem>
+              <FlexItem><Button accessibilityLabel='Botão para repetir áudio da mídia'><Icon type={'\ue616'} size='md' /></Button></FlexItem>
               <FlexItem style={styles.spacer}>
                 {footer}
               </FlexItem>
-              <FlexItem><Button><Icon type={'\ue629'} size='md' /></Button></FlexItem>
+              <FlexItem><Button accessibilityLabel={this.getAcc('Info')}><Icon type={'\ue629'} size='md' /></Button></FlexItem>
             </Flex>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -41,14 +41,33 @@ class Container extends Component {
   }
 
 
+  getAcc = tela => {
+    const { navigation } = this.props;
+
+    if(navigation.state.routeName == tela){
+      switch (tela) {
+        case 'Ajuda': return 'Fechar Ajuda geral. Botão';
+        case 'Config': return 'Fechar Configurações. Botão';
+        case 'Info': return 'Fechar Informações da peça física. Botão';
+      }
+    }else{
+      switch (tela) {
+        case 'Ajuda': return 'Abrir Ajuda geral. Botão';
+        case 'Config': return 'Abrir Configurações. Botão';
+        case 'Info': return 'Abrir Informações da peça física. Botão';
+      }
+    }
+  }  
+
+
   getTitle = () => {
     const { navigation } = this.props;
 
     switch (navigation.state.routeName) {
-      case 'Ajuda': return 'Ajuda';
-      case 'Config': return 'Configurações';
-      case 'Roteiro': return 'Roteiro';
-      default: return 'An@tom-P';
+      case 'Ajuda': return <Text accessibilityLabel='Ajuda. Título' style={styles.title}>Ajuda</Text>;
+      case 'Config': return <Text accessibilityLabel='Configurações. Título' style={styles.title}>Configurações</Text>;
+      case 'Roteiro': return <Text accessibilityLabel='Roteiro. Título' style={styles.title}>Roteiro</Text>;
+      default: return <Text accessibilityLabel='anatom P. Título' style={styles.title}>An@tom-P</Text>;
     }
   }
 

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { View, Text } from 'react-native';
+import { View, Text, Switch } from 'react-native';
 import Container from './Container';
 
 import Accordion from 'antd-mobile-rn/lib/accordion';
@@ -44,43 +44,58 @@ class Roteiro extends Component {
 
         return (
             <Container navigation={navigation}>
-                <List style={{marginBottom: 10}}>
-                    <ListItem
-                        wrap
-                        multipleLine
-                    >
+                <List style={{ marginBottom: 10 }} >
+                    <ListItem wrap multipleLine accessibilityLabel={`Roteiro: ${anatomp.nome}`}>
                         {anatomp.nome}
                     </ListItem>
                 </List>
                 <Accordion style={{ backgroundColor: '#f5f5f9' }} onChange={active => this.setState({ active })} activeKey={active}>
                     <Panel header="Tipo de conteúdo">
                         <List>
-                            <CheckboxItem checked={tipoConteudo == 'pratico'} onChange={this.onChange('tipoConteudo', 'pratico')}>
-                                <Text style={{ fontWeight: 'bold' }}>Prático: </Text><Text>Identificação anatômica por nome</Text>
-                            </CheckboxItem>
-                            <CheckboxItem checked={tipoConteudo == 'teorico'} onChange={this.onChange('tipoConteudo', 'teorico')}>
-                                <Text style={{ fontWeight: 'bold' }}>Teórico: </Text><Text>Identificação anatômica por informações teóricas associadas</Text>
-                            </CheckboxItem>
+                            <List.Item wrap multipleLine>
+                                <View>
+                                    <Text accessibilityLabel={`Tipo de conteúdo. prático`} style={{ fontWeight: 'bold'}}>Prático: </Text><Text>Identificação anatômica por nome</Text>
+                                    <Switch accessibilityLabel={`Tipo de conteúdo prático`} value={tipoConteudo == 'pratico'} onValueChange={this.onChange('tipoConteudo', 'pratico')} />
+                                </View>
+                            </List.Item>
+                            <List.Item wrap multipleLine>
+                                <View>
+                                    <Text accessibilityLabel={`Tipo de conteúdo. Teórico`} style={{ fontWeight: 'bold' }}>Teórico: </Text><Text>Identificação anatômica por informações teóricas associadas</Text>
+                                    <Switch accessibilityLabel={`Tipo de conteúdo Teórico`} value={tipoConteudo == 'teorico'} onValueChange={this.onChange('tipoConteudo', 'teorico')} />
+                                </View>
+                            </List.Item>
                         </List>
                     </Panel>
-                    <Panel header="Modo de aprendizagem">
+                    <Panel accessibilityLabel={`Etapa 2. Modo de aprendizagem`} header="Modo de aprendizagem">
                         <List>
-                            <CheckboxItem checked={modoAprendizagem == 'estudo'} onChange={this.onChange('modoAprendizagem', 'estudo')}>
-                                <Text style={{ fontWeight: 'bold' }}>Estudo: </Text><Text>Você seleciona uma parte anatômica e o sistema te informa o conteúdo correspondente.</Text>
-                            </CheckboxItem>
-                            <CheckboxItem checked={modoAprendizagem == 'treinamento'} onChange={this.onChange('modoAprendizagem', 'treinamento')}>
-                                <Text style={{ fontWeight: 'bold' }}>Treinamento: </Text><Text>O sistema te informa um conteúdo e você indica a parte anatômica correspondente.</Text>
-                            </CheckboxItem>
+                            <List.Item>
+                                <View>
+                                    <Text style={{ fontWeight: 'bold' }}>Estudo: </Text><Text>Você seleciona uma parte anatômica e o sistema te informa o conteúdo correspondente.</Text>
+                                    <Switch value={modoAprendizagem == 'estudo'} onValueChange={this.onChange('modoAprendizagem', 'estudo')} />
+                                </View>
+                            </List.Item>
+                            <List.Item>
+                                <View>
+                                    <Text style={{ fontWeight: 'bold'}}>Treinamento: </Text><Text>O sistema te informa um conteúdo e você indica a parte anatômica correspondente.</Text>
+                                    <Switch value={modoAprendizagem == 'treinamento'} onValueChange={this.onChange('modoAprendizagem', 'treinamento')} />
+                                </View>
+                            </List.Item>
                         </List>
                     </Panel>
-                    <Panel header="Sentido de identificação">
+                    <Panel accessibilityLabel={`Etapa 3. Sentido de identificação`} header="Sentido de identificação">
                         <List>
-                            <CheckboxItem checked={sentidoIdentificacao == 'localizar'} onChange={this.onChange('sentidoIdentificacao', 'localizar')}>
-                                <Text style={{ fontWeight: 'bold' }}>Localizar: </Text><Text>Sentido: Nome/teoria -> Localização</Text>
-                            </CheckboxItem>
-                            <CheckboxItem checked={sentidoIdentificacao == 'nomear'} onChange={this.onChange('sentidoIdentificacao', 'nomear')}>
-                                <Text style={{ fontWeight: 'bold' }}>Nomear: </Text><Text>Sentido: Localização -> Nome/teoria</Text>
-                            </CheckboxItem>
+                            <List.Item>
+                                <View>
+                                    <Text style={{ fontWeight: 'bold' }}>Localizar: </Text><Text>Sentido: Nome/teoria -> Localização</Text>
+                                    <Switch value={sentidoIdentificacao == 'localizar'} onValueChange={this.onChange('sentidoIdentificacao', 'localizar')} />
+                                </View>                                
+                            </List.Item>
+                            <List.Item>
+                                <View>
+                                    <Text style={{ fontWeight: 'bold' }}>Nomear: </Text><Text>Sentido: Localização -> Nome/teoria</Text>
+                                    <Switch value={sentidoIdentificacao == 'nomear'} onValueChange={this.onChange('sentidoIdentificacao', 'nomear')} />
+                                </View>                                
+                            </List.Item>
                         </List>
                     </Panel>
                 </Accordion>

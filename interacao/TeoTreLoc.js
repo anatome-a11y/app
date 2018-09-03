@@ -9,6 +9,84 @@ import Button from 'antd-mobile-rn/lib/button';
 import Flex from 'antd-mobile-rn/lib/flex';
 import Tag from 'antd-mobile-rn/lib/tag';
 import InputItem from 'antd-mobile-rn/lib/input-item';
+
+
+
+class Form extends Component{
+
+
+    componentDidMount(){
+        this.props.onSetFocus(this.props.count)
+    }
+
+
+    componentWillReceiveProps(next){
+        if(this.props.count != next.count){
+            this.props.onSetFocus(next.count)
+        }
+    }
+
+    render(){
+        const {
+            data, 
+            timer, 
+            tentativas, 
+            pecasFisicas, 
+            limite, 
+            count, 
+            onReadNFC, 
+            onStopNFC, 
+            value, 
+            idx, 
+            onGetRef, 
+            onChangeValor, 
+            onErrorClick, 
+            onSubmit,
+            onSetFocus
+        } = this.props;
+
+        const { modo, pecaFisica } = data;
+
+        let helper = undefined;
+
+
+        if (value != '') {
+            const pt = pecasFisicas[pecaFisica._id].partesNumeradas.find(p => p.numero == value);
+            helper = pt == undefined ? _ni : pt.parte.nome;
+        }
+
+        const placeholder = modo == 'singular' ? 'Parte' : `Parte ${idx + 1}`;
+
+        const label = value == '' ? placeholder : helper;
+
+        return (timer > 0 && tentativas < _maxTentativa) ? (
+            <ListItem key={idx} >
+                <InputItem
+                    ref={onGetRef(count, idx)}
+                    type='number'
+                    value={value}
+                    onFocus={() => onReadNFC(onChangeValor(idx))}
+                    onBlur={onStopNFC}
+                    onChange={onChangeValor(idx)}
+                    error={label == _ni}
+                    placeholder={placeholder}
+                    onErrorClick={onErrorClick}
+                    onSubmitEditing={() => modo == 'singular' || idx == limite ? onSubmit() : onSetFocus(count, idx+1)}
+                />
+                <View style={{ marginTop: 5, paddingLeft: 10 }}>
+                    <Brief >{helper}</Brief>
+                </View>
+            </ListItem>
+        ) : (
+                value == '' ? <ListItem key={idx} >{_ni}</ListItem> : <ListItem key={idx} >{value + ' - ' + label}</ListItem>
+            )
+    }    
+}
+
+
+
+
+
 const ListItem = List.Item;
 const { Brief } = List.Item;
 
@@ -26,11 +104,11 @@ class TeoTreLoc extends Component {
         total: 0,
         timer: _tempoMax,
         pecasFisicas: [],
-        tentativas: 0
+        tentativas: 0,
     }
 
     componentDidMount() {
-        const { anatomp } = this.props.screenProps;
+        const { anatomp } = this.props.screenProps;      
 
         Toast.loading('Aguarde...', 0)
 
@@ -76,7 +154,7 @@ class TeoTreLoc extends Component {
 
         this.setState({ data: dados, total: dados.length, pecasFisicas: { ...pecasFisicas } }, () => {
             this.onCount();
-            Toast.hide()
+            Toast.hide();
         })
     }
 
@@ -90,7 +168,7 @@ class TeoTreLoc extends Component {
         }
 
         if (this.state.count != nextState.count) {
-            this.setState({ timer: _tempoMax })
+            this.setState({ timer: _tempoMax })           
         }
     }
 
@@ -122,7 +200,7 @@ class TeoTreLoc extends Component {
                     <Card.Header title='Placar (acertos)' />
                     <Card.Body>
                         <Text style={{ flex: 1, fontSize: 35, textAlign: 'center', fontWeight: 'bold' }}>{acertos} /<Text>{total}</Text></Text>
-                        <Text style={{ flex: 1, fontSize: 25, textAlign: 'center' }}>{Number(((acertos*100) / total).toFixed(2))}</Text>
+                        <Text style={{ flex: 1, fontSize: 25, textAlign: 'center' }}>{Number(((acertos*100) / total).toFixed(2))}% de acertos</Text>
                     </Card.Body>
                 </Card>
 
@@ -146,7 +224,7 @@ class TeoTreLoc extends Component {
     showForm = () => {
         const { navigation, screenProps } = this.props;
 
-        const { anatomp } = screenProps;
+        const { anatomp, onReadNFC, onStopNFC } = screenProps;
 
         const { count, total, data, timer, pecasFisicas, tentativas } = this.state;
 
@@ -180,7 +258,27 @@ class TeoTreLoc extends Component {
                         <View>
                             <Text style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{data[count].texto}</Text>
                             <List>
-                                {data[count].valores.map(this.onGetCampos(data[count], timer, tentativas, pecasFisicas, data[count].valores.length - 1, count))}
+                                {data[count].valores.map((value, idx) => (
+                                    <View key={count+'-'+idx}>
+                                        <Form 
+                                            data={data[count]} 
+                                            timer={timer}
+                                            tentativas={tentativas}
+                                            pecasFisicas={pecasFisicas}
+                                            limite={data[count].valores.length - 1}
+                                            count={count}
+                                            onReadNFC={onReadNFC}
+                                            onStopNFC={onStopNFC}
+                                            onGetRef={this.onGetRef}
+                                            onSetFocus={this.onSetFocus}
+                                            onChangeValor={this.onChangeValor}
+                                            onErrorClick={this.onErrorClick}
+                                            onSubmit={this.onSubmit}
+                                            value={value}
+                                            idx={idx}
+                                            />
+                                    </View>
+                                ))}
                             </List>
                         </View>
                     </Card.Body>
@@ -194,39 +292,7 @@ class TeoTreLoc extends Component {
         )
     }
 
-    onGetCampos = ({ modo, pecaFisica }, timer, tentativas, pecasFisicas, limite, count) => (v, idx) => {
-        let helper = undefined;
 
-
-        if (v != '') {
-            const pt = pecasFisicas[pecaFisica._id].partesNumeradas.find(p => p.numero == v);
-            helper = pt == undefined ? _ni : pt.parte.nome;
-        }
-
-        const placeholder = modo == 'singular' ? 'Parte' : `Parte ${idx + 1}`;
-
-        const label = v == '' ? placeholder : helper;
-
-        return (timer > 0 && tentativas < _maxTentativa) ? (
-            <ListItem key={idx} >
-                <InputItem
-                    ref={r => this.refs[count][idx] = r}
-                    type='number'
-                    value={v}
-                    onChange={this.onChangeValor(idx)}
-                    error={label == _ni}
-                    placeholder={placeholder}
-                    onErrorClick={this.onErrorClick}
-                    onSubmitEditing={() => modo == 'singular' || idx == limite ? this.onSubmit() : this.refs[count][idx + 1].focus()}
-                />
-                <View style={{ marginTop: 5, paddingLeft: 10 }}>
-                    <Brief >{helper}</Brief>
-                </View>
-            </ListItem>
-        ) : (
-                v == '' ? <ListItem key={idx} >{_ni}</ListItem> : <ListItem key={idx} >{v + ' - ' + label}</ListItem>
-            )
-    }
 
     onRepeat = () => {
         const {data} = this.state;
@@ -255,7 +321,7 @@ class TeoTreLoc extends Component {
                 Toast.fail('Você errou.', 3, this.onNext(acertou))
             } else {
                 const num = _maxTentativa - tentativas - 1;
-                Toast.fail(`Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`, 3)
+                Toast.fail(`Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`, 3, () => this.onSetFocus(count))
             }
         }
 
@@ -283,6 +349,10 @@ class TeoTreLoc extends Component {
         })
 
     }
+
+    onGetRef = (count, idx) => r => {this.refs[count][idx] = r}
+
+    onSetFocus = (count, idx = 0) => {this.refs[count][idx].focus()}
 
     checkAcertos = item => {
         if (item.modo == 'singular') {
