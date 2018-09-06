@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { View, Text } from 'react-native';
+import { View, Text, TouchableHighlight } from 'react-native';
 import Container from '../Container';
 import List from 'antd-mobile-rn/lib/list';
 import Card from 'antd-mobile-rn/lib/card';
@@ -256,7 +256,10 @@ class TeoTreLoc extends Component {
                     <Card.Header title={data[count].pecaFisica.nome} />
                     <Card.Body>
                         <View>
+                        <TouchableHighlight autoFocus>
                             <Text style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{data[count].texto}</Text>
+                        </TouchableHighlight>
+                            
                             <List>
                                 {data[count].valores.map((value, idx) => (
                                     <View key={count+'-'+idx}>

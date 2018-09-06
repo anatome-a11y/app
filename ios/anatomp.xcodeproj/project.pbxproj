@@ -38,6 +38,7 @@
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ADBDB9271DFEBF0700ED6528 /* libRCTBlob.a */; };
 		00B34B8665434A40B48B907C /* libNfcManager.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E35823125B4343508CEF47E6 /* libNfcManager.a */; };
+		9D16C2B6014B496EB9F8D509 /* libRNReactNativeAccessibility.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 929FA8C5BE404762BB5FBB48 /* libRNReactNativeAccessibility.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -345,6 +346,8 @@
 		ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
 		A53F1094CBDB4BF68085E9AB /* NfcManager.xcodeproj */ = {isa = PBXFileReference; name = "NfcManager.xcodeproj"; path = "../node_modules/react-native-nfc-manager/ios/NfcManager.xcodeproj"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = wrapper.pb-project; explicitFileType = undefined; includeInIndex = 0; };
 		E35823125B4343508CEF47E6 /* libNfcManager.a */ = {isa = PBXFileReference; name = "libNfcManager.a"; path = "libNfcManager.a"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = archive.ar; explicitFileType = undefined; includeInIndex = 0; };
+		4652AC63C00D43F0AF2B35AD /* RNReactNativeAccessibility.xcodeproj */ = {isa = PBXFileReference; name = "RNReactNativeAccessibility.xcodeproj"; path = "../node_modules/react-native-accessibility/ios/RNReactNativeAccessibility.xcodeproj"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = wrapper.pb-project; explicitFileType = undefined; includeInIndex = 0; };
+		929FA8C5BE404762BB5FBB48 /* libRNReactNativeAccessibility.a */ = {isa = PBXFileReference; name = "libRNReactNativeAccessibility.a"; path = "libRNReactNativeAccessibility.a"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = archive.ar; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -374,6 +377,7 @@
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
 				00B34B8665434A40B48B907C /* libNfcManager.a in Frameworks */,
+				9D16C2B6014B496EB9F8D509 /* libRNReactNativeAccessibility.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -561,6 +565,7 @@
 				00C302DF1ABCB9EE00DB3ED1 /* RCTVibration.xcodeproj */,
 				139FDEE61B06529A00C62182 /* RCTWebSocket.xcodeproj */,
 				A53F1094CBDB4BF68085E9AB /* NfcManager.xcodeproj */,
+				4652AC63C00D43F0AF2B35AD /* RNReactNativeAccessibility.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -1188,10 +1193,12 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-nfc-manager/ios",
+					"$(SRCROOT)/../node_modules/react-native-accessibility/ios",
 				);
 			};
 			name = Debug;
@@ -1213,10 +1220,12 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-nfc-manager/ios",
+					"$(SRCROOT)/../node_modules/react-native-accessibility/ios",
 				);
 			};
 			name = Release;
@@ -1239,6 +1248,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-nfc-manager/ios",
+					"$(SRCROOT)/../node_modules/react-native-accessibility/ios",
 				);
 			};
 			name = Debug;
@@ -1260,6 +1270,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-nfc-manager/ios",
+					"$(SRCROOT)/../node_modules/react-native-accessibility/ios",
 				);
 			};
 			name = Release;
@@ -1290,10 +1301,12 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-nfc-manager/ios",
+					"$(SRCROOT)/../node_modules/react-native-accessibility/ios",
 				);
 			};
 			name = Debug;
@@ -1324,10 +1337,12 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-nfc-manager/ios",
+					"$(SRCROOT)/../node_modules/react-native-accessibility/ios",
 				);
 			};
 			name = Release;
@@ -1357,10 +1372,12 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-nfc-manager/ios",
+					"$(SRCROOT)/../node_modules/react-native-accessibility/ios",
 				);
 			};
 			name = Debug;
@@ -1390,10 +1407,12 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-nfc-manager/ios",
+					"$(SRCROOT)/../node_modules/react-native-accessibility/ios",
 				);
 			};
 			name = Release;
