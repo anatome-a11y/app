@@ -14,12 +14,39 @@ const ListItem = List.Item;
 const { CheckboxItem } = Checkbox;
 const { Panel } = Accordion;
 
+import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 
+const getAcc = (pre, checked) => {
+    const sel = checked ? 'Selecionado' : 'Não selecionado';
+    const action = checked ? '' : 'Toque duas vezes para selecionar';
+    return `${pre}. ${sel}. ${action}. Descrição: `
+}
+
+
+const Option = ({ checked, onChange, label, title, children, _ref }) => (
+    <Checkbox checked={checked} onChange={onChange} ref={_ref}>
+        <View style={{ marginLeft: 15 }} >
+            <Text accessibilityLabel={getAcc(label, checked)} style={{ fontWeight: 'bold' }}>{title}: </Text>
+            <Text>{children}</Text>
+        </View>
+    </Checkbox>
+)
 
 class Roteiro extends Component {
 
+    initialFocus = null;
+    initialFocusTC = null;
+    initialFocusMA = null;
+    initialFocusSI = null;
+
     state = {
         active: '0'
+    }
+
+    componentDidMount() {
+        setTimeout(() => {
+            focusOnView(this.initialFocus)
+        }, 500)
     }
 
 
@@ -27,12 +54,28 @@ class Roteiro extends Component {
         const { tipoConteudo, modoAprendizagem, sentidoIdentificacao } = this.props.screenProps.modoInteracao;
 
         if (tipoConteudo != next.screenProps.modoInteracao.tipoConteudo) {
-            this.setState({ active: '1' })
+            // this.setState({ active: '1' })
         }
 
         if (modoAprendizagem != next.screenProps.modoInteracao.modoAprendizagem) {
-            this.setState({ active: '2' })
+            // this.setState({ active: '2' })
         }
+    }
+
+    componentWillUpdate(_, nextState){
+        const {active} = this.state;
+
+        if(active !== '0' && nextState.active == '0'){
+            announceForAccessibility('Aberto. Seleção do tipo de conteúdo. Prossiga para selecionar o tipo de conteúdo');
+        }
+
+        if(active !== '1' && nextState.active == '1'){
+            announceForAccessibility('Aberto. Seleção do modo de aprendizagem. Prossiga para selecionar o modo de aprendizagem');
+        }        
+
+        if(active !== '2' && nextState.active == '2'){
+            announceForAccessibility('Aberto. Seleção do sentido de identificação. Prossiga para selecionar o sentido de identificação');
+        }        
     }
 
 
@@ -47,72 +90,99 @@ class Roteiro extends Component {
         return (
             <Container navigation={navigation}>
                 <List style={{ marginBottom: 10 }} >
-                    <ListItem wrap multipleLine accessibilityLabel={`Roteiro: ${anatomp.nome}`}>
+                    <ListItem ref={r => this.initialFocus = r} wrap multipleLine accessibilityLabel={`Roteiro: ${anatomp.nome} selecionado. Prossiga para configurar a interação.`}>
                         {anatomp.nome}
                     </ListItem>
                 </List>
                 <Accordion style={{ backgroundColor: '#f5f5f9' }} onChange={active => this.setState({ active })} activeKey={active}>
                     <Panel
                         style={{ justifyContent: 'space-between', padding: 10, color: '#000' }}
-                        header={<Text accessibilityLabel={`Seleção do Tipo de conteúdo. ${active == '0' ? 'Expandido' : 'Toque duas vezes para expandir'}`}>Tipo de conteúdo</Text>}
+                        header={<Text accessibilityLabel={`Seleção do Tipo de conteúdo. ${active == '0' ? 'Prossiga para selecionar um tipo de conteúdo' : 'Toque duas vezes para abrir'}`}>Tipo de conteúdo</Text>}
                     >
                         <List>
                             <List.Item wrap multipleLine>
-                                <View>
-                                    <Text accessibilityLabel={`Tipo de conteúdo. prático`} style={{ fontWeight: 'bold' }}>Prático: </Text><Text>Identificação anatômica por nome</Text>
-                                    <Switch accessibilityLabel={`Tipo de conteúdo prático`} value={tipoConteudo == 'pratico'} onValueChange={this.onChange('tipoConteudo', 'pratico')} />
-                                </View>
+                                <Option
+                                    _ref={r => this.initialFocusTC = r}
+                                    title='Prático'
+                                    label='Tipo de conteúdo. Prático'
+                                    checked={tipoConteudo == 'pratico'}
+                                    onChange={this.onChange('tipoConteudo', 'pratico')}
+                                >
+                                    Identificação anatômica por nome
+                                </Option>
                             </List.Item>
                             <List.Item wrap multipleLine>
-                                <View>
-                                    <Text accessibilityLabel={`Tipo de conteúdo. Teórico`} style={{ fontWeight: 'bold' }}>Teórico: </Text><Text>Identificação anatômica por informações teóricas associadas</Text>
-                                    <Switch accessibilityLabel={`Tipo de conteúdo Teórico`} value={tipoConteudo == 'teorico'} onValueChange={this.onChange('tipoConteudo', 'teorico')} />
-                                </View>
+                                <Option
+                                    title='Teórico'
+                                    label='Tipo de conteúdo. Teórico'
+                                    checked={tipoConteudo == 'teorico'}
+                                    onChange={this.onChange('tipoConteudo', 'teorico')}
+                                >
+                                    Identificação anatômica por informações teóricas associadas
+                                </Option>
                             </List.Item>
                         </List>
                     </Panel>
                     <Panel
                         style={{ justifyContent: 'space-between', padding: 10, color: '#000' }}
-                        header={<Text accessibilityLabel={`Seleção do Modo de aprendizagem. ${active == '1' ? 'Expandido' : 'Toque duas vezes para expandir'}`}>Modo de aprendizagem</Text>}
+                        header={<Text accessibilityLabel={`Seleção do Modo de aprendizagem. ${active == '1' ? 'Prossiga para selecionar um modo de aprendizagem' : 'Toque duas vezes para abrir'}`}>Modo de aprendizagem</Text>}
                     >
                         <List>
-                            <List.Item>
-                                <View>
-                                    <Text style={{ fontWeight: 'bold' }}>Estudo: </Text><Text>Você seleciona uma parte anatômica e o sistema te informa o conteúdo correspondente.</Text>
-                                    <Switch value={modoAprendizagem == 'estudo'} onValueChange={this.onChange('modoAprendizagem', 'estudo')} />
-                                </View>
+                            <List.Item wrap multipleLine>
+                                <Option
+                                    _ref={r => this.initialFocusMA = r}
+                                    title='Estudo'
+                                    label='Modo de aprendizagem. Estudo'
+                                    checked={modoAprendizagem == 'estudo'}
+                                    onChange={this.onChange('modoAprendizagem', 'estudo')}
+                                >
+                                    Identificação anatômica por informações teóricas associadas
+                                </Option>
                             </List.Item>
-                            <List.Item>
-                                <View>
-                                    <Text style={{ fontWeight: 'bold' }}>Treinamento: </Text><Text>O sistema te informa um conteúdo e você indica a parte anatômica correspondente.</Text>
-                                    <Switch value={modoAprendizagem == 'treinamento'} onValueChange={this.onChange('modoAprendizagem', 'treinamento')} />
-                                </View>
+                            <List.Item wrap multipleLine>
+                                <Option
+                                    title='Treinamento'
+                                    label='Modo de aprendizagem. Treinamento'
+                                    checked={modoAprendizagem == 'treinamento'}
+                                    onChange={this.onChange('modoAprendizagem', 'treinamento')}
+                                >
+                                    O sistema te informa um conteúdo e você indica a parte anatômica correspondente.
+                                </Option>
                             </List.Item>
                         </List>
                     </Panel>
                     <Panel
                         style={{ justifyContent: 'space-between', padding: 10, color: '#000' }}
-                        header={<Text accessibilityLabel={`Seleção do Sentido de identificação. ${active == '2' ? 'Expandido' : 'Toque duas vezes para expandir'}`}>Sentido de identificação</Text>}
+                        header={<Text accessibilityLabel={`Seleção do Sentido de identificação. ${active == '2' ? 'Prossiga para selecionar um sentido de identificação' : 'Toque duas vezes para abrir'}`}>Sentido de identificação</Text>}
                     >
                         <List>
-                            <List.Item>
-                                <View>
-                                    <Text accessibilityLabel='Localizar.' style={{ fontWeight: 'bold' }}>Localizar: </Text><Text accessibilityLabel='Partindo-se do nome ou teoria, encontra-se a localização da parte' >Sentido: Nome/teoria -> Localização</Text>
-                                    <Switch value={sentidoIdentificacao == 'localizar'} onValueChange={this.onChange('sentidoIdentificacao', 'localizar')} />
-                                </View>
+                            <List.Item wrap multipleLine>
+                                <Option
+                                    _ref={r => this.initialFocusSI = r}
+                                    title='Localizar'
+                                    label='Sentido de identificação. Localizar'
+                                    checked={sentidoIdentificacao == 'localizar'}
+                                    onChange={this.onChange('sentidoIdentificacao', 'localizar')}
+                                >
+                                    Partindo-se do nome ou teoria, encontra-se a localização da parte
+                                </Option>
                             </List.Item>
-                            <List.Item>
-                                <View>
-                                    <Text accessibilityLabel='Nomear.' style={{ fontWeight: 'bold' }}>Nomear: </Text><Text accessibilityLabel='Partindo-se da localização da parte define-se o nome ou a informação teórica correta'>Sentido: Localização -> Nome/teoria</Text>
-                                    <Switch value={sentidoIdentificacao == 'nomear'} onValueChange={this.onChange('sentidoIdentificacao', 'nomear')} />
-                                </View>
+                            <List.Item wrap multipleLine>
+                                <Option
+                                    title='Nomear'
+                                    label='Sentido de identificação. Nomear'
+                                    checked={sentidoIdentificacao == 'nomear'}
+                                    onChange={this.onChange('sentidoIdentificacao', 'nomear')}
+                                >
+                                    Partindo-se da localização da parte define-se o nome ou a informação teórica correta
+                                </Option>
                             </List.Item>
                         </List>
                     </Panel>
                 </Accordion>
                 <Flex style={{ marginTop: 15 }}>
                     {/* <Button onPressOut={() => navigation.goBack()} style={{ flex: 1 }}><Text>Voltar</Text></Button> */}
-                    <Button accessibilityLabel='Iniciar interação. Botão. Pressione duas vezes para iniciar.' onPressOut={this.onStart} style={{ flex: 1 }} disabled={!isComplete} type='primary'><Text>Iniciar</Text></Button>
+                    <Button accessibilityLabel='Iniciar interação. Botão. Toque duas vezes para iniciar.' onPressOut={this.onStart} style={{ flex: 1 }} disabled={!isComplete} type='primary'><Text>Iniciar</Text></Button>
                 </Flex>
             </Container>
         )

@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import Icon from 'antd-mobile-rn/lib/icon';
 import List from 'antd-mobile-rn/lib/list';
 import Flex from 'antd-mobile-rn/lib/flex';
-import NoticeBar from 'antd-mobile-rn/lib/notice-bar';
+import Toast from 'antd-mobile-rn/lib/toast';
 
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 
@@ -76,17 +76,19 @@ const Midias = ({ value }) => {
 
 class App extends Component {
 
+  initialFocus = null;
+
   state = {
     anatomps: [],
     loading: true,
     open: true,
-    msg: 'Aguarde... Carregando...'
   }
 
   componentDidMount() {
 
 
-    // announceForAccessibility('type some message here')
+    announceForAccessibility('Carregando...');
+    Toast.loading('Carregando...', 0)
 
     fetch('https://frozen-thicket-97625.herokuapp.com/anatomp', {
       headers: {
@@ -96,7 +98,8 @@ class App extends Component {
     })
       .then(r => r.json())
       .then(r => {
-        this.onCloseModal()
+        Toast.hide()
+        focusOnView(this.initialFocus) 
         if (r.status == 200) {
           this.setState({ anatomps: r.data })
         } else {
@@ -105,15 +108,11 @@ class App extends Component {
       })
       .catch(e => {
         const msg = typeof e == 'string' ? e : 'Não foi possível obter os roteiros de aprendizagem'
-        this.onCloseModal()
-        this.onOpenModal(msg)
+        Toast.hide()
+        Toast.fail(msg)
+        announceForAccessibility(msg)
       })
       .finally(() => this.setState({ loading: false }))
-
-      console.log('-----------------------------------------------------')
-      setTimeout(() => {
-        focusOnView(this.refs.oigente) 
-      }, 3000)
       
   }
 
@@ -122,10 +121,8 @@ class App extends Component {
     const { navigation } = this.props;
 
     return (
-      <Container navigation={navigation}>
-      <View ref='oigente' accessible={true} accessibilityLabel='crendeuspai'><Text>Menina</Text></View>
-        
-        <List accessibilityLabel={`Roteiros de Aprendizagem. Lista com ${anatomps.length} itens.`} renderHeader={() => 'Roteiros de aprendizagem'}>
+      <Container navigation={navigation}>        
+        <List ref={r => this.initialFocus = r} accessibilityLabel={`Roteiros de Aprendizagem. Lista com ${anatomps.length} itens. Prossiga para escolher um roteiro`} renderHeader={() => 'Roteiros de aprendizagem'}>
           {
             anatomps.map(anatomp => (
               <ListItem
@@ -149,9 +146,6 @@ class App extends Component {
     );
   }
 
-  onCloseModal = () => this.setState({ open: false, msg: '' })
-
-  onOpenModal = msg => this.setState({ open: true, msg })
 
   onSelectRoteiro = roteiro => () => {
     const { navigation, screenProps } = this.props;

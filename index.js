@@ -154,7 +154,6 @@ class Root extends Component{
     
     _startDetection = cb => {
 
-        console.log(cb)
         if(this.state.config.indexOf('nfc') != -1){
             NfcManager.registerTagEvent(tag => {cb(this._parseText(tag))})
             .then(result => {
