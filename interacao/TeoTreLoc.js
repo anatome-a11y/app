@@ -12,6 +12,8 @@ import InputItem from 'antd-mobile-rn/lib/input-item';
 
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 
+import Resultados from './Resultados'
+import Placar from './Placar'
 
 class Form extends Component {
 
@@ -166,20 +168,13 @@ class FormContainer extends React.Component {
                         multipleLine
                         align="center"
                     >
-                        <Flex accessible={true}>
-                            <View accessibilityLabel={`Etapa ${count + 1} de ${total}.`} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                                <Text>Etapa</Text>
-                                <Tag><Text>{`${count + 1}/${total}`}</Text></Tag>
-                            </View>
-                            <View accessibilityLabel={`Tentativa ${tentativas + 1} de ${_maxTentativa}.`} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                                <Text>Tentativas</Text>
-                                <Tag><Text>{tentativas}/{_maxTentativa}</Text></Tag>
-                            </View>
-                            <View accessibilityLabel={`Tempo restante ${timer} segundos`} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                                <Text>Tempo</Text>
-                                <Tag><Text>{timer}</Text></Tag>
-                            </View>
-                        </Flex>
+                        <Placar 
+                            count={count}
+                            total={total}
+                            tentativas={tentativas}
+                            _maxTentativa={_maxTentativa}
+                            timer={timer}                                                      
+                        />
                     </ListItem>
                 </List>
             </View>
@@ -187,59 +182,6 @@ class FormContainer extends React.Component {
     }
 }
 
-
-
-
-class Resultados extends React.Component {
-
-    mainView = null;
-
-    componentDidMount(){
-        setTimeout(() => {
-            focusOnView(this.mainView)
-        }, 500)
-    }
-
-
-    render() {
-        const { data, onRepeat } = this.props;
-
-        const erros = data.filter(d => d.acertou == false);
-        const total = data.length;
-        const acertos = total - erros.length
-        const aprov = Number(((acertos * 100) / total).toFixed(2));
-
-        const accLabel = `Total de questões: ${total}. Acertos: ${acertos}. Aproveitamento: ${aprov} por cento.`;
-
-        return (
-            <View>
-                <View ref={r => this.mainView = r} accessible={true} accessibilityLabel={accLabel}>
-                    <Card style={{ marginBottom: 15 }}>
-                        <Card.Header title='Placar (acertos)' />
-                        <Card.Body>
-                            <Text style={{ flex: 1, fontSize: 35, textAlign: 'center', fontWeight: 'bold' }}>{acertos} /<Text>{total}</Text></Text>
-                            <Text style={{ flex: 1, fontSize: 25, textAlign: 'center' }}>{aprov}% de acertos</Text>
-                        </Card.Body>
-                    </Card>
-                </View>
-
-                {
-                    (acertos != total) && (
-                        <List renderHeader={() => 'Perguntas com resposta incorreta'}>
-                            {
-                                erros.map((e, idx) => (
-                                    <ListItem key={idx}>{e.texto}</ListItem>
-                                ))
-                            }
-                        </List>
-                    )
-                }
-
-                <Button style={{ flex: 1 }} onPressOut={onRepeat} type='primary'>Treinar novamente</Button>
-            </View>
-        )
-    }
-}
 
 
 
@@ -351,7 +293,7 @@ class TeoTreLoc extends Component {
                         onErrorClick={this.onErrorClick}
                         onSubmit={this.onSubmit}
                     />
-                ) : <Resultados data={data} onRepeat={this.onRepeat} />}
+                ) : <Resultados data={data} onRepeat={this.onRepeat} formatter={e => e.texto} />}
             </Container>
         )
     }
@@ -359,6 +301,8 @@ class TeoTreLoc extends Component {
     onRepeat = () => {
         const { data } = this.state;
         const dados = data.map(fd => ({ ...fd, acertou: false, valores: fd.modo == 'singular' ? Array(1).fill('') : Array(fd.partes.length).fill('') }));
+
+        clearInterval(this.timer)
 
         this.setState({
             data: dados,

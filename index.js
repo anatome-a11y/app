@@ -6,6 +6,8 @@ import Ajuda from './Ajuda';
 import Config from './Config';
 import Roteiro from './Roteiro';
 import TeoTreLoc from './interacao/TeoTreLoc';
+import TeoTreNom from './interacao/TeoTreNom';
+import PraTreNom from './interacao/PraTreNom';
 import {name as appName} from './app.json';
 import Toast from 'antd-mobile-rn/lib/toast';
 
@@ -20,6 +22,8 @@ const Nav = createStackNavigator({
     Config: { screen: Config },
     Roteiro: { screen: Roteiro },
     TeoTreLoc: { screen: TeoTreLoc },
+    TeoTreNom: { screen: TeoTreNom },
+    PraTreNom: { screen: PraTreNom },
 },
 {
   headerMode: 'none',
@@ -37,9 +41,9 @@ class Root extends Component{
         config: [],
         anatomp: null,
         modoInteracao: {
-            tipoConteudo: 'teorico',
+            tipoConteudo: 'pratico',
             modoAprendizagem: 'treinamento',
-            sentidoIdentificacao: 'localizar',
+            sentidoIdentificacao: 'nomear',
         },
         supported: true,
         enabled: false,

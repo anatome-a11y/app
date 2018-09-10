@@ -11,6 +11,7 @@
     "react": "16.4.1",
     "react-native": "0.56.0",
     "react-native-accessibility": "^1.0.7",
+    "react-native-autocomplete-input": "^3.5.0",
     "react-native-nfc-manager": "^0.5.5",
     "react-navigation": "^2.12.1"
   },

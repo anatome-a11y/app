@@ -62,20 +62,20 @@ class Roteiro extends Component {
         }
     }
 
-    componentWillUpdate(_, nextState){
-        const {active} = this.state;
+    componentWillUpdate(_, nextState) {
+        const { active } = this.state;
 
-        if(active !== '0' && nextState.active == '0'){
+        if (active !== '0' && nextState.active == '0') {
             announceForAccessibility('Aberto. Seleção do tipo de conteúdo. Prossiga para selecionar o tipo de conteúdo');
         }
 
-        if(active !== '1' && nextState.active == '1'){
+        if (active !== '1' && nextState.active == '1') {
             announceForAccessibility('Aberto. Seleção do modo de aprendizagem. Prossiga para selecionar o modo de aprendizagem');
-        }        
+        }
 
-        if(active !== '2' && nextState.active == '2'){
+        if (active !== '2' && nextState.active == '2') {
             announceForAccessibility('Aberto. Seleção do sentido de identificação. Prossiga para selecionar o sentido de identificação');
-        }        
+        }
     }
 
 
@@ -197,13 +197,17 @@ class Roteiro extends Component {
             case 'pratico-estudo-localizar': break;
             case 'pratico-estudo-nomear': break;
             case 'pratico-treinamento-localizar': break;
-            case 'pratico-treinamento-nomear': break;
+            case 'pratico-treinamento-nomear':
+                navigation.navigate('PraTreNom')
+                break;
             case 'teorico-estudo-localizar': break;
             case 'teorico-estudo-nomear': break;
             case 'teorico-treinamento-localizar':
                 navigation.navigate('TeoTreLoc')
                 break;
-            case 'teorico-treinamento-nomear': break;
+            case 'teorico-treinamento-nomear':
+                navigation.navigate('TeoTreNom')
+                break;
         }
 
     }
