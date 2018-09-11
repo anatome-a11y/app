@@ -84,11 +84,12 @@ class Roteiro extends Component {
         const { navigation, screenProps } = this.props;
         const { tipoConteudo, modoAprendizagem, sentidoIdentificacao } = screenProps.modoInteracao;
 
-        const { anatomp } = screenProps;
+        const { anatomp, onStartRecognizing, onStopRecognizing } = screenProps;
         const isComplete = tipoConteudo != '' && modoAprendizagem != '' && sentidoIdentificacao != '';
 
         return (
             <Container navigation={navigation}>
+            <Button onPressIn={onStartRecognizing} onPressOut={onStopRecognizing}>aaaaa</Button>
                 <List style={{ marginBottom: 10 }} >
                     <ListItem ref={r => this.initialFocus = r} wrap multipleLine accessibilityLabel={`Roteiro: ${anatomp.nome} selecionado. Prossiga para configurar a interação.`}>
                         {anatomp.nome}

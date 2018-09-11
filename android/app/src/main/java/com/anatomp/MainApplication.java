@@ -3,6 +3,7 @@ package com.anatomp;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.wenkesj.voice.VoicePackage;
 import com.reactlibrary.RNReactNativeAccessibilityPackage;
 import community.revteltech.nfc.NfcManagerPackage;
 import com.facebook.react.ReactNativeHost;
@@ -25,6 +26,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new VoicePackage(),
             new RNReactNativeAccessibilityPackage(),
             new NfcManagerPackage()
       );

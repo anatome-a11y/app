@@ -12,6 +12,7 @@ import {name as appName} from './app.json';
 import Toast from 'antd-mobile-rn/lib/toast';
 
 import NfcManager, {NdefParser} from 'react-native-nfc-manager';
+import Voice from 'react-native-voice';
 
 
 import { createStackNavigator } from 'react-navigation';
@@ -37,19 +38,29 @@ const Nav = createStackNavigator({
 
 class Root extends Component{
 
-    state = {
-        config: [],
-        anatomp: null,
-        modoInteracao: {
-            tipoConteudo: 'pratico',
-            modoAprendizagem: 'treinamento',
-            sentidoIdentificacao: 'nomear',
-        },
-        supported: true,
-        enabled: false,
-        parsedText: null,
-        tag: {},
+    constructor(props){
+        super(props);
+
+        Voice.onSpeechStart = this.onSpeechStart;
+        Voice.onSpeechEnd = this.onSpeechEnd;
+        Voice.onSpeechPartialResults = this.onSpeechPartialResults;     
+        
+        this.state = {
+            config: [],
+            anatomp: null,
+            modoInteracao: {
+                tipoConteudo: 'pratico',
+                modoAprendizagem: 'treinamento',
+                sentidoIdentificacao: 'nomear',
+            },
+            supported: true,
+            enabled: false,
+            parsedText: null,
+            tag: {},
+        }        
     }
+
+   
 
     componentDidMount() {
         NfcManager.isSupported()
@@ -62,8 +73,12 @@ class Root extends Component{
                     Toast.fail('Seu dispositivo não possui suporte a NFC')
                 }
             })
-            .catch(e => console.log(e))
-    }    
+            .catch(e => console.log(e))    
+    }   
+    
+    componentWillUnmount() {
+        Voice.destroy().then(Voice.removeAllListeners);
+      }    
 
     render(){
 
@@ -79,10 +94,42 @@ class Root extends Component{
                 onSelectRoteiro: this.onSelectRoteiro,
                 onChangeModoInteracao: this.onChangeModoInteracao,
                 onReadNFC: this._startDetection,
-                onStopNFC: this._stopDetection 
+                onStopNFC: this._stopDetection,
+                onStartRecognizing: this._startRecognizing,
+                onStopRecognizing: this._stopRecognizing 
             }} 
         />
     }
+
+
+    onSpeechStart = () => {
+        console.log('inicio')
+    }
+
+    onSpeechEnd = () => {
+        console.log('fim')
+    }
+
+    onSpeechPartialResults = e => {
+        console.log('==>', e.value)
+    } 
+
+    async _startRecognizing(e) {
+        try {
+          await Voice.start('pt-BR');
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    
+      async _stopRecognizing(e) {
+        try {
+          await Voice.stop();
+        } catch (e) {
+          console.error(e);
+        }
+      }    
+
 
     onChangeConfig = key => {
         const {config} = this.state;

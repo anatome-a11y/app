@@ -77,7 +77,7 @@ class FormContainer extends React.Component {
         return (
             <View>
                 <Card>
-                    <Card.Header title={<Text accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a dica da parte.`} ref={r => this.nomeDaPeca = r}>{title}</Text>} />
+                    <Card.Header title={<Text accessibilityLabel={`Peça: ${title}. Prossiga para ouvir o número da parte anatômica`} ref={r => this.nomeDaPeca = r}>{title}</Text>} />
                     <Card.Body>
                         <View>
                             <Text ref={r => this.dicaDaParte = r} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Número {data[count].numero}</Text>

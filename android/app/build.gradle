@@ -148,6 +148,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-voice')
     compile project(':react-native-accessibility')
     compile project(':react-native-nfc-manager')
     compile fileTree(dir: "libs", include: ["*.jar"])
