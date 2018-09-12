@@ -43,7 +43,7 @@ class Root extends Component{
 
         Voice.onSpeechStart = this.onSpeechStart;
         Voice.onSpeechEnd = this.onSpeechEnd;
-        Voice.onSpeechPartialResults = this.onSpeechPartialResults;     
+        Voice.onSpeechResults = this.onGetVoice;     
         
         this.state = {
             config: [],
@@ -55,8 +55,9 @@ class Root extends Component{
             },
             supported: true,
             enabled: false,
-            parsedText: null,
             tag: {},
+            gravando: false,
+            voiceData: null
         }        
     }
 
@@ -82,7 +83,7 @@ class Root extends Component{
 
     render(){
 
-        const {config, modoInteracao, anatomp} = this.state;
+        const {config, modoInteracao, anatomp, voiceData} = this.state;
 
         return <Nav 
             {...this.props} 
@@ -90,29 +91,33 @@ class Root extends Component{
                 config, 
                 anatomp, 
                 modoInteracao,
+                voiceData,
                 onChangeConfig: this.onChangeConfig,
                 onSelectRoteiro: this.onSelectRoteiro,
                 onChangeModoInteracao: this.onChangeModoInteracao,
                 onReadNFC: this._startDetection,
                 onStopNFC: this._stopDetection,
                 onStartRecognizing: this._startRecognizing,
-                onStopRecognizing: this._stopRecognizing 
+                onStopRecognizing: this._stopRecognizing,
             }} 
         />
     }
 
 
     onSpeechStart = () => {
-        console.log('inicio')
+        console.log('ini')
+        this.setState({gravando: true})
     }
 
     onSpeechEnd = () => {
         console.log('fim')
+        this.setState({gravando: false, voiceData: null})
     }
 
-    onSpeechPartialResults = e => {
-        console.log('==>', e.value)
-    } 
+    onGetVoice = e => {
+        console.log(e.value)
+        this.setState({ voiceData: e.value})
+    }
 
     async _startRecognizing(e) {
         try {

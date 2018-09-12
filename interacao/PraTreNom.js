@@ -21,6 +21,7 @@ class FormContainer extends React.Component {
 
     nomeDaPeca = null;
     dicaDaParte = null;
+    listRef = null;
 
     state = {
         filtered: this.props.mainState.partes,
@@ -34,7 +35,7 @@ class FormContainer extends React.Component {
     }
 
     componentWillReceiveProps(next) {
-        const { mainState } = this.props;
+        const { mainState, screenProps } = this.props;
 
         //Se mudou a peça física, foco na peça física
         if (mainState.data[mainState.count].pecaFisica.nome != next.mainState.data[next.mainState.count].pecaFisica.nome) {
@@ -45,6 +46,11 @@ class FormContainer extends React.Component {
                 focusOnView(this.dicaDaParte)
             }
         }
+
+        if(screenProps.voiceData == null && next.screenProps.voiceData != null){
+            this.onFilter(next.screenProps.voiceData[0]);
+        }
+
     }
 
     componentWillUnmount() {
@@ -54,7 +60,7 @@ class FormContainer extends React.Component {
 
     render() {
         const { screenProps, mainState, onGetRef, onSubmit } = this.props;
-        const { anatomp } = screenProps;
+        const { anatomp, onStartRecognizing, onStopRecognizing, voiceData } = screenProps;
         const { count, total, data, timer, tentativas } = mainState;
         const title = data[count].pecaFisica.nome + ' - ' + anatomp.nome;
         const {filtered} = this.state;
@@ -80,15 +86,24 @@ class FormContainer extends React.Component {
                     <Card.Header title={<Text accessibilityLabel={`Peça: ${title}. Prossiga para ouvir o número da parte anatômica`} ref={r => this.nomeDaPeca = r}>{title}</Text>} />
                     <Card.Body>
                         <View>
-                            <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`Número ${data[count].numero}. Informe no campo a seguir um termo para filtrar a lista de partes.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Número {data[count].numero}</Text>
-                            <List>
+                            <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`Número ${data[count].numero}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Número {data[count].numero}</Text>
+                            <Flex style={{marginBottom: 10}}>
+                                <Button accessibilityLabel='Filtrar. Botão. Mantenha pressionado e fale um termo de busca para filtrar a lista de partes.' style={{flex: 1, margin: 5}} type='primary' onPressIn={onStartRecognizing} onPressOut={onStopRecognizing}>Filtrar</Button>
+                                <Button style={{flex: 1, margin: 5}} onPressOut={() => this.onFilter('')}>Limpar filtro</Button>
+                            </Flex>
+
+                            {/* <List>
                                 <InputItem
                                     ref={onGetRef(count)}
                                     value={this.state.pesquisa}
                                     onChange={this.onFilter}
-                                    placeholder='Filtrar partes...'
+                                    placeholder='Filtrar partes'
+                                    onSubmitEditing={() => focusOnView(this.listRef)}
+                                    onFocus={this.onFocus}
                                 />
-                                {_Itens}
+                            </List> */}
+                            <List ref={r => this.listRef = r} accessibilityLabel={`Nomes das partes. Lista com ${filtered.length} itens. Prossiga para escolher uma parte`} renderHeader={() => 'Nomes das Partes'}>
+                                {_Itens}                                
                             </List>
                         </View>
                     </Card.Body>
@@ -115,6 +130,13 @@ class FormContainer extends React.Component {
         )
     }
 
+    onFocus = () => {
+        announceForAccessibility(`Após o sinal, informe uma expressão para filtrar a lista de partes`)
+        setTimeout(() => {
+            this.props.screenProps.onStartRecognizing()
+        }, 5000)
+    }
+
     onFilter = pesquisa => {
         this.setState({
             pesquisa
@@ -123,13 +145,16 @@ class FormContainer extends React.Component {
                 return c.nome.toLowerCase().indexOf(this.state.pesquisa.toLowerCase()) != -1
             });
 
-            this.setState({filtered})
+            this.setState({filtered}, () => {
+                announceForAccessibility(`Na lista ${filtered.length} partes: ${filtered.map(f => f.nome).join(', ')}`)
+            })
         })
     }
 
 
     onChange = parte => () => {
         this.props.onChangeValor(parte)
+        announceForAccessibility(`${parte.nome} selecionado`)
     }
 }
 

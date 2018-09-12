@@ -84,12 +84,11 @@ class Roteiro extends Component {
         const { navigation, screenProps } = this.props;
         const { tipoConteudo, modoAprendizagem, sentidoIdentificacao } = screenProps.modoInteracao;
 
-        const { anatomp, onStartRecognizing, onStopRecognizing } = screenProps;
+        const { anatomp } = screenProps;
         const isComplete = tipoConteudo != '' && modoAprendizagem != '' && sentidoIdentificacao != '';
 
         return (
             <Container navigation={navigation}>
-            <Button onPressIn={onStartRecognizing} onPressOut={onStopRecognizing}>aaaaa</Button>
                 <List style={{ marginBottom: 10 }} >
                     <ListItem ref={r => this.initialFocus = r} wrap multipleLine accessibilityLabel={`Roteiro: ${anatomp.nome} selecionado. Prossiga para configurar a interação.`}>
                         {anatomp.nome}
@@ -107,7 +106,7 @@ class Roteiro extends Component {
                                     title='Prático'
                                     label='Tipo de conteúdo. Prático'
                                     checked={tipoConteudo == 'pratico'}
-                                    onChange={this.onChange('tipoConteudo', 'pratico')}
+                                    onChange={this.onChange('tipoConteudo', 'pratico', 'Prático')}
                                 >
                                     Identificação anatômica por nome
                                 </Option>
@@ -117,7 +116,7 @@ class Roteiro extends Component {
                                     title='Teórico'
                                     label='Tipo de conteúdo. Teórico'
                                     checked={tipoConteudo == 'teorico'}
-                                    onChange={this.onChange('tipoConteudo', 'teorico')}
+                                    onChange={this.onChange('tipoConteudo', 'teorico', 'Teórico')}
                                 >
                                     Identificação anatômica por informações teóricas associadas
                                 </Option>
@@ -135,7 +134,7 @@ class Roteiro extends Component {
                                     title='Estudo'
                                     label='Modo de aprendizagem. Estudo'
                                     checked={modoAprendizagem == 'estudo'}
-                                    onChange={this.onChange('modoAprendizagem', 'estudo')}
+                                    onChange={this.onChange('modoAprendizagem', 'estudo', 'Estudo')}
                                 >
                                     Identificação anatômica por informações teóricas associadas
                                 </Option>
@@ -145,7 +144,7 @@ class Roteiro extends Component {
                                     title='Treinamento'
                                     label='Modo de aprendizagem. Treinamento'
                                     checked={modoAprendizagem == 'treinamento'}
-                                    onChange={this.onChange('modoAprendizagem', 'treinamento')}
+                                    onChange={this.onChange('modoAprendizagem', 'treinamento', 'treinamento')}
                                 >
                                     O sistema te informa um conteúdo e você indica a parte anatômica correspondente.
                                 </Option>
@@ -163,7 +162,7 @@ class Roteiro extends Component {
                                     title='Localizar'
                                     label='Sentido de identificação. Localizar'
                                     checked={sentidoIdentificacao == 'localizar'}
-                                    onChange={this.onChange('sentidoIdentificacao', 'localizar')}
+                                    onChange={this.onChange('sentidoIdentificacao', 'localizar', 'Loaclizar')}
                                 >
                                     Partindo-se do nome ou teoria, encontra-se a localização da parte
                                 </Option>
@@ -173,7 +172,7 @@ class Roteiro extends Component {
                                     title='Nomear'
                                     label='Sentido de identificação. Nomear'
                                     checked={sentidoIdentificacao == 'nomear'}
-                                    onChange={this.onChange('sentidoIdentificacao', 'nomear')}
+                                    onChange={this.onChange('sentidoIdentificacao', 'nomear', 'Nomear')}
                                 >
                                     Partindo-se da localização da parte define-se o nome ou a informação teórica correta
                                 </Option>
@@ -213,7 +212,10 @@ class Roteiro extends Component {
 
     }
 
-    onChange = (field, value) => () => this.props.screenProps.onChangeModoInteracao(field, value)
+    onChange = (field, value, name) => () => {
+        this.props.screenProps.onChangeModoInteracao(field, value)
+        announceForAccessibility(`${name} selecionado`)
+    }
 }
 
 export default Roteiro;
