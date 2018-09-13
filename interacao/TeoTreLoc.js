@@ -8,19 +8,15 @@ import Toast from 'antd-mobile-rn/lib/toast';
 import Button from 'antd-mobile-rn/lib/button';
 import Flex from 'antd-mobile-rn/lib/flex';
 import Tag from 'antd-mobile-rn/lib/tag';
-import InputItem from 'antd-mobile-rn/lib/input-item';
 
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 
 import Resultados from './Resultados'
 import Placar from './Placar'
 
+import Input from '../components/Input'
+
 class Form extends Component {
-
-
-    componentDidMount() {
-        // this.props.onSetFocus(this.props.count)
-    }
 
 
     componentWillReceiveProps(next) {
@@ -64,17 +60,18 @@ class Form extends Component {
 
         return (timer > 0 && tentativas < _maxTentativa) ? (
             <ListItem key={idx} >
-                <InputItem
-                    ref={onGetRef(count, idx)}
-                    type='number'
-                    value={value}
-                    onFocus={() => onReadNFC(onChangeValor(idx))}
-                    onBlur={onStopNFC}
-                    onChange={onChangeValor(idx)}
-                    error={label == _ni}
-                    placeholder={placeholder}
-                    onErrorClick={onErrorClick}
-                    onSubmitEditing={() => modo == 'singular' || idx == limite ? onSubmit() : onSetFocus(count, idx + 1)}
+                <Input 
+                isTag
+                _ref={onGetRef(count, idx)}
+                value={value}
+                onChange={onChangeValor(idx)}
+                name={placeholder}
+                onDone={() => modo == 'singular' || idx == limite ? onSubmit() : onSetFocus(count, idx + 1)}
+                InputProps={{
+                    type: 'number',      
+                    error: label == _ni,
+                    onErrorClick: onErrorClick,                                       
+                }}
                 />
                 {/* <View style={{ marginTop: 5, paddingLeft: 10 }}>
                     <Brief >{helper}</Brief>
@@ -253,6 +250,7 @@ class TeoTreLoc extends Component {
 
         this.setState({ data: dados, total: dados.length, pecasFisicas: { ...pecasFisicas } }, () => {
             this.onCount();
+            this.onSetFocus(0)
             Toast.hide();
         })
 
@@ -320,13 +318,15 @@ class TeoTreLoc extends Component {
         let acertou = this.checkAcertos(data[count]);
 
         if (acertou) {
-            Toast.success('Acertou!', 3, this.onNext(acertou));
+            Toast.success('Acertou!', 3);
             announceForAccessibility('Acertou!')
+            setTimeout(this.onNext(acertou), 3200)
         } else {
             this.setState({ tentativas: tentativas + 1 })
             if (tentativas == _maxTentativa - 1 || timer == 0) {
-                Toast.fail('Você errou.', 3, this.onNext(acertou))
+                Toast.fail('Você errou.', 3)
                 announceForAccessibility('Você errou.')
+                setTimeout(this.onNext(acertou), 3200)
             } else {
                 const num = _maxTentativa - tentativas - 1;
                 const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
@@ -356,13 +356,27 @@ class TeoTreLoc extends Component {
         }, () => {
             clearInterval(this.timer)
             this.onCount()
+            if(count+1 < data.length){
+                this.onSetFocus(count+1)
+            }
+            
         })
 
     }
 
     onGetRef = (count, idx) => r => { this.fieldRef[count][idx] = r }
 
-    onSetFocus = (count, idx = 0) => { this.fieldRef[count][idx].focus() }
+    onSetFocus = (count, idx = 0) => { 
+        const {config} = this.props.screenProps;
+        if(config.indexOf('nfc') == -1 && config.indexOf('voz') == -1){
+            this.fieldRef[count][idx].focus()
+        }else{
+            if(config.indexOf('talkback') !== -1){
+                focusOnView(this.fieldRef[count][idx])
+            }
+        }
+        
+     }
 
     checkAcertos = item => {
         if (item.modo == 'singular') {

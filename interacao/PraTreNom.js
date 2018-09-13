@@ -87,10 +87,10 @@ class FormContainer extends React.Component {
                     <Card.Body>
                         <View>
                             <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`Número ${data[count].numero}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Número {data[count].numero}</Text>
-                            <Flex style={{marginBottom: 10}}>
+                            <View style={{marginBottom: 10}}>
                                 <Button accessibilityLabel='Filtrar. Botão. Mantenha pressionado e fale um termo de busca para filtrar a lista de partes.' style={{flex: 1, margin: 5}} type='primary' onPressIn={onStartRecognizing} onPressOut={onStopRecognizing}>Filtrar</Button>
-                                <Button style={{flex: 1, margin: 5}} onPressOut={() => this.onFilter('')}>Limpar filtro</Button>
-                            </Flex>
+                                <Button type='ghost' style={{flex: 1, margin: 5}} onPressOut={() => this.onFilter('')}>Limpar filtro</Button>
+                            </View>
 
                             {/* <List>
                                 <InputItem

@@ -8,29 +8,16 @@ import List from 'antd-mobile-rn/lib/list';
 import Button from 'antd-mobile-rn/lib/button';
 import Flex from 'antd-mobile-rn/lib/flex';
 
-import Checkbox from 'antd-mobile-rn/lib/checkbox';
+
 const ListItem = List.Item;
 
-const { CheckboxItem } = Checkbox;
 const { Panel } = Accordion;
 
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 
-const getAcc = (pre, checked) => {
-    const sel = checked ? 'Selecionado' : 'Não selecionado';
-    const action = checked ? '' : 'Toque duas vezes para selecionar';
-    return `${pre}. ${sel}. ${action}. Descrição: `
-}
 
+import Option from './components/Option'
 
-const Option = ({ checked, onChange, label, title, children, _ref }) => (
-    <Checkbox checked={checked} onChange={onChange} ref={_ref}>
-        <View style={{ marginLeft: 15 }} >
-            <Text accessibilityLabel={getAcc(label, checked)} style={{ fontWeight: 'bold' }}>{title}: </Text>
-            <Text>{children}</Text>
-        </View>
-    </Checkbox>
-)
 
 class Roteiro extends Component {
 

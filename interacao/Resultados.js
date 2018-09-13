@@ -17,7 +17,7 @@ class Resultados extends React.Component {
 
     componentDidMount(){
         setTimeout(() => {
-            focusOnView(this.mainView)
+            this.mainView && focusOnView(this.mainView)
         }, 1000)
     }
 

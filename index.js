@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import {AppRegistry, Platform} from 'react-native';
+import { AppRegistry, Platform, AccessibilityInfo } from 'react-native';
 import App from './App';
 import Ajuda from './Ajuda';
 import Config from './Config';
@@ -8,12 +8,15 @@ import Roteiro from './Roteiro';
 import TeoTreLoc from './interacao/TeoTreLoc';
 import TeoTreNom from './interacao/TeoTreNom';
 import PraTreNom from './interacao/PraTreNom';
-import {name as appName} from './app.json';
+import { name as appName } from './app.json';
 import Toast from 'antd-mobile-rn/lib/toast';
 
-import NfcManager, {NdefParser} from 'react-native-nfc-manager';
+import NfcManager, { NdefParser } from 'react-native-nfc-manager';
 import Voice from 'react-native-voice';
 
+import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
+
+import AppContext from './components/AppContext'
 
 import { createStackNavigator } from 'react-navigation';
 
@@ -26,130 +29,135 @@ const Nav = createStackNavigator({
     TeoTreNom: { screen: TeoTreNom },
     PraTreNom: { screen: PraTreNom },
 },
-{
-  headerMode: 'none',
-  navigationOptions: {
-      headerVisible: false,
-  }
-}
+    {
+        headerMode: 'none',
+        navigationOptions: {
+            headerVisible: false,
+        }
+    }
 );
 
 
 
-class Root extends Component{
+class Root extends Component {
 
-    constructor(props){
+    constructor(props) {
         super(props);
 
         Voice.onSpeechStart = this.onSpeechStart;
         Voice.onSpeechEnd = this.onSpeechEnd;
-        Voice.onSpeechResults = this.onGetVoice;     
-        
+
         this.state = {
             config: [],
             anatomp: null,
             modoInteracao: {
-                tipoConteudo: 'pratico',
+                tipoConteudo: 'teorico',
                 modoAprendizagem: 'treinamento',
-                sentidoIdentificacao: 'nomear',
+                sentidoIdentificacao: 'localizar',
             },
             supported: true,
             enabled: false,
             tag: {},
             gravando: false,
-            voiceData: null
-        }        
+        }
     }
 
-   
+
 
     componentDidMount() {
+        const { config } = this.state;
+
+        AccessibilityInfo.fetch().then((isEnabled) => {
+            this.setState({config: [...config, 'talkback']})
+        });        
         NfcManager.isSupported()
             .then(supported => {
                 this.setState({ supported });
                 if (supported) {
-                    this.setState({config: ['nfc']})
-                    this._startNfc();             
-                }else{
-                    Toast.fail('Seu dispositivo não possui suporte a NFC')
+                    // this.setState({config: [...config, 'nfc']})
+                    this._startNfc();
+                } else {
+                    const msg = 'Seu dispositivo não possui suporte a NFC';
+                    Toast.fail(msg)
+                    announceForAccessibility(msg)
                 }
             })
-            .catch(e => console.log(e))    
-    }   
-    
+            .catch(e => console.log(e))
+    }
+
     componentWillUnmount() {
         Voice.destroy().then(Voice.removeAllListeners);
-      }    
+    }
 
-    render(){
+    render() {
 
-        const {config, modoInteracao, anatomp, voiceData} = this.state;
+        const { config, modoInteracao, anatomp } = this.state;
 
-        return <Nav 
-            {...this.props} 
-            screenProps={{
-                config, 
-                anatomp, 
-                modoInteracao,
-                voiceData,
-                onChangeConfig: this.onChangeConfig,
-                onSelectRoteiro: this.onSelectRoteiro,
-                onChangeModoInteracao: this.onChangeModoInteracao,
-                onReadNFC: this._startDetection,
-                onStopNFC: this._stopDetection,
-                onStartRecognizing: this._startRecognizing,
-                onStopRecognizing: this._stopRecognizing,
-            }} 
-        />
+        return <AppContext.Provider value={{
+            config,  
+            onStartListen: this._startRecognizing,
+            onStopListen: this._stopRecognizing, 
+            onReadNFC: this._startDetection,
+            onStopNFC: this._stopDetection,                                 
+        }}>
+            <Nav
+                {...this.props}
+                screenProps={{
+                    config,
+                    anatomp,
+                    modoInteracao,
+                    onChangeConfig: this.onChangeConfig,
+                    onSelectRoteiro: this.onSelectRoteiro,
+                    onChangeModoInteracao: this.onChangeModoInteracao,
+                }}
+            />
+        </AppContext.Provider>
     }
 
 
     onSpeechStart = () => {
-        console.log('ini')
-        this.setState({gravando: true})
+        this.setState({ gravando: true })
     }
 
     onSpeechEnd = () => {
-        console.log('fim')
-        this.setState({gravando: false, voiceData: null})
+        this.setState({ gravando: false })
     }
 
-    onGetVoice = e => {
-        console.log(e.value)
-        this.setState({ voiceData: e.value})
+    onGetVoice = cb => e => {
+        cb(e.value)
+    }    
+
+    _startRecognizing = cb => e => {
+        Voice.onSpeechResults = this.onGetVoice(cb);
+
+        Voice.start('pt-BR')
+        .then(r => r)
+        .catch(err => console.error(err))
     }
 
-    async _startRecognizing(e) {
+    async _stopRecognizing(e) {
         try {
-          await Voice.start('pt-BR');
+            await Voice.stop();
         } catch (e) {
-          console.error(e);
+            console.error(e);
         }
-      }
-    
-      async _stopRecognizing(e) {
-        try {
-          await Voice.stop();
-        } catch (e) {
-          console.error(e);
-        }
-      }    
+    }
 
 
     onChangeConfig = key => {
-        const {config} = this.state;
-        if(config.indexOf(key) == -1){
-            this.setState({config: [...config, key]})
-        }else{
-            this.setState({config: config.filter(k => k != key)})
+        const { config } = this.state;
+        if (config.indexOf(key) == -1) {
+            this.setState({ config: [...config, key] })
+        } else {
+            this.setState({ config: config.filter(k => k != key) })
         }
     }
 
     onSelectRoteiro = anatomp => {
-        this.setState({anatomp});
+        this.setState({ anatomp });
     }
 
-    onChangeModoInteracao = (field, value) => this.setState({modoInteracao: {...this.state.modoInteracao, [field]: value}})
+    onChangeModoInteracao = (field, value) => this.setState({ modoInteracao: { ...this.state.modoInteracao, [field]: value } })
 
 
     _startNfc() {
@@ -163,7 +171,7 @@ class Root extends Component{
             })
             .catch(error => {
                 console.warn('start fail', error);
-                this.setState({supported: false});
+                this.setState({ supported: false });
             })
 
         if (Platform.OS === 'android') {
@@ -187,9 +195,9 @@ class Root extends Component{
             NfcManager.onStateChanged(
                 event => {
                     if (event.state === 'on') {
-                        this.setState({enabled: true});
+                        this.setState({ enabled: true });
                     } else if (event.state === 'off') {
-                        this.setState({enabled: false});
+                        this.setState({ enabled: false });
                     } else if (event.state === 'turning_on') {
                         // do whatever you want
                     } else if (event.state === 'turning_off') {
@@ -198,7 +206,7 @@ class Root extends Component{
                 }
             )
                 .then(sub => {
-                    this._stateChangedSubscription = sub; 
+                    this._stateChangedSubscription = sub;
                     // remember to call this._stateChangedSubscription.remove()
                     // when you don't want to listen to this anymore
                 })
@@ -207,20 +215,20 @@ class Root extends Component{
                 })
         }
     }
-    
-    _startDetection = cb => {
 
-        if(this.state.config.indexOf('nfc') != -1){
-            NfcManager.registerTagEvent(tag => {cb(this._parseText(tag))})
-            .then(result => {
-                console.log('registerTagEvent OK', result)
-            })
-            .catch(error => {
-                console.warn('registerTagEvent fail', error)
-            })
+    _startDetection = cb => e => {
+
+        if (this.state.config.indexOf('nfc') != -1) {
+            NfcManager.registerTagEvent(tag => { cb(this._parseText(tag)) })
+                .then(result => {
+                    console.log('registerTagEvent OK', result)
+                })
+                .catch(error => {
+                    console.warn('registerTagEvent fail', error)
+                })
         }
-    } 
-    
+    }
+
     _stopDetection = () => {
         NfcManager.unregisterTagEvent()
             .then(result => {
@@ -229,7 +237,7 @@ class Root extends Component{
             .catch(error => {
                 console.warn('unregisterTagEvent fail', error)
             })
-    }    
+    }
 
 
     _parseText = (tag) => {
@@ -237,7 +245,7 @@ class Root extends Component{
             return NdefParser.parseText(tag.ndefMessage[0]);
         }
         return null;
-    }    
+    }
 }
 
 AppRegistry.registerComponent(appName, () => Root);

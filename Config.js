@@ -9,22 +9,33 @@ import Checkbox from 'antd-mobile-rn/lib/checkbox';
 
 const { CheckboxItem } = Checkbox;
 
+import Option from './components/Option'
+
 class Config extends Component {
     render() {
         const { navigation, screenProps } = this.props;
         const { config } = screenProps;
 
-        const hasNFC = config.indexOf('nfc') != -1;
 
         return (
             <Container navigation={navigation}>
                 <Text accessibilityLabel='Configurações de entrada' style={styles.subTitle}>Entrada</Text>
-                <List renderHeader={() => 'NFC'} style={{ marginBottom: 15 }}>
-                    <List.Item >
-                        <Flex>
-                            <Text style={{ flex: 1 }}>Leitura com NFC</Text>
-                            <Switch accessibilityLabel='Leitura com NFC' style={{ flex: 1 }} disabled value={hasNFC} onValueChange={() => { }} />
-                        </Flex>
+                <List renderHeader={() => 'NFC e Voz'} style={{ marginBottom: 15 }}>
+                    <List.Item>
+                        <Option
+                            checked={config.indexOf('nfc') != -1}
+                            onChange={this.onChange('nfc')}
+                        >
+                            Leitura de etiquetas com NFC
+                                </Option>
+                    </List.Item>
+                    <List.Item>
+                        <Option
+                            checked={config.indexOf('voz') != -1}
+                            onChange={this.onChange('voz')}
+                        >
+                            Inserção de texto por voz
+                        </Option>
                     </List.Item>
                 </List>
                 <Text accessibilityLabel='Configurações de saída' style={styles.subTitle}>Saída</Text>
