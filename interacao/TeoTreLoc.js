@@ -60,18 +60,18 @@ class Form extends Component {
 
         return (timer > 0 && tentativas < _maxTentativa) ? (
             <ListItem key={idx} >
-                <Input 
-                isTag
-                _ref={onGetRef(count, idx)}
-                value={value}
-                onChange={onChangeValor(idx)}
-                name={placeholder}
-                onDone={() => modo == 'singular' || idx == limite ? onSubmit() : onSetFocus(count, idx + 1)}
-                InputProps={{
-                    type: 'number',      
-                    error: label == _ni,
-                    onErrorClick: onErrorClick,                                       
-                }}
+                <Input
+                    isTag
+                    _ref={onGetRef(count, idx)}
+                    value={value}
+                    onChange={onChangeValor(idx)}
+                    name={placeholder}
+                    onDone={() => modo == 'singular' || idx == limite ? onSubmit() : onSetFocus(count, idx + 1)}
+                    InputProps={{
+                        type: 'number',
+                        error: label == _ni,
+                        onErrorClick: onErrorClick,
+                    }}
                 />
                 {/* <View style={{ marginTop: 5, paddingLeft: 10 }}>
                     <Brief >{helper}</Brief>
@@ -165,12 +165,12 @@ class FormContainer extends React.Component {
                         multipleLine
                         align="center"
                     >
-                        <Placar 
+                        <Placar
                             count={count}
                             total={total}
                             tentativas={tentativas}
                             _maxTentativa={_maxTentativa}
-                            timer={timer}                                                      
+                            timer={timer}
                         />
                     </ListItem>
                 </List>
@@ -356,27 +356,27 @@ class TeoTreLoc extends Component {
         }, () => {
             clearInterval(this.timer)
             this.onCount()
-            if(count+1 < data.length){
-                this.onSetFocus(count+1)
+            if (count + 1 < data.length) {
+                this.onSetFocus(count + 1)
             }
-            
+
         })
 
     }
 
     onGetRef = (count, idx) => r => { this.fieldRef[count][idx] = r }
 
-    onSetFocus = (count, idx = 0) => { 
-        const {config} = this.props.screenProps;
-        if(config.indexOf('nfc') == -1 && config.indexOf('voz') == -1){
+    onSetFocus = (count, idx = 0) => {
+        const { config } = this.props.screenProps;
+        if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
             this.fieldRef[count][idx].focus()
-        }else{
-            if(config.indexOf('talkback') !== -1){
+        } else {
+            if (config.indexOf('talkback') !== -1) {
                 focusOnView(this.fieldRef[count][idx])
             }
         }
-        
-     }
+
+    }
 
     checkAcertos = item => {
         if (item.modo == 'singular') {

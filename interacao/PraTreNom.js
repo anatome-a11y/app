@@ -16,6 +16,10 @@ import { announceForAccessibility, focusOnView } from 'react-native-accessibilit
 import Resultados from './Resultados'
 import Placar from './Placar'
 
+import Input from '../components/Input'
+
+import { norm } from '../utils'
+
 
 class FormContainer extends React.Component {
 
@@ -24,7 +28,7 @@ class FormContainer extends React.Component {
     listRef = null;
 
     state = {
-        filtered: this.props.mainState.partes,
+        found: null,
         pesquisa: ''
     }
 
@@ -47,10 +51,6 @@ class FormContainer extends React.Component {
             }
         }
 
-        if(screenProps.voiceData == null && next.screenProps.voiceData != null){
-            this.onFilter(next.screenProps.voiceData[0]);
-        }
-
     }
 
     componentWillUnmount() {
@@ -60,25 +60,23 @@ class FormContainer extends React.Component {
 
     render() {
         const { screenProps, mainState, onGetRef, onSubmit } = this.props;
-        const { anatomp, onStartRecognizing, onStopRecognizing, voiceData } = screenProps;
+        const { anatomp } = screenProps;
         const { count, total, data, timer, tentativas } = mainState;
         const title = data[count].pecaFisica.nome + ' - ' + anatomp.nome;
-        const {filtered} = this.state;
+        const { found, pesquisa } = this.state;
 
         const value = data[count].valores[0];
 
 
-        const _Itens = filtered.length > 0 ? (
-            filtered.map(parte => (
-                <List.Item wrap multipleLine key={parte._id}>
-                    <Checkbox checked={value._id == parte._id} onChange={this.onChange(parte)} >
-                        <View style={{ marginLeft: 15 }} >
-                            <Text>{parte.nome}</Text>
-                        </View>
-                    </Checkbox>
-                </List.Item>
-            ))
-        ) : <List.Item><Text>Nenhum conteúdo foi encontrado</Text></List.Item>
+        const _Itens = (found && pesquisa != '') ? (
+            <List.Item wrap multipleLine key={found._id}>
+                <Checkbox checked={value._id == found._id} onChange={this.onChange(found)} >
+                    <View style={{ marginLeft: 15 }} >
+                        <Text>{found.nome}</Text>
+                    </View>
+                </Checkbox>
+            </List.Item>
+        ) : <List.Item><Text>Nenhuma parte foi informada</Text></List.Item>
 
         return (
             <View>
@@ -87,23 +85,19 @@ class FormContainer extends React.Component {
                     <Card.Body>
                         <View>
                             <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`Número ${data[count].numero}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Número {data[count].numero}</Text>
-                            <View style={{marginBottom: 10}}>
-                                <Button accessibilityLabel='Filtrar. Botão. Mantenha pressionado e fale um termo de busca para filtrar a lista de partes.' style={{flex: 1, margin: 5}} type='primary' onPressIn={onStartRecognizing} onPressOut={onStopRecognizing}>Filtrar</Button>
-                                <Button type='ghost' style={{flex: 1, margin: 5}} onPressOut={() => this.onFilter('')}>Limpar filtro</Button>
-                            </View>
-
-                            {/* <List>
-                                <InputItem
-                                    ref={onGetRef(count)}
-                                    value={this.state.pesquisa}
-                                    onChange={this.onFilter}
-                                    placeholder='Filtrar partes'
-                                    onSubmitEditing={() => focusOnView(this.listRef)}
-                                    onFocus={this.onFocus}
-                                />
-                            </List> */}
-                            <List ref={r => this.listRef = r} accessibilityLabel={`Nomes das partes. Lista com ${filtered.length} itens. Prossiga para escolher uma parte`} renderHeader={() => 'Nomes das Partes'}>
-                                {_Itens}                                
+                            <List>
+                                <ListItem>
+                                    <Input
+                                        _ref={onGetRef(count)}
+                                        value={this.state.pesquisa}
+                                        onChange={this.onFind}
+                                        name={'Nome da parte'}
+                                        onDone={onSubmit}
+                                    />
+                                </ListItem>
+                            </List>
+                            <List ref={r => this.listRef = r} accessibilityLabel={`Nome da parte correspondente. Parte informada como resposta`} renderHeader={() => 'Nome da Parte correspondente'}>
+                                {_Itens}
                             </List>
                         </View>
                     </Card.Body>
@@ -117,12 +111,12 @@ class FormContainer extends React.Component {
                         multipleLine
                         align="center"
                     >
-                        <Placar 
+                        <Placar
                             count={count}
                             total={total}
                             tentativas={tentativas}
                             _maxTentativa={_maxTentativa}
-                            timer={timer}                                                      
+                            timer={timer}
                         />
                     </ListItem>
                 </List>
@@ -137,16 +131,20 @@ class FormContainer extends React.Component {
         }, 5000)
     }
 
-    onFilter = pesquisa => {
+    onFind = pesquisa => {
         this.setState({
             pesquisa
         }, () => {
-            const filtered = this.props.mainState.partes.filter(c => {
-                return c.nome.toLowerCase().indexOf(this.state.pesquisa.toLowerCase()) != -1
+            const _filtered = this.props.mainState.partes.find(c => {
+                return norm(c.nome) == norm(this.state.pesquisa)
             });
 
-            this.setState({filtered}, () => {
-                announceForAccessibility(`Na lista ${filtered.length} partes: ${filtered.map(f => f.nome).join(', ')}`)
+            console.log(_filtered)            
+
+            const found = _filtered != undefined ? _filtered : null
+
+            this.setState({ found }, () => {
+                // announceForAccessibility(`Na lista ${found.length} partes: ${found.map(f => f.nome).join(', ')}`)
             })
         })
     }
@@ -213,7 +211,7 @@ class PraTreNom extends Component {
 
         this.fieldRef = flatData.map(fd => [null])
 
-        this.setState({loading: false, data: dados, total: dados.length, partes: anatomp.roteiro.partes }, () => {
+        this.setState({ loading: false, data: dados, total: dados.length, partes: anatomp.roteiro.partes }, () => {
             this.onCount();
             Toast.hide();
         })
@@ -243,7 +241,7 @@ class PraTreNom extends Component {
         const { navigation, screenProps } = this.props;
         const { data, count, loading } = this.state;
 
-        const _View = loading ? null :(
+        const _View = loading ? null : (
             count < data.length ? (
                 <FormContainer
                     screenProps={screenProps}
@@ -326,7 +324,16 @@ class PraTreNom extends Component {
 
     onGetRef = (count) => r => { this.fieldRef[count] = r }
 
-    onSetFocus = (count) => { this.fieldRef[count].focus() }
+    onSetFocus = (count) => {
+        const { config } = this.props.screenProps;
+        if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
+            this.fieldRef[count].focus()
+        } else {
+            if (config.indexOf('talkback') !== -1) {
+                focusOnView(this.fieldRef[count])
+            }
+        }
+    }
 
     checkAcertos = item => {
         return item.valores[0]._id == item.parte._id

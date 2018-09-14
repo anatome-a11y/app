@@ -82,6 +82,34 @@ class Roteiro extends Component {
                     </ListItem>
                 </List>
                 <Accordion style={{ backgroundColor: '#f5f5f9' }} onChange={active => this.setState({ active })} activeKey={active}>
+                <Panel
+                        style={{ justifyContent: 'space-between', padding: 10, color: '#000' }}
+                        header={<Text accessibilityLabel={`Seleção do Modo de aprendizagem. ${active == '1' ? 'Prossiga para selecionar um modo de aprendizagem' : 'Toque duas vezes para abrir'}`}>Modo de aprendizagem</Text>}
+                    >
+                        <List>
+                            <List.Item wrap multipleLine>
+                                <Option
+                                    _ref={r => this.initialFocusMA = r}
+                                    title='Estudo'
+                                    label='Modo de aprendizagem. Estudo'
+                                    checked={modoAprendizagem == 'estudo'}
+                                    onChange={this.onChange('modoAprendizagem', 'estudo', 'Estudo')}
+                                >
+                                    Identificação anatômica por informações teóricas associadas
+                                </Option>
+                            </List.Item>
+                            <List.Item wrap multipleLine>
+                                <Option
+                                    title='Treinamento'
+                                    label='Modo de aprendizagem. Treinamento'
+                                    checked={modoAprendizagem == 'treinamento'}
+                                    onChange={this.onChange('modoAprendizagem', 'treinamento', 'treinamento')}
+                                >
+                                    O sistema te informa um conteúdo e você indica a parte anatômica correspondente.
+                                </Option>
+                            </List.Item>
+                        </List>
+                    </Panel>                    
                     <Panel
                         style={{ justifyContent: 'space-between', padding: 10, color: '#000' }}
                         header={<Text accessibilityLabel={`Seleção do Tipo de conteúdo. ${active == '0' ? 'Prossiga para selecionar um tipo de conteúdo' : 'Toque duas vezes para abrir'}`}>Tipo de conteúdo</Text>}
@@ -106,34 +134,6 @@ class Roteiro extends Component {
                                     onChange={this.onChange('tipoConteudo', 'teorico', 'Teórico')}
                                 >
                                     Identificação anatômica por informações teóricas associadas
-                                </Option>
-                            </List.Item>
-                        </List>
-                    </Panel>
-                    <Panel
-                        style={{ justifyContent: 'space-between', padding: 10, color: '#000' }}
-                        header={<Text accessibilityLabel={`Seleção do Modo de aprendizagem. ${active == '1' ? 'Prossiga para selecionar um modo de aprendizagem' : 'Toque duas vezes para abrir'}`}>Modo de aprendizagem</Text>}
-                    >
-                        <List>
-                            <List.Item wrap multipleLine>
-                                <Option
-                                    _ref={r => this.initialFocusMA = r}
-                                    title='Estudo'
-                                    label='Modo de aprendizagem. Estudo'
-                                    checked={modoAprendizagem == 'estudo'}
-                                    onChange={this.onChange('modoAprendizagem', 'estudo', 'Estudo')}
-                                >
-                                    Identificação anatômica por informações teóricas associadas
-                                </Option>
-                            </List.Item>
-                            <List.Item wrap multipleLine>
-                                <Option
-                                    title='Treinamento'
-                                    label='Modo de aprendizagem. Treinamento'
-                                    checked={modoAprendizagem == 'treinamento'}
-                                    onChange={this.onChange('modoAprendizagem', 'treinamento', 'treinamento')}
-                                >
-                                    O sistema te informa um conteúdo e você indica a parte anatômica correspondente.
                                 </Option>
                             </List.Item>
                         </List>

@@ -53,7 +53,7 @@ class Root extends Component {
             modoInteracao: {
                 tipoConteudo: 'teorico',
                 modoAprendizagem: 'treinamento',
-                sentidoIdentificacao: 'localizar',
+                sentidoIdentificacao: 'nomear',
             },
             supported: true,
             enabled: false,
@@ -123,12 +123,13 @@ class Root extends Component {
         this.setState({ gravando: false })
     }
 
-    onGetVoice = cb => e => {
-        cb(e.value)
+    onGetVoice = (cb, isNumber = false) => e => {
+        const val = e.value[0] == 'anatom limpar' ? '' : e.value[0];
+        cb(val)
     }    
 
-    _startRecognizing = cb => e => {
-        Voice.onSpeechResults = this.onGetVoice(cb);
+    _startRecognizing = (cb, isNumber = false) => e => {
+        Voice.onSpeechResults = this.onGetVoice(cb, isNumber);
 
         Voice.start('pt-BR')
         .then(r => r)

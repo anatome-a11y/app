@@ -37,8 +37,8 @@ class Input extends React.Component {
                                 ref={_ref}
                                 accessibilityLabel={'Filtrar. Botão. Mantenha pressionado e fale após o sinal '}
                                 style={{ flex: 1, margin: 5 }}
-                                onPressIn={onStartListen(onChange)}
-                                onPressOut={() => {onStopListen(); onDone()}}>
+                                onPressIn={onStartListen(onChange, isTag)}
+                                onPressOut={onStopListen}>
                                 <Icon type={'\ue677'} style={{color: '#fff'}} />{name}
                             </Button>
                             {/* <Button type='ghost' style={{ flex: 1, margin: 5 }} onPressOut={() => onChange('')}>Limpar detecção</Button> */}

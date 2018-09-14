@@ -7,14 +7,14 @@ import Card from 'antd-mobile-rn/lib/card';
 import Toast from 'antd-mobile-rn/lib/toast';
 import Button from 'antd-mobile-rn/lib/button';
 import Flex from 'antd-mobile-rn/lib/flex';
-import Tag from 'antd-mobile-rn/lib/tag';
-import InputItem from 'antd-mobile-rn/lib/input-item';
 import Checkbox from 'antd-mobile-rn/lib/checkbox';
 
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 
 import Resultados from './Resultados'
 import Placar from './Placar'
+import Input from '../components/Input'
+import {norm} from '../utils'
 
 
 class FormContainer extends React.Component {
@@ -57,7 +57,7 @@ class FormContainer extends React.Component {
         const { anatomp } = screenProps;
         const { count, total, data, timer, tentativas } = mainState;
         const title = data[count].pecaFisica.nome + ' - ' + anatomp.nome;
-        const {filtered} = this.state;
+        const { filtered } = this.state;
 
         const value = data[count].valores[0];
 
@@ -82,14 +82,19 @@ class FormContainer extends React.Component {
                         <View>
                             <Text ref={r => this.dicaDaParte = r} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Número {data[count].numero}</Text>
                             <List>
-                                <InputItem
-                                    ref={onGetRef(count)}
-                                    value={this.state.pesquisa}
-                                    onChange={this.onFilter}
-                                    placeholder='Informe um termo ou expressão para filtrar a lista'
-                                />
-                                {_Itens}
+                                <ListItem>
+                                    <Input
+                                        _ref={onGetRef(count)}
+                                        value={this.state.pesquisa}
+                                        onChange={this.onFilter}
+                                        name={'Filtrar'}
+                                        onDone={onSubmit}
+                                    />
+                                </ListItem>
                             </List>
+                            <List ref={r => this.listRef = r} accessibilityLabel={`Conteúdos teóricos. Lista com ${filtered.length} itens. Prossiga para escolher um conteúdo`} renderHeader={() => 'Conteúdos teóricos'}>
+                                {_Itens}
+                            </List>                            
                         </View>
                     </Card.Body>
                 </Card>
@@ -102,12 +107,12 @@ class FormContainer extends React.Component {
                         multipleLine
                         align="center"
                     >
-                        <Placar 
+                        <Placar
                             count={count}
                             total={total}
                             tentativas={tentativas}
                             _maxTentativa={_maxTentativa}
-                            timer={timer}                                                      
+                            timer={timer}
                         />
                     </ListItem>
                 </List>
@@ -120,10 +125,10 @@ class FormContainer extends React.Component {
             pesquisa
         }, () => {
             const filtered = this.props.mainState.conteudos.filter(c => {
-                return c.texto.toLowerCase().indexOf(this.state.pesquisa.toLowerCase()) != -1
+                return norm(c.texto).indexOf(norm(this.state.pesquisa)) != -1
             });
 
-            this.setState({filtered})
+            this.setState({ filtered })
         })
     }
 
@@ -197,7 +202,7 @@ class TeotreNom extends Component {
 
         this.fieldRef = flatData.map(fd => [null])
 
-        this.setState({loading: false, data: dados, total: dados.length, conteudos: conteudosFlat }, () => {
+        this.setState({ loading: false, data: dados, total: dados.length, conteudos: conteudosFlat }, () => {
             this.onCount();
             Toast.hide();
         })
@@ -227,7 +232,7 @@ class TeotreNom extends Component {
         const { navigation, screenProps } = this.props;
         const { data, count, loading } = this.state;
 
-        const _View = loading ? null :(
+        const _View = loading ? null : (
             count < data.length ? (
                 <FormContainer
                     screenProps={screenProps}
@@ -310,7 +315,16 @@ class TeotreNom extends Component {
 
     onGetRef = (count) => r => { this.fieldRef[count] = r }
 
-    onSetFocus = (count) => { this.fieldRef[count].focus() }
+    onSetFocus = (count) => {
+        const { config } = this.props.screenProps;
+        if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
+            this.fieldRef[count].focus()
+        } else {
+            if (config.indexOf('talkback') !== -1) {
+                focusOnView(this.fieldRef[count])
+            }
+        }
+    }
 
     checkAcertos = item => {
         if (item.modo == 'singular') {
