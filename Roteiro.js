@@ -82,7 +82,7 @@ class Roteiro extends Component {
                     </ListItem>
                 </List>
                 <Accordion style={{ backgroundColor: '#f5f5f9' }} onChange={active => this.setState({ active })} activeKey={active}>
-                <Panel
+                    <Panel
                         style={{ justifyContent: 'space-between', padding: 10, color: '#000' }}
                         header={<Text accessibilityLabel={`Seleção do Modo de aprendizagem. ${active == '1' ? 'Prossiga para selecionar um modo de aprendizagem' : 'Toque duas vezes para abrir'}`}>Modo de aprendizagem</Text>}
                     >
@@ -109,7 +109,7 @@ class Roteiro extends Component {
                                 </Option>
                             </List.Item>
                         </List>
-                    </Panel>                    
+                    </Panel>
                     <Panel
                         style={{ justifyContent: 'space-between', padding: 10, color: '#000' }}
                         header={<Text accessibilityLabel={`Seleção do Tipo de conteúdo. ${active == '0' ? 'Prossiga para selecionar um tipo de conteúdo' : 'Toque duas vezes para abrir'}`}>Tipo de conteúdo</Text>}
