@@ -8,15 +8,15 @@ import List from 'antd-mobile-rn/lib/list';
 import Button from 'antd-mobile-rn/lib/button';
 import Flex from 'antd-mobile-rn/lib/flex';
 
+import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
+import Option from './components/Option'
+
 
 const ListItem = List.Item;
 
 const { Panel } = Accordion;
 
-import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
-
-
-import Option from './components/Option'
+const getCode = name => name.charAt(0).toUpperCase() + name.slice(1,3)
 
 
 class Roteiro extends Component {
@@ -178,33 +178,16 @@ class Roteiro extends Component {
     onStart = () => {
         const { navigation, screenProps } = this.props;
         const { tipoConteudo, modoAprendizagem, sentidoIdentificacao } = screenProps.modoInteracao;
-
-        const key = tipoConteudo + '-' + modoAprendizagem + '-' + sentidoIdentificacao;
-        switch (key) {
-            case 'pratico-estudo-localizar': break;
-            case 'pratico-estudo-nomear': break;
-            case 'pratico-treinamento-localizar':
-                navigation.navigate('PraTreLoc')
-                break;            
-            case 'pratico-treinamento-nomear':
-                navigation.navigate('PraTreNom')
-                break;
-            case 'teorico-estudo-localizar': break;
-            case 'teorico-estudo-nomear': break;
-            case 'teorico-treinamento-localizar':
-                navigation.navigate('TeoTreLoc')
-                break;
-            case 'teorico-treinamento-nomear':
-                navigation.navigate('TeoTreNom')
-                break;
-        }
-
+        const view = getCode(tipoConteudo) + getCode(modoAprendizagem) + getCode(sentidoIdentificacao)
+        navigation.navigate(view)
     }
 
     onChange = (field, value, name) => () => {
         this.props.screenProps.onChangeModoInteracao(field, value)
         announceForAccessibility(`${name} selecionado`)
     }
+
+
 }
 
 export default Roteiro;

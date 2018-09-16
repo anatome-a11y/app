@@ -67,10 +67,12 @@ const getMediaLabel = (media, idx) => {
 
 const Midias = ({ value }) => {
   return value.length == 0 ? <Text>Nenhuma mídia associada</Text> : (
-    <Flex>
-      <Brief style={{ flex: 1 }}>Mídias Associadas: </Brief>
-      {value.map((v, idx) => <Text style={{ flex: 1 }} key={idx} accessibilityLabel={getMediaLabel(v)}>{getMediaIcon(v)}</Text>)}
-    </Flex>
+    <View>
+      <Brief >Mídias associadas: </Brief>
+      <View>
+      {value.map((v, idx) => <View key={idx} accessibilityLabel={getMediaLabel(v)}>{getMediaIcon(v)}</View>)}
+      </View>
+    </View>
   )
 }
 

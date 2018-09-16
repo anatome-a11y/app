@@ -58,5 +58,9 @@ class Input extends React.Component {
     }
 }
 
+Input.defaultProps = {
+    onDone: () => {}
+}
+
 
 export default withAppContext(Input)

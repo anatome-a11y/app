@@ -192,8 +192,7 @@ class PraTreNom extends Component {
 
         //Seta as partes e seus numeros para cada peça física
         anatomp.mapa.forEach(mapa => {
-            const loc = mapa.localizacao[0];
-            pecasFisicas[loc.pecaFisica._id].partesNumeradas.push({ parte: mapa.parte, numero: loc.numero })
+            mapa.localizacao.map(loc => pecasFisicas[loc.pecaFisica._id].partesNumeradas.push({ parte: mapa.parte, numero: loc.numero }))            
         })
 
 

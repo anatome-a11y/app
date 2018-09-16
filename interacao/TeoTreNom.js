@@ -146,7 +146,7 @@ const _maxTentativa = 3;
 const _tempoMax = 60;
 const _ni = 'Não identificado'
 
-class TeotreNom extends Component {
+class TeoTreNom extends Component {
     timer = null;
     fieldRef = []
 
@@ -174,8 +174,7 @@ class TeotreNom extends Component {
 
         //Seta as partes e seus numeros para cada peça física
         anatomp.mapa.forEach(mapa => {
-            const loc = mapa.localizacao[0];
-            pecasFisicas[loc.pecaFisica._id].partesNumeradas.push({ parte: mapa.parte, numero: loc.numero })
+            mapa.localizacao.map(loc => pecasFisicas[loc.pecaFisica._id].partesNumeradas.push({ parte: mapa.parte, numero: loc.numero }));
         })
 
 
@@ -358,4 +357,4 @@ class TeotreNom extends Component {
     }
 }
 
-export default TeotreNom;
+export default TeoTreNom;
