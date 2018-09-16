@@ -183,7 +183,9 @@ class Roteiro extends Component {
         switch (key) {
             case 'pratico-estudo-localizar': break;
             case 'pratico-estudo-nomear': break;
-            case 'pratico-treinamento-localizar': break;
+            case 'pratico-treinamento-localizar':
+                navigation.navigate('PraTreLoc')
+                break;            
             case 'pratico-treinamento-nomear':
                 navigation.navigate('PraTreNom')
                 break;

@@ -12,7 +12,7 @@ import FormTreLoc from './FormTreLoc'
 const _maxTentativa = 3;
 const _tempoMax = 60;
 
-class TeoTreLoc extends Component {
+class PraTreloc extends Component {
     timer = null;
     fieldRef = []
 
@@ -44,32 +44,20 @@ class TeoTreLoc extends Component {
             })
         })
 
-        let flatData = []
+        let dados = []
 
-        //Itera em cada conteudo e o vincula às peças fisicas
-        anatomp.roteiro.conteudos.forEach(conteudo => {
-            //Busca as peças fisicas que contem o conteudo
-            Object.keys(pecasFisicas).forEach(key => {
-                const pfTemAParteDoConteudo = pecasFisicas[key].partesNumeradas.find(pn => conteudo.partes.find(p => p._id == pn.parte._id) != undefined)
+        Object.keys(pecasFisicas).forEach(key => {
+            const { nome, _id } = pecasFisicas[key];
 
-                if (pfTemAParteDoConteudo) {
-                    const { nome, _id } = pecasFisicas[key];
-                    //Substitui as partes do conteudo por partes numeradas
-                    const partes = pecasFisicas[key].partesNumeradas.filter(pn => conteudo.partes.find(p => p._id == pn.parte._id) != undefined);
+            pecasFisicas[key].partesNumeradas.forEach(pn => {
+                const texto = pn.parte.nome;
 
-                    if (conteudo.singular != '') {
-                        flatData.push({ pecaFisica: { nome, _id }, modo: 'singular', texto: conteudo.singular, partes })
-                    }
-                    if (conteudo.plural != '') {
-                        flatData.push({ pecaFisica: { nome, _id }, modo: 'plural', texto: conteudo.plural, partes })
-                    }
-                }
+                dados.push({ pecaFisica: { nome, _id }, texto, modo: 'singular', partes: [pn], acertou: false, valores: [''] })
             })
+
         })
 
-        const dados = flatData.map(fd => ({ ...fd, acertou: false, valores: fd.modo == 'singular' ? Array(1).fill('') : Array(fd.partes.length).fill('') }));
-
-        this.fieldRef = flatData.map(fd => fd.modo == 'singular' ? Array(1).fill(null) : Array(fd.partes.length).fill(null))
+        this.fieldRef = dados.map(fd => Array(1).fill(null))
 
         this.setState({ data: dados, total: dados.length, pecasFisicas: { ...pecasFisicas } }, () => {
             this.onCount();
@@ -235,4 +223,4 @@ class TeoTreLoc extends Component {
     }
 }
 
-export default TeoTreLoc;
+export default PraTreloc;
