@@ -13,7 +13,7 @@ class Container extends Component {
 
 
   render() {
-    const { children, navigation, footer } = this.props;
+    const { children, navigation, footer, disabled } = this.props;
 
     return (
       <View style={styles.container}>
@@ -28,11 +28,11 @@ class Container extends Component {
             {children}
             </View>
             <Flex>
-              <FlexItem><Button accessibilityLabel='Botão para repetir áudio da mídia'><Icon type={'\ue616'} size='md' /></Button></FlexItem>
+              <FlexItem><Button accessibilityLabel={this.getAcc('Contexto')} ><Icon type={'\ue616'} size='md' /></Button></FlexItem>
               <FlexItem style={styles.spacer}>
                 {footer}
               </FlexItem>
-              <FlexItem><Button accessibilityLabel={this.getAcc('Info')}><Icon type={'\ue629'} size='md' /></Button></FlexItem>
+              <FlexItem><Button accessibilityLabel={this.getAcc('Info')} onPressOut={this.onNavigate('Info')}><Icon type={this.getIcone('Info', '\ue629')} size='md' /></Button></FlexItem>
             </Flex>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -41,7 +41,7 @@ class Container extends Component {
   }
 
 
-  getAcc = tela => {
+  getAcc = (tela) => {
     const { navigation } = this.props;
 
     if(navigation.state.routeName == tela){
@@ -54,7 +54,8 @@ class Container extends Component {
       switch (tela) {
         case 'Ajuda': return 'Abrir Ajuda geral. Botão';
         case 'Config': return 'Abrir Configurações. Botão';
-        case 'Info': return 'Abrir Informações da peça física. Botão';
+        case 'Contexto': return 'Ouvir contexto. Botão';
+        case 'Info': return 'Abrir informações do roteiro Botão';
       }
     }
   }  
@@ -64,6 +65,7 @@ class Container extends Component {
     const { navigation } = this.props;
 
     switch (navigation.state.routeName) {
+      case 'Info': return <Text accessibilityLabel='Informações. Título' style={styles.title}>Informações</Text>;
       case 'Ajuda': return <Text accessibilityLabel='Ajuda. Título' style={styles.title}>Ajuda</Text>;
       case 'Config': return <Text accessibilityLabel='Configurações. Título' style={styles.title}>Configurações</Text>;
       case 'Roteiro': return <Text accessibilityLabel='Roteiro. Título' style={styles.title}>Roteiro</Text>;
@@ -96,7 +98,8 @@ class Container extends Component {
 
 
 Container.defaultProps = {
-  footer: null
+  footer: null,
+  disabled: []
 }
 
 const styles = StyleSheet.create({

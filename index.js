@@ -5,6 +5,7 @@ import App from './App';
 import Ajuda from './Ajuda';
 import Config from './Config';
 import Roteiro from './Roteiro';
+import Info from './Info';
 import TeoTreLoc from './interacao/TeoTreLoc';
 import TeoTreNom from './interacao/TeoTreNom';
 import PraTreNom from './interacao/PraTreNom';
@@ -38,6 +39,7 @@ const Nav = createStackNavigator({
     PraEstNom: { screen: PraEstNom },
     TeoEstLoc: { screen: TeoEstLoc },
     PraEstLoc: { screen: PraEstLoc },
+    Info: { screen: Info },
 },
     {
         headerMode: 'none',
