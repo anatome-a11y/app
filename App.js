@@ -50,7 +50,6 @@ const getMediaLabel = (media, idx) => {
     case 'video': code = 'Vídeo'; break;
     case 'text': code = 'Texto'; break;
     case 'image': code = 'Imagem'; break;
-    default: code = '';
   }
 
   switch (type) {
@@ -59,21 +58,25 @@ const getMediaLabel = (media, idx) => {
     case 'docx': code = 'Documento de texto'; break;
     case 'xls':
     case 'xlsx': code = 'Planilha'; break;
-  }
+  }  
 
-  return code + ' ' + type.toUpperCase();
+
+  return code != null ? (code + ' ' + type.toUpperCase()) : null;
 }
 
 
 const Midias = ({ value }) => {
-  return value.length == 0 ? <Text>Nenhuma mídia associada</Text> : (
-    <View>
-      <Brief >Mídias associadas: </Brief>
-      <View>
+//   const unicos = value.filter(function(item, pos) {
+
+//     return value.findIndex(v => v.media == item.media) == pos;
+// })
+  return <View>
+    <View style={{ flexWrap: 'wrap', alignItems: 'flex-start', flexDirection: 'row' }}>
+      <Brief >Formatos de saída: </Brief>
+      <View accessibilityLabel={'Leitor de tela'}><Icon style={{padding: 5}} type={'\uE698'} /></View>
       {value.map((v, idx) => <View key={idx} accessibilityLabel={getMediaLabel(v)}>{getMediaIcon(v)}</View>)}
-      </View>
     </View>
-  )
+  </View>
 }
 
 class App extends Component {
@@ -101,7 +104,7 @@ class App extends Component {
       .then(r => r.json())
       .then(r => {
         Toast.hide()
-        focusOnView(this.initialFocus) 
+        focusOnView(this.initialFocus)
         if (r.status == 200) {
           this.setState({ anatomps: r.data })
         } else {
@@ -115,7 +118,7 @@ class App extends Component {
         announceForAccessibility(msg)
       })
       .finally(() => this.setState({ loading: false }))
-      
+
   }
 
   render() {
@@ -123,7 +126,7 @@ class App extends Component {
     const { navigation } = this.props;
 
     return (
-      <Container navigation={navigation}>        
+      <Container navigation={navigation}>
         <List ref={r => this.initialFocus = r} accessibilityLabel={`Roteiros de Aprendizagem. Lista com ${anatomps.length} itens. Prossiga para escolher um roteiro`} renderHeader={() => 'Roteiros de aprendizagem'}>
           {
             anatomps.map(anatomp => (
@@ -136,8 +139,7 @@ class App extends Component {
                 arrow="horizontal"
               >
                 <Text style={styles.listItemTitle} accessibilityLabel={'Roteiro. ' + anatomp.nome}>{anatomp.nome}</Text>
-                <Brief>{anatomp.roteiro.curso}</Brief>
-                <Brief>{anatomp.roteiro.disciplina}<Text> - </Text>{anatomp.instituicao}</Brief>
+                <Brief>{anatomp.roteiro.curso} | {anatomp.roteiro.disciplina} | {anatomp.instituicao}</Brief>
                 <Text accessibilityLabel='Toque duas vezes para selecionar.'></Text>
                 <Midias value={anatomp.roteiro.resumoMidias} />
               </ListItem>

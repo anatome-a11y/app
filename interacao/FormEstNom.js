@@ -14,7 +14,6 @@ const ListItem = List.Item;
 
 
 class FormEstNom extends Component {
-    timer = null;
     fieldRef = []
 
     state = {

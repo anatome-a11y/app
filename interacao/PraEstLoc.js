@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { View, Text, TouchableHighlight, TextInput, Modal } from 'react-native';
+import { View, Text, TouchableHighlight, TextInput, Modal, ScrollView } from 'react-native';
 import Container from '../Container';
 import List from 'antd-mobile-rn/lib/list';
 import Toast from 'antd-mobile-rn/lib/toast';
@@ -17,8 +17,9 @@ const ListItem = List.Item;
 
 
 class PraEstLoc extends Component {
-    timer = null;
-    fieldRef = []
+    initialFocus = null;
+    modalBody = null;
+    localizacao = null;
 
     state = {
         loading: true,
@@ -47,7 +48,10 @@ class PraEstLoc extends Component {
         })
 
         this.setState({ loading: false, pecasFisicas }, () => {
-            Toast.hide();
+            setTimeout(() => {
+                Toast.hide();
+                focusOnView(this.initialFocus)
+            }, 500)
         })
 
     }
@@ -59,38 +63,8 @@ class PraEstLoc extends Component {
         const selected = parte == undefined ? '' : parte._id;
         return (
             <Container navigation={navigation}>
-                <List renderHeader={() => 'Parte anatômica'}>
-                    <ListItem>
-                        <Button onPressOut={this.onOpen}>Selecionar</Button>
-                    </ListItem>
-                    <ListItem>
-                        {parte != undefined ? <Text>Parte: {parte.nome}</Text> : <Text>Nenhuma parte selecionada</Text>}
-                    </ListItem>
-                </List>
-                {parte != undefined && <View>
-                    <Text>Localização</Text>
-                    {Object.keys(pecasFisicas).map(key => {
-                        const pf = pecasFisicas[key];
-                        const l = pf.localizacao.find(m => m.parte._id == parte._id)
-                        const _Item = l ? (
-                            <ListItem key={l._id}>
-                                <Text> Número {l.numero}</Text>
-                            </ListItem>
-                        ) : null;
-
-                        if (_Item != null) {
-                            return (<List renderHeader={() => pf.nome}>{_Item}</List>)
-                        } else {
-                            return null;
-                        }
-                    })}
-                </View>}
-                <Modal
-                    animationType="slide"
-                    transparent={false}
-                    visible={open}
-                    onRequestClose={this.onClose}>
-                    <List renderHeader={() => 'Partes anatômicas'}>
+                <ScrollView style={{flexGrow: 0}}>
+                    <List ref={r => this.initialFocus = r} accessibilityLabel={'Seleção de parte anatômica. Prossiga para selecionar uma parte.'} renderHeader={() => 'Parte anatômica'}>
                         {screenProps.anatomp.roteiro.partes.map(c => (
                             <List.Item wrap multipleLine key={c._id}>
                                 <Checkbox checked={c._id == selected} onChange={this.onSelectParte(c)} >
@@ -101,16 +75,37 @@ class PraEstLoc extends Component {
                             </List.Item>
                         ))}
                     </List>
-                </Modal>
+                </ScrollView>
+                {parte != undefined && <View>
+                    <List ref={r => this.localizacao = r} accessibilityLabel={`Parte ${parte.nome} selecionada. Prossiga para ouvir a localização nas peças físicas.`} renderHeader={() => 'Localização da parte nas peças'}>
+                        {Object.keys(pecasFisicas).map(key => {
+                            const pf = pecasFisicas[key];
+                            const l = pf.localizacao.find(m => m.parte._id == parte._id)
+                            return l ? (
+                                <ListItem key={l._id}>
+                                    <Text>{pf.nome}:  Número {l.numero}</Text>
+                                </ListItem>
+                            ) : null;
+                        })}
+                        {this.props.screenProps.config.indexOf('talkback') != -1 && (
+                            <ListItem style={{textAlign: 'center'}}>
+                                <Button accessibilityLabel='Selecionar nova parte. Botão. Toque duas vezes para voltar para a seleção de partes'  onPressOut={() => focusOnView(this.initialFocus)} >Selecionar nova parte</Button>
+                            </ListItem>                            
+                        )}
+                    </List>
+                </View>}
             </Container>
         )
     }
 
-    onSelectParte = parte => e => this.setState({ parte, open: false })
+    onSelectParte = parte => e => {
+        this.setState({ parte }, () => {
+            setTimeout(() => {
+                focusOnView(this.localizacao)  
+            }, 500)          
+        })
+    }
 
-    onOpen = () => this.setState({ open: true })
-
-    onClose = () => this.setState({ open: false })
 }
 
 export default PraEstLoc;
