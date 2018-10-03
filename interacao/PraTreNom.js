@@ -140,9 +140,7 @@ class FormContainer extends React.Component {
         }, () => {
             const _filtered = this.props.mainState.partes.find(c => {
                 return norm(c.nome) == norm(this.state.pesquisa)
-            });
-
-            console.log(_filtered)            
+            });      
 
             const found = _filtered != undefined ? _filtered : null
 

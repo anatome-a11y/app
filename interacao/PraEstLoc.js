@@ -7,6 +7,9 @@ import Toast from 'antd-mobile-rn/lib/toast';
 import Button from 'antd-mobile-rn/lib/button';
 import Checkbox from 'antd-mobile-rn/lib/checkbox';
 import Modal from 'antd-mobile-rn/lib/modal';
+import Card from 'antd-mobile-rn/lib/card';
+
+import { norm } from '../utils'
 
 import BC from '../components/Breadcrumbs'
 
@@ -27,7 +30,9 @@ class PraEstLoc extends Component {
         loading: true,
         open: false,
         parte: undefined,
-        pecasFisicas: {}
+        pecasFisicas: {},
+        pesquisa: '',
+        filtered: this.props.screenProps.anatomp.roteiro.partes
     }
 
     componentDidMount() {
@@ -58,9 +63,9 @@ class PraEstLoc extends Component {
 
     }
 
-    componentWillUpdate(nextProps, nextState){
-        if(JSON.stringify(this.state.parte) != JSON.stringify(nextState.parte)){
-            this.setState({open: true})
+    componentWillUpdate(nextProps, nextState) {
+        if (JSON.stringify(this.state.parte) != JSON.stringify(nextState.parte)) {
+            this.setState({ open: true })
         }
     }
 
@@ -68,7 +73,7 @@ class PraEstLoc extends Component {
 
     render() {
         const { navigation, screenProps, isTeoria } = this.props;
-        const { open, parte, pecasFisicas } = this.state;
+        const { open, parte, pecasFisicas, filtered } = this.state;
 
         const selected = parte == undefined ? '' : parte._id;
 
@@ -79,12 +84,22 @@ class PraEstLoc extends Component {
 
         return (
             <Container navigation={navigation}>
+                <View ref={r => this.initialFocus = r} accessibilityLabel={'Seleção de parte anatômica. Prossiga para selecionar uma parte.'}>
+                    <BC body={['Roteiros', screenProps.anatomp.nome]} head={'Estudo-Prático-Localizar'} />
+                </View>
+                <Card>
+                    <Card.Header title='Filtro de partes' />
+                    <Card.Body>
+                        <Input
+                            value={this.state.pesquisa}
+                            onChange={this.onFilter}
+                            name={'Nome da parte'}
+                        />
+                    </Card.Body>
+                </Card>
                 <ScrollView style={{ flexGrow: 0 }}>
-                    <View ref={r => this.initialFocus = r} accessibilityLabel={'Seleção de parte anatômica. Prossiga para selecionar uma parte.'}>
-                        <BC body={['Roteiros', screenProps.anatomp.nome]} head={'Estudo-Prático-Localizar'} />
-                    </View>
                     <List renderHeader={() => 'Parte anatômica'}>
-                        {screenProps.anatomp.roteiro.partes.map(c => (
+                        {filtered.map(c => (
                             <List.Item wrap multipleLine key={c._id}>
                                 <Checkbox checked={c._id == selected} onChange={this.onSelectParte(c)} >
                                     <View style={{ marginLeft: 15 }} >
@@ -108,13 +123,13 @@ class PraEstLoc extends Component {
                     ]}
                 >
                     {parte != undefined && <View>
-                        <List style={{marginTop: 10}} ref={r => this.localizacao = r} accessibilityLabel={`Parte ${parte.nome} selecionada. Prossiga para ouvir a localização nas peças físicas.`}>
+                        <List style={{ marginTop: 10 }} ref={r => this.localizacao = r} accessibilityLabel={`Parte ${parte.nome} selecionada. Prossiga para ouvir a localização nas peças físicas.`}>
                             {Object.keys(pecasFisicas).map(key => {
                                 const pf = pecasFisicas[key];
                                 const l = pf.localizacao.find(m => m.parte._id == parte._id)
                                 return l ? (
                                     <ListItem key={l._id}>
-                                        <Text><Text style={{fontWeight: 'bold'}}>{pf.nome}:</Text>  <Text>{l.numero}</Text></Text>
+                                        <Text><Text style={{ fontWeight: 'bold' }}>{pf.nome}:</Text>  <Text>{l.numero}</Text></Text>
                                     </ListItem>
                                 ) : null;
                             })}
@@ -128,6 +143,22 @@ class PraEstLoc extends Component {
                 </Modal>
             </Container>
         )
+    }
+
+    onFilter = pesquisa => {
+        this.setState({
+            pesquisa
+        }, () => {
+            const _filtered = this.props.screenProps.anatomp.roteiro.partes.filter(c => {
+                return norm(c.nome).indexOf(norm(pesquisa)) != -1
+            });
+
+            const filtered = _filtered != undefined ? _filtered : null
+
+            this.setState({ filtered }, () => {
+                // announceForAccessibility(`Na lista ${found.length} partes: ${found.map(f => f.nome).join(', ')}`)
+            })
+        })
     }
 
 
