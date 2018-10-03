@@ -12,6 +12,8 @@ import Option from '../components/Option'
 
 const ListItem = List.Item;
 
+import BC from '../components/Breadcrumbs'
+
 
 class FormEstNom extends Component {
     fieldRef = []
@@ -49,11 +51,12 @@ class FormEstNom extends Component {
     }
 
     render() {
-        const { navigation, screenProps, isTeoria } = this.props;
+        const { navigation, screenProps, isTeoria, interaction } = this.props;
         const { value, pecasFisicas, pecaFisica, parte, conteudos } = this.state;
 
         return (
             <Container navigation={navigation}>
+                <BC body={['Roteiros', screenProps.anatomp.nome]} head={interaction} />
                 <List renderHeader={() => 'Peças físicas'}>
                     {
                         Object.keys(pecasFisicas).map(key => {

@@ -5,10 +5,12 @@ import Icon from 'antd-mobile-rn/lib/icon';
 import List from 'antd-mobile-rn/lib/list';
 import Flex from 'antd-mobile-rn/lib/flex';
 import Toast from 'antd-mobile-rn/lib/toast';
+import Tag from 'antd-mobile-rn/lib/tag';
 
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 
 import Container from './Container'
+import BC from './components/Breadcrumbs'
 
 
 const ListItem = List.Item;
@@ -127,6 +129,7 @@ class App extends Component {
 
     return (
       <Container navigation={navigation}>
+        <BC head='Roteiros' />
         <List ref={r => this.initialFocus = r} accessibilityLabel={`Roteiros de Aprendizagem. Lista com ${anatomps.length} itens. Prossiga para escolher um roteiro`} renderHeader={() => 'Roteiros de aprendizagem'}>
           {
             anatomps.map(anatomp => (

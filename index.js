@@ -80,7 +80,9 @@ class Root extends Component {
         const { config } = this.state;
 
         AccessibilityInfo.fetch().then((isEnabled) => {
-            this.setState({config: [...config, 'talkback']})
+            if(isEnabled){
+                this.setState({config: [...config, 'talkback']})
+            }            
         });        
         NfcManager.isSupported()
             .then(supported => {

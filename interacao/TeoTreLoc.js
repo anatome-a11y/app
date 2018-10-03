@@ -8,6 +8,7 @@ import { announceForAccessibility, focusOnView } from 'react-native-accessibilit
 import Resultados from './Resultados'
 import FormTreLoc from './FormTreLoc'
 
+import BC from '../components/Breadcrumbs'
 
 const _maxTentativa = 3;
 const _tempoMax = 60;
@@ -113,6 +114,7 @@ class TeoTreLoc extends Component {
                         onChangeValor={this.onChangeValor}
                         onErrorClick={this.onErrorClick}
                         onSubmit={this.onSubmit}
+                        interaction='Treinamento-Teórico-Localizar'
                     />
                 ) : <Resultados data={data} onRepeat={this.onRepeat} formatter={e => e.texto} />}
             </Container>

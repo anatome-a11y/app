@@ -12,6 +12,7 @@ import { announceForAccessibility, focusOnView } from 'react-native-accessibilit
 import Input from '../components/Input'
 import Option from '../components/Option'
 
+import BC from '../components/Breadcrumbs'
 
 const ListItem = List.Item;
 
@@ -71,6 +72,7 @@ class TeoEstLoc extends Component {
         const selected = conteudo == undefined ? '' : conteudo._id;
         return (
             <Container navigation={navigation}>
+                <BC body={['Roteiros', screenProps.anatomp.nome]} head={'Estudo-Teórico-Localizar'} />
                 <List renderHeader={() => 'Conteúdo teórico'}>
                     <ListItem>
                         <Button onPressOut={this.onOpen}>Selecionar conteúdo</Button>

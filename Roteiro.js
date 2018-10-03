@@ -11,6 +11,8 @@ import Flex from 'antd-mobile-rn/lib/flex';
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 import Option from './components/Option'
 
+import BC from './components/Breadcrumbs'
+
 
 const ListItem = List.Item;
 
@@ -76,11 +78,9 @@ class Roteiro extends Component {
 
         return (
             <Container navigation={navigation}>
-                <List style={{ marginBottom: 10 }} >
-                    <ListItem ref={r => this.initialFocus = r} wrap multipleLine accessibilityLabel={`Roteiro: ${anatomp.nome} selecionado. Prossiga para configurar a interação.`}>
-                        {anatomp.nome}
-                    </ListItem>
-                </List>
+                <View accessible={true} ref={r => this.initialFocus = r} accessibilityLabel={`Roteiro: ${anatomp.nome} selecionado. Prossiga para configurar a interação.`}>
+                    <BC body={['Roteiros']} head={anatomp.nome} />
+                </View>                
                 <Accordion style={{ backgroundColor: '#f5f5f9' }} onChange={active => this.setState({ active })} activeKey={active}>
                     <Panel
                         style={{ justifyContent: 'space-between', padding: 10, color: '#000' }}

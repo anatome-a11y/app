@@ -12,6 +12,7 @@ import Placar from './Placar'
 
 import Input from '../components/Input'
 
+import BC from '../components/Breadcrumbs'
 
 
 const ListItem = List.Item;
@@ -119,13 +120,14 @@ class FormTreLoc extends React.Component {
 
 
     render() {
-        const { screenProps, mainState, onGetRef, onSetFocus, onChangeValor, onErrorClick, onSubmit } = this.props;
+        const { screenProps, mainState, onGetRef, onSetFocus, onChangeValor, onErrorClick, onSubmit, interaction } = this.props;
         const { anatomp, onReadNFC, onStopNFC } = screenProps;
         const { count, total, data, timer, pecasFisicas, tentativas } = mainState;
         const title = data[count].pecaFisica.nome + ' - ' + anatomp.nome;
 
         return (
             <View>
+                 <BC body={['Roteiros', anatomp.nome]} head={interaction} />
                 <Card>
                     <Card.Header title={<Text accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a dica da parte.`} ref={r => this.nomeDaPeca = r}>{title}</Text>} />
                     <Card.Body>

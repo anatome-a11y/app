@@ -8,7 +8,6 @@ import { announceForAccessibility, focusOnView } from 'react-native-accessibilit
 import Resultados from './Resultados'
 import FormTreLoc from './FormTreLoc'
 
-
 const _maxTentativa = 3;
 const _tempoMax = 60;
 
@@ -101,6 +100,7 @@ class PraTreloc extends Component {
                         onChangeValor={this.onChangeValor}
                         onErrorClick={this.onErrorClick}
                         onSubmit={this.onSubmit}
+                        interaction='Treinamento-Prático-Localizar'
                     />
                 ) : <Resultados data={data} onRepeat={this.onRepeat} formatter={e => e.texto} />}
             </Container>
