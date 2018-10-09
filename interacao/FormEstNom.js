@@ -9,14 +9,20 @@ import { announceForAccessibility, focusOnView } from 'react-native-accessibilit
 import Input from '../components/Input'
 import Option from '../components/Option'
 
+import Modal from 'antd-mobile-rn/lib/modal';
+import Card from 'antd-mobile-rn/lib/card';
+import Button from 'antd-mobile-rn/lib/button';
+
 
 const ListItem = List.Item;
 
 import BC from '../components/Breadcrumbs'
+import Instrucoes from '../components/Instrucoes'
 
 
 class FormEstNom extends Component {
     fieldRef = []
+    initialFocus = null;
 
     state = {
         pecasFisicas: {},
@@ -52,68 +58,100 @@ class FormEstNom extends Component {
 
     render() {
         const { navigation, screenProps, isTeoria, interaction } = this.props;
-        const { value, pecasFisicas, pecaFisica, parte, conteudos } = this.state;
+        const { value, pecasFisicas, pecaFisica, parte, conteudos, open } = this.state;
+
+        const btnNovoFluxo = this.props.screenProps.config.indexOf('talkback') != -1 ? [{
+            text: 'Nova seleção',
+            onPress: () => focusOnView(this.initialFocus)
+        }] : []
 
         return (
             <Container navigation={navigation}>
-                <BC body={['Roteiros', screenProps.anatomp.nome]} head={interaction} />
-                <List renderHeader={() => 'Peças físicas'}>
-                    {
-                        Object.keys(pecasFisicas).map(key => {
-                            const pf = pecasFisicas[key];
-                            return (
-                                <ListItem key={pf._id}>
-                                    <Option
-                                        checked={pecaFisica == pf._id}
-                                        onChange={this.onSelectPF(pf._id)}
-                                    >
-                                        {pf.nome}
-                                    </Option>
-                                </ListItem>
-                            )
-                        })
-                    }
-                </List>
-                <List renderHeader={() => 'Parte anatômica'}>
-                    <ListItem>
+                    <BC body={['Roteiros', screenProps.anatomp.nome]} head={interaction} />
+                <Instrucoes
+                    info={[
+                        'Selecione uma peça física e informe o número de uma parte para visualizar seu nome e os conteúdos associados',
+                    ]}
+                />
+                <Card ref={r => this.initialFocus = r} style={{ marginBottom: 10 }}>
+                    <Card.Header title='Peças físicas' />
+                    <Card.Body>
+                        <List>
+                            {
+                                Object.keys(pecasFisicas).map(key => {
+                                    const pf = pecasFisicas[key];
+                                    return (
+                                        <ListItem key={pf._id}>
+                                            <Option
+                                                checked={pecaFisica == pf._id}
+                                                onChange={this.onSelectPF(pf._id)}
+                                            >
+                                                {pf.nome}
+                                            </Option>
+                                        </ListItem>
+                                    )
+                                })
+                            }
+                        </List>
+                    </Card.Body>
+                </Card>
+
+                <Card style={{ marginBottom: 10 }}>
+                    <Card.Header title='Parte anatômica' />
+                    <Card.Body>
                         <Input
                             isTag
                             _ref={this.onGetRef}
                             value={value}
                             onChange={this.onChange}
-                            name='Parte'
-                            onDone={this.onSubmit}
+                            name='localização'
+                            onDone={this.onOpen}
                             InputProps={{
                                 type: 'number',
                                 error: parte == undefined && value != '',
                                 onErrorClick: this.onErrorClick,
                             }}
                         />
-                    </ListItem>
-                    {parte != undefined && (
-                        <ListItem>
-                            <Text>Nome: {parte.parte.nome}</Text>
-                        </ListItem>
-                    )}
-                </List>
+                        <Button style={{margin: 5}} disabled={!parte || !pecaFisica} onPressOut={this.onOpen} type='primary'>Pesquisar</Button>
+                    </Card.Body>
+                </Card>
 
-                {isTeoria && <List renderHeader={() => 'Informações da parte'}>
-                    {
-                        conteudos.length == 0 ? (
-                            <ListItem key='emptyList'>
-                                <Text>Nenhum conteúdo foi encontrado</Text>
-                            </ListItem>
-                        ) : (conteudos.map(c => (
-                            <ListItem key={c}>
-                                <Text>{c}</Text>
-                            </ListItem>                            
-                        )))
-                    }
-                </List>}
+                <Modal
+                    title="Informações da parte"
+                    transparent
+                    onClose={this.onClose}
+                    maskClosable
+                    visible={open}
+                    closable={false}
+                    footer={[
+                        { text: 'Fechar', onPress: this.onClose },
+                        ...btnNovoFluxo
+                    ]}
+                >
+                    {parte != undefined && <View>
+                        <Text style={{ textAlign: 'center', padding: 5, fontWeight: 'bold', fontSize: 18 }}>{parte.parte.nome}</Text>
+                        {isTeoria && <List>
+                            {
+                                conteudos.length == 0 ? (
+                                    <ListItem key='emptyList'>
+                                        <Text>Nenhum conteúdo foi encontrado</Text>
+                                    </ListItem>
+                                ) : (conteudos.map(c => (
+                                    <ListItem key={c}>
+                                        <Text>{c}</Text>
+                                    </ListItem>
+                                )))
+                            }
+                        </List>}
+                    </View>}
+                </Modal>
             </Container>
         )
     }
 
+    onOpen = () => this.setState({open: true})
+
+    onClose = () => this.setState({open: false})
 
     onErrorClick = () => { Toast.info('Parte não registrada'); announceForAccessibility('Parte não registrada') }
 
@@ -126,7 +164,7 @@ class FormEstNom extends Component {
         this.setState({ value, parte, conteudos })
     }
 
-    onSelectPF = pecaFisica => e => this.setState({ pecaFisica })
+    onSelectPF = pecaFisica => e => this.setState({ pecaFisica, parte: undefined, value: '' })
 
     onGetRef = r => { this.fieldRef = r }
 }
