@@ -21,6 +21,7 @@ import Input from '../components/Input'
 import { norm } from '../utils'
 
 import BC from '../components/Breadcrumbs'
+import Instrucoes from '../components/Instrucoes'
 
 
 class FormContainer extends React.Component {
@@ -71,58 +72,55 @@ class FormContainer extends React.Component {
 
 
         const _Itens = (found && pesquisa != '') ? (
-            <List.Item wrap multipleLine key={found._id}>
+            <View>
                 <Checkbox checked={value._id == found._id} onChange={this.onChange(found)} >
                     <View style={{ marginLeft: 15 }} >
                         <Text>{found.nome}</Text>
                     </View>
                 </Checkbox>
-            </List.Item>
-        ) : <List.Item><Text>Nenhuma parte foi informada</Text></List.Item>
+            </View>
+        ) : <Text>Nenhuma parte foi informada</Text>
 
         return (
             <View>
                 <BC body={['Roteiros', anatomp.nome]} head={'Treinamento-Prático-Nomear'} />
-                <Card>
-                    <Card.Header title={<Text accessibilityLabel={`Peça: ${title}. Prossiga para ouvir o número da parte anatômica`} ref={r => this.nomeDaPeca = r}>{title}</Text>} />
+                <Instrucoes info={[
+                    'Para cada parte (ie. sua localização) em cada peça física, selecione o nome da parte e em seguida pressione o botão "Próximo" para submeter',
+                    'Utilize o campo "Nome da parte" para buscar a parte desejada.',
+                    `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
+                ]} />                
+                <Card style={{marginBottom: 10}}>
+                    <Card.Header ref={r => this.nomeDaPeca = r} accessibilityLabel={`Peça: ${title}. Prossiga para ouvir o número da parte anatômica`} title={title} />
                     <Card.Body>
                         <View>
                             <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`Número ${data[count].numero}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Número {data[count].numero}</Text>
-                            <List>
-                                <ListItem>
-                                    <Input
+                            <Input
                                         _ref={onGetRef(count)}
                                         value={this.state.pesquisa}
                                         onChange={this.onFind}
                                         name={'Nome da parte'}
                                         onDone={onSubmit}
                                     />
-                                </ListItem>
-                            </List>
-                            <List ref={r => this.listRef = r} accessibilityLabel={`Nome da parte correspondente. Parte informada como resposta`} renderHeader={() => 'Nome da Parte correspondente'}>
+                            <View style={{padding: 15}} ref={r => this.listRef = r} accessibilityLabel={`Nome da parte informada`}>
                                 {_Itens}
-                            </List>
+                            </View>
                         </View>
+                        <Button accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
                     </Card.Body>
                 </Card>
-                <Flex style={{ marginTop: 15, marginBottom: 15 }}>
-                    <Button accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
-                </Flex>
-                <List>
-                    <ListItem
-                        wrap
-                        multipleLine
-                        align="center"
-                    >
-                        <Placar
+
+                <Card>
+                    <Card.Header title='Resumo' />
+                    <Card.Body>
+                    <Placar
                             count={count}
                             total={total}
                             tentativas={tentativas}
                             _maxTentativa={_maxTentativa}
                             timer={timer}
-                        />
-                    </ListItem>
-                </List>
+                        />                        
+                    </Card.Body>
+                </Card>
             </View>
         )
     }

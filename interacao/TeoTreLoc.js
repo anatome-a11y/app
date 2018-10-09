@@ -115,6 +115,10 @@ class TeoTreLoc extends Component {
                         onErrorClick={this.onErrorClick}
                         onSubmit={this.onSubmit}
                         interaction='Treinamento-Teórico-Localizar'
+                        info={[
+                            'Para cada conteúdo teórico informe o número da localização da(s) peça(s) correspondente(s) e em seguida pressione o botão "Próximo" para submeter.',
+                            `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
+                        ]}
                     />
                 ) : <Resultados data={data} onRepeat={this.onRepeat} formatter={e => e.texto} />}
             </Container>

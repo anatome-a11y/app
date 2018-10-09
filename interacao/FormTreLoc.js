@@ -128,11 +128,9 @@ class FormTreLoc extends React.Component {
 
         return (
             <View>
-                 <BC body={['Roteiros', anatomp.nome]} head={interaction} />
-                 <Instrucoes
-                    info={info}
-                />                  
-                <Card>
+                <BC body={['Roteiros', anatomp.nome]} head={interaction} />
+                <Instrucoes info={info} />
+                <Card style={{ marginBottom: 10 }}>
                     <Card.Header accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a dica da parte.`} ref={r => this.nomeDaPeca = r} title={title} />
                     <Card.Body>
                         <View>
@@ -161,26 +159,22 @@ class FormTreLoc extends React.Component {
                                 ))}
                             </List>
                         </View>
+                        <Button  accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
                     </Card.Body>
                 </Card>
-                <Flex style={{ marginTop: 15, marginBottom: 15 }}>
-                    <Button accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
-                </Flex>
-                <List>
-                    <ListItem
-                        wrap
-                        multipleLine
-                        align="center"
-                    >
-                        <Placar
-                            count={count}
-                            total={total}
-                            tentativas={tentativas}
-                            _maxTentativa={_maxTentativa}
-                            timer={timer}
-                        />
-                    </ListItem>
-                </List>
+
+                <Card>
+                    <Card.Header title='Resumo' />
+                    <Card.Body>
+                    <Placar
+                                    count={count}
+                                    total={total}
+                                    tentativas={tentativas}
+                                    _maxTentativa={_maxTentativa}
+                                    timer={timer}
+                                />
+                    </Card.Body>
+                </Card>
             </View>
         )
     }
