@@ -24,7 +24,7 @@ class Container extends Component {
         </Flex>
         <KeyboardAvoidingView style={styles.scroll}>
           <ScrollView contentContainerStyle={{flexGrow: 1}}>
-            <View style={{flex: 10}}>
+            <View style={{flex: 10, padding: 5, marginBottom: 30}}>
             {children}
             </View>
             <Flex>

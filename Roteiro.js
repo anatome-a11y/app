@@ -80,7 +80,13 @@ class Roteiro extends Component {
             <Container navigation={navigation}>
                 <View accessible={true} ref={r => this.initialFocus = r} accessibilityLabel={`Roteiro: ${anatomp.nome} selecionado. Prossiga para configurar a interação.`}>
                     <BC body={['Roteiros']} head={anatomp.nome} />
-                </View>                
+                </View>   
+                <Text style={{ padding: 10, paddingTop: 0, textAlign: 'justify', lineHeight: 22 }}>
+                    <Text style={{ fontWeight: 'bold'}}>Selecionados: </Text>                    
+                    <Text style={{ color: '#108ee9' }}>{modoAprendizagem == 'estudo' ? 'Estudo' : 'Treinamento'}</Text><Text> | </Text>
+                    <Text style={{ color: '#108ee9' }}>{tipoConteudo == 'pratico' ? 'Prático' : 'Teórico'}</Text><Text> | </Text>
+                    <Text style={{ color: '#108ee9' }}>{sentidoIdentificacao == 'nomear' ? 'Nomear' : 'Localizar'}</Text>
+                </Text>           
                 <Accordion style={{ backgroundColor: '#f5f5f9' }} onChange={active => this.setState({ active })} activeKey={active}>
                     <Panel
                         style={{ justifyContent: 'space-between', padding: 10, color: '#000' }}

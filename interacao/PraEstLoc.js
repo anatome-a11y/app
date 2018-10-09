@@ -12,6 +12,7 @@ import Card from 'antd-mobile-rn/lib/card';
 import { norm } from '../utils'
 
 import BC from '../components/Breadcrumbs'
+import Instrucoes from '../components/Instrucoes'
 
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 import Input from '../components/Input'
@@ -72,7 +73,7 @@ class PraEstLoc extends Component {
 
 
     render() {
-        const { navigation, screenProps, isTeoria } = this.props;
+        const { navigation, screenProps } = this.props;
         const { open, parte, pecasFisicas, filtered } = this.state;
 
         const selected = parte == undefined ? '' : parte._id;
@@ -87,7 +88,13 @@ class PraEstLoc extends Component {
                 <View ref={r => this.initialFocus = r} accessibilityLabel={'Seleção de parte anatômica. Prossiga para selecionar uma parte.'}>
                     <BC body={['Roteiros', screenProps.anatomp.nome]} head={'Estudo-Prático-Localizar'} />
                 </View>
-                <Card>
+                <Instrucoes
+                    info={[
+                        'Selecione uma parte na lista de partes para visualizar sua localização nas peças físicas.',
+                        'Caso deseje, utilize o filtro a seguir para encontrar uma parte.'
+                    ]}
+                />
+                <Card style={{ marginBottom: 10 }}>
                     <Card.Header title='Filtro de partes' />
                     <Card.Body>
                         <Input
@@ -97,19 +104,22 @@ class PraEstLoc extends Component {
                         />
                     </Card.Body>
                 </Card>
-                <ScrollView style={{ flexGrow: 0 }}>
-                    <List renderHeader={() => 'Parte anatômica'}>
-                        {filtered.map(c => (
-                            <List.Item wrap multipleLine key={c._id}>
-                                <Checkbox checked={c._id == selected} onChange={this.onSelectParte(c)} >
-                                    <View style={{ marginLeft: 15 }} >
-                                        <Text>{c.nome}</Text>
-                                    </View>
-                                </Checkbox>
-                            </List.Item>
-                        ))}
-                    </List>
-                </ScrollView>
+                <Card>
+                    <Card.Header title='Partes a selecionar' />
+                    <Card.Body>
+                        <List>
+                            {filtered.map(c => (
+                                <List.Item wrap multipleLine key={c._id}>
+                                    <Checkbox checked={c._id == selected} onChange={this.onSelectParte(c)} >
+                                        <View style={{ marginLeft: 15 }} >
+                                            <Text>{c.nome}</Text>
+                                        </View>
+                                    </Checkbox>
+                                </List.Item>
+                            ))}
+                        </List>
+                    </Card.Body>
+                </Card>
                 <Modal
                     title="Localização da parte nas peças"
                     transparent
@@ -133,11 +143,6 @@ class PraEstLoc extends Component {
                                     </ListItem>
                                 ) : null;
                             })}
-                            {/* {this.props.screenProps.config.indexOf('talkback') != -1 && (
-                            <ListItem style={{textAlign: 'center'}}>
-                                <Button accessibilityLabel='Selecionar nova parte. Botão. Toque duas vezes para voltar para a seleção de partes'  onPressOut={() => focusOnView(this.initialFocus)} >Selecionar nova parte</Button>
-                            </ListItem>                            
-                        )} */}
                         </List>
                     </View>}
                 </Modal>

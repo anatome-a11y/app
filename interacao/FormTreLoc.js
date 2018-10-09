@@ -13,6 +13,7 @@ import Placar from './Placar'
 import Input from '../components/Input'
 
 import BC from '../components/Breadcrumbs'
+import Instrucoes from '../components/Instrucoes'
 
 
 const ListItem = List.Item;
@@ -120,7 +121,7 @@ class FormTreLoc extends React.Component {
 
 
     render() {
-        const { screenProps, mainState, onGetRef, onSetFocus, onChangeValor, onErrorClick, onSubmit, interaction } = this.props;
+        const { screenProps, mainState, onGetRef, onSetFocus, onChangeValor, onErrorClick, onSubmit, interaction, info } = this.props;
         const { anatomp, onReadNFC, onStopNFC } = screenProps;
         const { count, total, data, timer, pecasFisicas, tentativas } = mainState;
         const title = data[count].pecaFisica.nome + ' - ' + anatomp.nome;
@@ -128,8 +129,11 @@ class FormTreLoc extends React.Component {
         return (
             <View>
                  <BC body={['Roteiros', anatomp.nome]} head={interaction} />
+                 <Instrucoes
+                    info={info}
+                />                  
                 <Card>
-                    <Card.Header title={<Text accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a dica da parte.`} ref={r => this.nomeDaPeca = r}>{title}</Text>} />
+                    <Card.Header accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a dica da parte.`} ref={r => this.nomeDaPeca = r} title={title} />
                     <Card.Body>
                         <View>
                             <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`Dica: ${data[count].texto}. Prossiga para informar ${data[count].valores.length > 1 ? 'os nomes das partes' : 'o nome da parte'}`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{data[count].texto}</Text>

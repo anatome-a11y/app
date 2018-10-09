@@ -89,6 +89,7 @@ class PraTreloc extends Component {
         const { navigation, screenProps } = this.props;
         const { data, count } = this.state;
 
+
         return (
             <Container navigation={navigation}>
                 {count < data.length ? (
@@ -101,6 +102,10 @@ class PraTreloc extends Component {
                         onErrorClick={this.onErrorClick}
                         onSubmit={this.onSubmit}
                         interaction='Treinamento-Prático-Localizar'
+                        info={[
+                            'Para cada parte das peças físicas do roteiro, informe o número de sua localização e pressione o botão "Próximo" para submeter.',
+                            `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
+                        ]}
                     />
                 ) : <Resultados data={data} onRepeat={this.onRepeat} formatter={e => e.texto} />}
             </Container>

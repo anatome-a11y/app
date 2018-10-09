@@ -61,6 +61,10 @@ class Root extends Component {
 
         this.state = {
             config: [],
+            inputConfig: {
+                chances: 3,
+                tempo: 60
+            },
             anatomp: null,
             modoInteracao: {
                 tipoConteudo: 'pratico',
@@ -105,10 +109,11 @@ class Root extends Component {
 
     render() {
 
-        const { config, modoInteracao, anatomp } = this.state;
+        const { config, modoInteracao, anatomp, inputConfig } = this.state;
 
         return <AppContext.Provider value={{
             config,  
+            inputConfig,
             onStartListen: this._startRecognizing,
             onStopListen: this._stopRecognizing, 
             onReadNFC: this._startDetection,
@@ -118,6 +123,7 @@ class Root extends Component {
                 {...this.props}
                 screenProps={{
                     config,
+                    inputConfig,
                     anatomp,
                     modoInteracao,
                     onChangeConfig: this.onChangeConfig,
