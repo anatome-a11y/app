@@ -67,7 +67,7 @@ class FormContainer extends React.Component {
         const { screenProps, mainState, onGetRef, onSubmit } = this.props;
         const { anatomp } = screenProps;
         const { count, total, data, timer, tentativas } = mainState;
-        const title = data[count].pecaFisica.nome + ' - ' + anatomp.nome;
+        const title = data[count].pecaFisica.nome ;
         const { filtered } = this.state;
 
         const value = data[count].valores[0];
