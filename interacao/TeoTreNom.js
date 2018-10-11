@@ -41,11 +41,19 @@ class FormContainer extends React.Component {
 
         //Se mudou a peça física, foco na peça física
         if (mainState.data[mainState.count].pecaFisica.nome != next.mainState.data[next.mainState.count].pecaFisica.nome) {
-            focusOnView(this.nomeDaPeca)
+            focusOnView(this.nomeDaPeca);
+            this.setState({
+                filtered: this.props.mainState.conteudos,
+                pesquisa: ''
+            })
         } else {
             //Se muou apenas a parte: foco na parte
             if (mainState.count != next.mainState.count) {
-                focusOnView(this.dicaDaParte)
+                focusOnView(this.dicaDaParte);
+                this.setState({
+                    filtered: this.props.mainState.conteudos,
+                    pesquisa: ''
+                })                
             }
         }
     }
@@ -86,10 +94,11 @@ class FormContainer extends React.Component {
                     `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
                 ]} />
                 <Card style={{ marginBottom: 10 }}>
-                    <Card.Header accessibilityLabel={`Peça: ${title}. Prossiga para ouvir o número da parte anatômica`} ref={r => this.nomeDaPeca = r} title={title} />
+                    <Card.Header accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a parte anatômica`} ref={r => this.nomeDaPeca = r} title={title} />
                     <Card.Body>
                         <View>
-                            <Text ref={r => this.dicaDaParte = r} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Número {data[count].numero}</Text>
+                            <Text ref={r => this.dicaDaParte = r} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Parte {data[count].numero}</Text>
+                            <Button disabled={!value} accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
                             <List>
                                 <ListItem>
                                     <Input
@@ -97,15 +106,14 @@ class FormContainer extends React.Component {
                                         value={this.state.pesquisa}
                                         onChange={this.onFilter}
                                         name={'Filtrar'}
-                                        onDone={onSubmit}
+                                        // onDone={onSubmit}
                                     />
                                 </ListItem>
                             </List>
                             <List ref={r => this.listRef = r} accessibilityLabel={`Conteúdos teóricos. Lista com ${filtered.length} itens. Prossiga para escolher um conteúdo`}>
                                 {_Itens}
                             </List>                            
-                        </View>
-                        <Button accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>                        
+                        </View>                        
                     </Card.Body>
                 </Card>
                 <Card>

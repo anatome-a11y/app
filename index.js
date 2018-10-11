@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { AppRegistry, Platform, AccessibilityInfo } from 'react-native';
+import { AppRegistry, Platform, AccessibilityInfo, Vibration } from 'react-native';
 import App from './App';
 import Ajuda from './Ajuda';
 import Config from './Config';
@@ -72,7 +72,7 @@ class Root extends Component {
                 sentidoIdentificacao: 'localizar',
             },
             supported: true,
-            enabled: false,
+            // enabled: false,
             tag: {},
             gravando: false,
         }
@@ -100,7 +100,9 @@ class Root extends Component {
                     announceForAccessibility(msg)
                 }
             })
-            .catch(e => console.log(e))
+            .catch(e => {
+                // console.error(e)
+            })
     }
 
     componentWillUnmount() {
@@ -127,6 +129,7 @@ class Root extends Component {
                     anatomp,
                     modoInteracao,
                     onChangeConfig: this.onChangeConfig,
+                    onChangeInputConfig: this.onChangeInputConfig,
                     onSelectRoteiro: this.onSelectRoteiro,
                     onChangeModoInteracao: this.onChangeModoInteracao,
                 }}
@@ -144,23 +147,27 @@ class Root extends Component {
     }
 
     onGetVoice = (cb, isNumber = false) => e => {
-        const val = e.value[0] == 'anatom limpar' ? '' : e.value[0];
+        const val = e.value[0] == 'comando limpar' ? '' : e.value;
         cb(val)
     }    
 
     _startRecognizing = (cb, isNumber = false) => e => {
+        Vibration.vibrate(300)
         Voice.onSpeechResults = this.onGetVoice(cb, isNumber);
 
         Voice.start('pt-BR')
         .then(r => r)
-        .catch(err => console.error(err))
+        .catch(err => {
+            //console.error(err)
+        })
     }
 
     async _stopRecognizing(e) {
         try {
+            Vibration.vibrate(300)
             await Voice.stop();
         } catch (e) {
-            console.error(e);
+            //console.error(e);
         }
     }
 
@@ -174,6 +181,8 @@ class Root extends Component {
         }
     }
 
+    onChangeInputConfig = field => value => this.setState({...this.state, inputConfig: {...this.state.inputConfig, [field]: value}})
+
     onSelectRoteiro = anatomp => {
         this.setState({ anatomp });
     }
@@ -184,41 +193,41 @@ class Root extends Component {
     _startNfc() {
         NfcManager.start({
             onSessionClosedIOS: () => {
-                console.log('ios session closed');
+                // console.log('ios session closed');
             }
         })
             .then(result => {
-                console.log('start OK', result);
+                // console.log('start OK', result);
             })
             .catch(error => {
-                console.warn('start fail', error);
+                // console.warn('start fail', error);
                 this.setState({ supported: false });
             })
 
         if (Platform.OS === 'android') {
             NfcManager.getLaunchTagEvent()
                 .then(tag => {
-                    console.log('launch tag', tag);
+                    // console.log('launch tag', tag);
                     if (tag) {
                         this.setState({ tag });
                     }
                 })
                 .catch(err => {
-                    console.log(err);
+                    // console.log(err);
                 })
             NfcManager.isEnabled()
                 .then(enabled => {
-                    this.setState({ enabled });
+                    //this.setState({ enabled });
                 })
                 .catch(err => {
-                    console.log(err);
+                    // console.log(err);
                 })
             NfcManager.onStateChanged(
                 event => {
                     if (event.state === 'on') {
-                        this.setState({ enabled: true });
+                        // this.setState({ enabled: true });
                     } else if (event.state === 'off') {
-                        this.setState({ enabled: false });
+                        // this.setState({ enabled: false });
                     } else if (event.state === 'turning_on') {
                         // do whatever you want
                     } else if (event.state === 'turning_off') {
@@ -232,7 +241,7 @@ class Root extends Component {
                     // when you don't want to listen to this anymore
                 })
                 .catch(err => {
-                    console.warn(err);
+                    // console.warn(err);
                 })
         }
     }
@@ -240,12 +249,13 @@ class Root extends Component {
     _startDetection = cb => e => {
 
         if (this.state.config.indexOf('nfc') != -1) {
-            NfcManager.registerTagEvent(tag => { cb(this._parseText(tag)) })
+            Vibration.vibrate(300)
+            NfcManager.registerTagEvent(tag => { Vibration.vibrate(300); cb(this._parseText(tag)) })
                 .then(result => {
-                    console.log('registerTagEvent OK', result)
+                    // console.log('registerTagEvent OK', result)
                 })
                 .catch(error => {
-                    console.warn('registerTagEvent fail', error)
+                    // console.warn('registerTagEvent fail', error)
                 })
         }
     }
@@ -253,10 +263,10 @@ class Root extends Component {
     _stopDetection = () => {
         NfcManager.unregisterTagEvent()
             .then(result => {
-                console.log('unregisterTagEvent OK', result)
+                // console.log('unregisterTagEvent OK', result)
             })
             .catch(error => {
-                console.warn('unregisterTagEvent fail', error)
+                // console.warn('unregisterTagEvent fail', error)
             })
     }
 

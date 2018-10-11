@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 
-import { View, Text} from 'react-native';
+import { View, Text } from 'react-native';
 import List from 'antd-mobile-rn/lib/list';
 import Card from 'antd-mobile-rn/lib/card';
 import Button from 'antd-mobile-rn/lib/button';
@@ -15,7 +15,7 @@ class Resultados extends React.Component {
 
     mainView = null;
 
-    componentDidMount(){
+    componentDidMount() {
         setTimeout(() => {
             this.mainView && focusOnView(this.mainView)
         }, 1000)
@@ -46,13 +46,18 @@ class Resultados extends React.Component {
 
                 {
                     (acertos != total) && (
-                        <List renderHeader={() => 'Itens com resposta incorreta'}>
-                            {
-                                erros.map((e, idx) => (
-                                    <ListItem wrap multipleLine key={idx}>{formatter(e)}</ListItem>
-                                ))
-                            }
-                        </List>
+                        <Card >
+                            <Card.Header title='Itens com resposta incorreta' />
+                            <Card.Body>
+                                <List>
+                                    {
+                                        erros.map((e, idx) => (
+                                            <ListItem wrap multipleLine key={idx}>{formatter(e)}</ListItem>
+                                        ))
+                                    }
+                                </List>
+                            </Card.Body>
+                        </Card>
                     )
                 }
 

@@ -8,9 +8,6 @@ import { announceForAccessibility, focusOnView } from 'react-native-accessibilit
 import Resultados from './Resultados'
 import FormTreLoc from './FormTreLoc'
 
-const _maxTentativa = 3;
-const _tempoMax = 60;
-
 class PraTreloc extends Component {
     timer = null;
     fieldRef = []
@@ -19,7 +16,7 @@ class PraTreloc extends Component {
         data: [],
         count: 0,
         total: 0,
-        timer: _tempoMax,
+        timer: this.props.screenProps.inputConfig.tempo,
         pecasFisicas: [],
         tentativas: 0,
     }
@@ -77,7 +74,7 @@ class PraTreloc extends Component {
         }
 
         if (this.state.count != nextState.count) {
-            this.setState({ timer: _tempoMax });
+            this.setState({ timer: this.props.screenProps.inputConfig.tempo });
         }
     }
 
@@ -103,7 +100,7 @@ class PraTreloc extends Component {
                         onSubmit={this.onSubmit}
                         interaction='Treinamento-Prático-Localizar'
                         info={[
-                            'Para cada parte das peças físicas do roteiro, informe o número de sua localização e pressione o botão "Próximo" para submeter.',
+                            'Informe as partes de cada peça física do roteiro e pressione o botão "Próximo" para submeter.',
                             `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
                         ]}
                     />
@@ -121,7 +118,7 @@ class PraTreloc extends Component {
         this.setState({
             data: dados,
             count: 0,
-            timer: _tempoMax,
+            timer: this.props.screenProps.inputConfig.tempo,
             tentativas: 0
         }, () => this.onCount())
     }
@@ -139,12 +136,12 @@ class PraTreloc extends Component {
             setTimeout(this.onNext(acertou), 3200)
         } else {
             this.setState({ tentativas: tentativas + 1 })
-            if (tentativas == _maxTentativa - 1 || timer == 0) {
+            if (tentativas == this.props.screenProps.inputConfig.chances - 1 || timer == 0) {
                 Toast.fail('Você errou.', 3)
                 announceForAccessibility('Você errou.')
                 setTimeout(this.onNext(acertou), 3200)
             } else {
-                const num = _maxTentativa - tentativas - 1;
+                const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
                 const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
                 Toast.fail(msg, 3, () => this.onSetFocus(count))
                 announceForAccessibility(msg)
@@ -159,7 +156,7 @@ class PraTreloc extends Component {
 
         this.setState({
             count: count + 1,
-            timer: _tempoMax,
+            timer: this.props.screenProps.inputConfig.tempo,
             tentativas: 0,
             data: [
                 ...data.slice(0, count),

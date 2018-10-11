@@ -47,9 +47,11 @@ class FormContainer extends React.Component {
         //Se mudou a peça física, foco na peça física
         if (mainState.data[mainState.count].pecaFisica.nome != next.mainState.data[next.mainState.count].pecaFisica.nome) {
             focusOnView(this.nomeDaPeca)
+            this.setState({ found: null, pesquisa: '' })
         } else {
             //Se muou apenas a parte: foco na parte
             if (mainState.count != next.mainState.count) {
+                this.setState({ found: null, pesquisa: '' })
                 focusOnView(this.dicaDaParte)
             }
         }
@@ -65,21 +67,10 @@ class FormContainer extends React.Component {
         const { screenProps, mainState, onGetRef, onSubmit } = this.props;
         const { anatomp } = screenProps;
         const { count, total, data, timer, tentativas } = mainState;
-        const title = data[count].pecaFisica.nome + ' - ' + anatomp.nome;
+        const title = data[count].pecaFisica.nome;
         const { found, pesquisa } = this.state;
 
         const value = data[count].valores[0];
-
-
-        const _Itens = (found && pesquisa != '') ? (
-            <View>
-                <Checkbox checked={value._id == found._id} onChange={this.onChange(found)} >
-                    <View style={{ marginLeft: 15 }} >
-                        <Text>{found.nome}</Text>
-                    </View>
-                </Checkbox>
-            </View>
-        ) : <Text>Nenhuma parte foi informada</Text>
 
         return (
             <View>
@@ -88,37 +79,35 @@ class FormContainer extends React.Component {
                     'Para cada parte (ie. sua localização) em cada peça física, selecione o nome da parte e em seguida pressione o botão "Próximo" para submeter',
                     'Utilize o campo "Nome da parte" para buscar a parte desejada.',
                     `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
-                ]} />                
-                <Card style={{marginBottom: 10}}>
-                    <Card.Header ref={r => this.nomeDaPeca = r} accessibilityLabel={`Peça: ${title}. Prossiga para ouvir o número da parte anatômica`} title={title} />
+                ]} />
+                <Card style={{ marginBottom: 10 }}>
+                    <Card.Header ref={r => this.nomeDaPeca = r} accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a parte anatômica`} title={title} />
                     <Card.Body>
                         <View>
-                            <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`Número ${data[count].numero}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Número {data[count].numero}</Text>
+                            <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`Parte ${data[count].numero}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Parte {data[count].numero}</Text>
                             <Input
-                                        _ref={onGetRef(count)}
-                                        value={this.state.pesquisa}
-                                        onChange={this.onFind}
-                                        name={'Nome da parte'}
-                                        onDone={onSubmit}
-                                    />
-                            <View style={{padding: 15}} ref={r => this.listRef = r} accessibilityLabel={`Nome da parte informada`}>
-                                {_Itens}
-                            </View>
+                                _ref={onGetRef(count)}
+                                value={this.state.pesquisa}
+                                onChange={this.onFind}
+                                name={'Nome da parte'}
+                                onDone={onSubmit}
+                            />
+                            {!found || pesquisa == '' && <Text style={{ padding: 5 }}>Nenhuma parte foi identificada</Text>}
                         </View>
-                        <Button accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
+                        <Button disabled={!found} accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
                     </Card.Body>
                 </Card>
 
                 <Card>
                     <Card.Header title='Resumo' />
                     <Card.Body>
-                    <Placar
+                        <Placar
                             count={count}
                             total={total}
                             tentativas={tentativas}
-                            _maxTentativa={_maxTentativa}
+                            _maxTentativa={this.props.maxTentativa}
                             timer={timer}
-                        />                        
+                        />
                     </Card.Body>
                 </Card>
             </View>
@@ -136,20 +125,20 @@ class FormContainer extends React.Component {
         this.setState({
             pesquisa
         }, () => {
-            const _filtered = this.props.mainState.partes.find(c => {
+            const found = this.props.mainState.partes.find(c => {
                 return norm(c.nome) == norm(this.state.pesquisa)
-            });      
+            });
 
-            const found = _filtered != undefined ? _filtered : null
+            if (found) {
+                this.onChange(found);
+            }
 
-            this.setState({ found }, () => {
-                // announceForAccessibility(`Na lista ${found.length} partes: ${found.map(f => f.nome).join(', ')}`)
-            })
+            this.setState({ found })
         })
     }
 
 
-    onChange = parte => () => {
+    onChange = parte => {
         this.props.onChangeValor(parte)
         announceForAccessibility(`${parte.nome} selecionado`)
     }
@@ -159,8 +148,6 @@ class FormContainer extends React.Component {
 
 const ListItem = List.Item;
 
-const _maxTentativa = 3;
-const _tempoMax = 60;
 const _ni = 'Não identificado'
 
 class PraTreNom extends Component {
@@ -171,7 +158,7 @@ class PraTreNom extends Component {
         data: [],
         count: 0,
         total: 0,
-        timer: _tempoMax,
+        timer: this.props.screenProps.inputConfig.tempo,
         partes: [],
         tentativas: 0,
         loading: true
@@ -191,7 +178,7 @@ class PraTreNom extends Component {
 
         //Seta as partes e seus numeros para cada peça física
         anatomp.mapa.forEach(mapa => {
-            mapa.localizacao.map(loc => pecasFisicas[loc.pecaFisica._id].partesNumeradas.push({ parte: mapa.parte, numero: loc.numero }))            
+            mapa.localizacao.map(loc => pecasFisicas[loc.pecaFisica._id].partesNumeradas.push({ parte: mapa.parte, numero: loc.numero }))
         })
 
 
@@ -227,7 +214,7 @@ class PraTreNom extends Component {
         }
 
         if (this.state.count != nextState.count) {
-            this.setState({ timer: _tempoMax });
+            this.setState({ timer: this.props.screenProps.inputConfig.tempo });
         }
     }
 
@@ -247,6 +234,7 @@ class PraTreNom extends Component {
                     onGetRef={this.onGetRef}
                     onChangeValor={this.onChangeValor}
                     onSubmit={this.onSubmit}
+                    maxTentativa={this.props.screenProps.inputConfig.chances}
                 />
             ) : <Resultados data={data} onRepeat={this.onRepeat} formatter={e => `Numero ${e.numero}, peça ${e.pecaFisica.nome}`} />
         )
@@ -267,7 +255,7 @@ class PraTreNom extends Component {
         this.setState({
             data: dados,
             count: 0,
-            timer: _tempoMax,
+            timer: this.props.screenProps.inputConfig.tempo,
             tentativas: 0
         }, () => this.onCount())
     }
@@ -284,11 +272,11 @@ class PraTreNom extends Component {
             announceForAccessibility('Acertou!')
         } else {
             this.setState({ tentativas: tentativas + 1 })
-            if (tentativas == _maxTentativa - 1 || timer == 0) {
+            if (tentativas == this.props.screenProps.inputConfig.chances - 1 || timer == 0) {
                 Toast.fail('Você errou.', 3, this.onNext(acertou))
                 announceForAccessibility('Você errou.')
             } else {
-                const num = _maxTentativa - tentativas - 1;
+                const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
                 const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
                 Toast.fail(msg, 3, () => this.onSetFocus(count))
                 announceForAccessibility(msg)
@@ -303,7 +291,7 @@ class PraTreNom extends Component {
 
         this.setState({
             count: count + 1,
-            timer: _tempoMax,
+            timer: this.props.screenProps.inputConfig.tempo,
             tentativas: 0,
             data: [
                 ...data.slice(0, count),

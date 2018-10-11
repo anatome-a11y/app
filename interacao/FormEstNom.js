@@ -65,12 +65,14 @@ class FormEstNom extends Component {
             onPress: () => focusOnView(this.initialFocus)
         }] : []
 
+        const view = isTeoria ? 'nome e os conteúdos associados.' : 'nome.';
+
         return (
             <Container navigation={navigation}>
                     <BC body={['Roteiros', screenProps.anatomp.nome]} head={interaction} />
                 <Instrucoes
                     info={[
-                        'Selecione uma peça física e informe o número de uma parte para visualizar seu nome e os conteúdos associados',
+                        'Selecione uma peça física e informe uma parte para visualizar seu '+view,
                     ]}
                 />
                 <Card ref={r => this.initialFocus = r} style={{ marginBottom: 10 }}>
@@ -104,7 +106,7 @@ class FormEstNom extends Component {
                             _ref={this.onGetRef}
                             value={value}
                             onChange={this.onChange}
-                            name='localização'
+                            name='Localização'
                             onDone={this.onOpen}
                             InputProps={{
                                 type: 'number',
@@ -112,12 +114,12 @@ class FormEstNom extends Component {
                                 onErrorClick: this.onErrorClick,
                             }}
                         />
-                        <Button style={{margin: 5}} disabled={!parte || !pecaFisica} onPressOut={this.onOpen} type='primary'>Pesquisar</Button>
+                        <Button style={{margin: 5}} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Pesquisar</Button>
                     </Card.Body>
                 </Card>
 
                 <Modal
-                    title="Informações da parte"
+                    title={null}
                     transparent
                     onClose={this.onClose}
                     maskClosable
@@ -128,8 +130,8 @@ class FormEstNom extends Component {
                         ...btnNovoFluxo
                     ]}
                 >
-                    {parte != undefined && <View>
-                        <Text style={{ textAlign: 'center', padding: 5, fontWeight: 'bold', fontSize: 18 }}>{parte.parte.nome}</Text>
+                    {parte != undefined ? <View>
+                        <Text style={{ textAlign: 'center', padding: 5, fontSize: 18 }}>{parte.parte.nome}</Text>
                         {isTeoria && <List>
                             {
                                 conteudos.length == 0 ? (
@@ -143,7 +145,7 @@ class FormEstNom extends Component {
                                 )))
                             }
                         </List>}
-                    </View>}
+                    </View> : <Text style={{padding: 5, textAlign: 'center'}}>Parte não encontrada</Text>}
                 </Modal>
             </Container>
         )

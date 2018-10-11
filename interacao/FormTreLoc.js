@@ -18,7 +18,6 @@ import Instrucoes from '../components/Instrucoes'
 
 const ListItem = List.Item;
 
-const _maxTentativa = 3;
 const _ni = 'Não identificado'
 
 class Form extends Component {
@@ -61,7 +60,7 @@ class Form extends Component {
 
         const label = value == '' ? placeholder : helper;
 
-        return (timer > 0 && tentativas < _maxTentativa) ? (
+        return (timer > 0 && tentativas < this.props.maxTentativas) ? (
             <ListItem key={idx} >
                 <Input
                     isTag
@@ -124,7 +123,7 @@ class FormTreLoc extends React.Component {
         const { screenProps, mainState, onGetRef, onSetFocus, onChangeValor, onErrorClick, onSubmit, interaction, info } = this.props;
         const { anatomp, onReadNFC, onStopNFC } = screenProps;
         const { count, total, data, timer, pecasFisicas, tentativas } = mainState;
-        const title = data[count].pecaFisica.nome + ' - ' + anatomp.nome;
+        const title = data[count].pecaFisica.nome;
 
         return (
             <View>
@@ -142,6 +141,7 @@ class FormTreLoc extends React.Component {
                                             data={data[count]}
                                             timer={timer}
                                             tentativas={tentativas}
+                                            maxTentativas={this.props.screenProps.inputConfig.chances}
                                             pecasFisicas={pecasFisicas}
                                             limite={data[count].valores.length - 1}
                                             count={count}
@@ -170,7 +170,7 @@ class FormTreLoc extends React.Component {
                                     count={count}
                                     total={total}
                                     tentativas={tentativas}
-                                    _maxTentativa={_maxTentativa}
+                                    _maxTentativa={this.props.screenProps.inputConfig.chances}
                                     timer={timer}
                                 />
                     </Card.Body>

@@ -74,13 +74,7 @@ class TeoEstLoc extends Component {
             focusOnView(this.initialFocus)
         })
 
-    }
-
-    componentWillUpdate(nextProps, nextState) {
-        if (JSON.stringify(this.state.conteudo) != JSON.stringify(nextState.conteudo)) {
-            this.setState({ open: true })
-        }
-    }    
+    }  
 
     render() {
         const { navigation, screenProps, isTeoria } = this.props;
@@ -99,38 +93,29 @@ class TeoEstLoc extends Component {
                 </View>
                 <Instrucoes
                     info={[
-                        'Selecione um conteúdo teórico na lista de conteúdos para visualizar o nome da parte e sua localização nas peças físicas',
+                        'Escolha um conteúdo teórico na lista de conteúdos para visualizar o nome da parte e sua localização nas peças físicas',
                         'Caso deseje, utilize o filtro a seguir para encontrar um conteúdo específico.'
                     ]}
                 />
-                <Card style={{ marginBottom: 10 }}>
-                    <Card.Header title='Filtro de conteúdo teórico' />
-                    <Card.Body>
-                        <Input
-                            value={this.state.pesquisa}
-                            onChange={this.onFilter}
-                            name={'Palavras chave'}
-                        />
-                    </Card.Body>
-                </Card>
                 <Card>
                     <Card.Header title='Conteúdos a selecionar' />
                     <Card.Body>
+                    <Input
+                            value={this.state.pesquisa}
+                            onChange={this.onFilter}
+                            name={'Filtro de conteúdo teórico'}
+                        />                        
                         <List>
-                            {filtered.map(c => (
-                                <List.Item wrap multipleLine key={c._id}>
-                                    <Checkbox checked={c._id == selected} onChange={this.onSelectParte(c)} >
-                                        <View style={{ marginLeft: 15 }} >
-                                            <Text>{c.texto}</Text>
-                                        </View>
-                                    </Checkbox>
+                            {filtered.length > 0 ? filtered.map(c => (
+                                <List.Item wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
+                                    <Text>{c.texto}</Text>
                                 </List.Item>
-                            ))}
+                            )) : <List.Item wrap multipleLine>Nenhum conteúdo foi encontrado</List.Item>}
                         </List>
                     </Card.Body>
                 </Card>
                 <Modal
-                    title="Localização das partes nas peças"
+                    title={null}
                     transparent
                     onClose={this.onClose}
                     maskClosable
@@ -142,7 +127,7 @@ class TeoEstLoc extends Component {
                     ]}
                 >
                     {conteudo != undefined && <View>
-                        <Text style={{textAlign: 'center', padding: 5}}>{conteudo.texto}</Text>
+                        <Text style={{textAlign: 'center', fontSize: 18, padding: 5}}>{conteudo.texto}</Text>
                         <List style={{ marginTop: 10 }} ref={r => this.localizacao = r} accessibilityLabel={`COnteúdo ${conteudo.texto} selecionado. Prossiga para ouvir a localização nas peças físicas.`}>
                             {Object.keys(pecasFisicas).map(key => {
                                 const pf = pecasFisicas[key];
@@ -153,7 +138,7 @@ class TeoEstLoc extends Component {
                                     if (l) {
                                         return (
                                             <ListItem key={l._id}>
-                                                <Text>{p.nome} - Número {l.numero}</Text>
+                                                <Text><Text style={{color: '#108ee9'}}>{p.nome}</Text> - Parte {l.numero}</Text>
                                             </ListItem>
                                         )
                                     } else {
@@ -175,7 +160,7 @@ class TeoEstLoc extends Component {
     }
 
     onSelectParte = conteudo => e => {
-        this.setState({ conteudo }, () => {
+        this.setState({ conteudo, open: true }, () => {
             setTimeout(() => {
                 focusOnView(this.localizacao)
             }, 500)

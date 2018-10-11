@@ -13,7 +13,7 @@ class Container extends Component {
 
 
   render() {
-    const { children, navigation, footer, disabled } = this.props;
+    const { children, footer } = this.props;
 
     return (
       <View style={styles.container}>
@@ -27,15 +27,15 @@ class Container extends Component {
             <View style={{flex: 10, padding: 5, marginBottom: 30}}>
             {children}
             </View>
-            <Flex>
+          </ScrollView>
+        </KeyboardAvoidingView>
+        <Flex style={{marginBottom: 5}}>
               <FlexItem><Button accessibilityLabel={this.getAcc('Contexto')} ><Icon type={'\ue616'} size='md' /></Button></FlexItem>
               <FlexItem style={styles.spacer}>
                 {footer}
               </FlexItem>
               <FlexItem><Button accessibilityLabel={this.getAcc('Info')} onPressOut={this.onNavigate('Info')}><Icon type={this.getIcone('Info', '\ue629')} size='md' /></Button></FlexItem>
-            </Flex>
-          </ScrollView>
-        </KeyboardAvoidingView>
+            </Flex>        
       </View>
     );
   }
@@ -68,7 +68,7 @@ class Container extends Component {
       case 'Info': return <Text accessibilityLabel='Informações. Título' style={styles.title}>Informações</Text>;
       case 'Ajuda': return <Text accessibilityLabel='Ajuda. Título' style={styles.title}>Ajuda</Text>;
       case 'Config': return <Text accessibilityLabel='Configurações. Título' style={styles.title}>Configurações</Text>;
-      case 'Roteiro': return <Text accessibilityLabel='Roteiro. Título' style={styles.title}>Roteiro</Text>;
+      case 'Roteiro': return <Text accessibilityLabel='Interações. Título' style={styles.title}>Interações</Text>;
       default: return <Text accessibilityLabel='anatom P. Título' style={styles.title}>An@tom-P</Text>;
     }
   }

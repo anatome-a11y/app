@@ -4,6 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import Container from './Container';
 
 import List from 'antd-mobile-rn/lib/list';
+import Card from 'antd-mobile-rn/lib/card';
 const ListItem = List.Item;
 
 const Sig = ({value}) => (
@@ -19,26 +20,25 @@ class Info extends Component {
         const { navigation, screenProps } = this.props;
         const {anatomp} = screenProps;
 
+        const dados = anatomp ? [
+            {label: 'Nome', value: anatomp.roteiro.nome},
+            {label: 'Curso', value: anatomp.roteiro.curso},
+            {label: 'Disciplina', value: anatomp.roteiro.disciplina},
+            {label: 'Intituição', value: anatomp.instituicao},
+            {label: 'Propósito', value: anatomp.roteiro.proposito ? anatomp.roteiro.proposito : 'Não informado'},
+        ] : []
 
         return (
             <Container navigation={navigation}>
-                {anatomp && (
-                    <List renderHeader={() => 'Peças físicas do roteiro'}>
-                        {anatomp.pecasFisicas.map(p => (
-                            <ListItem key={p._id}><Name>{p.nome}</Name><Sig value={p.descricao ? p.descricao : 'Nenhuma descrição'} /></ListItem>
-                        ))}
-                    </List>
-                )}
-                {anatomp && (
-                    <List renderHeader={() => 'Informações sobre o roteiro'}>
-                            <ListItem><Name>Nome</Name><Sig value={anatomp.roteiro.nome} /></ListItem>
-                            <ListItem><Name>Curso</Name><Sig value={anatomp.roteiro.curso} /></ListItem>
-                            <ListItem><Name>Disciplina</Name><Sig value={anatomp.roteiro.disciplina} /></ListItem>
-                            <ListItem><Name>Intituição</Name><Sig value={anatomp.instituicao} /></ListItem>
-                            <ListItem><Name>Propósito</Name><Sig value={anatomp.roteiro.proposito ? anatomp.roteiro.proposito : 'Não informado'} /></ListItem>
-                    </List>
-                )}                
-                <List renderHeader={() => 'Lista de siglas da Anatomia'}>
+                    <List style={{marginBottom: 10}} renderHeader={() => 'Peças físicas do roteiro'}>
+                        {anatomp ? anatomp.pecasFisicas.map(p => (
+                            <ListItem wrap multipleLine key={p._id}><Name>{p.nome}</Name><Sig value={p.descricao ? p.descricao : 'Nenhuma descrição'} /></ListItem>
+                        )) : <ListItem wrap multipleLine><Text>Selecione um roteiro para visualizar as informações das peças físicas</Text></ListItem>}
+                    </List>                
+                    <List style={{marginBottom: 10}} renderHeader={() => 'Informações sobre o roteiro'}>
+                            {anatomp ? dados.map(d => <ListItem key={d.label} wrap multipleLine><Name>{d.label}</Name><Sig value={d.value} /></ListItem>) : <ListItem wrap multipleLine><Text>Selecione um roteiro para visualizar suas informações</Text></ListItem>}
+                    </List>            
+                <List style={{marginBottom: 10}} renderHeader={() => 'Lista de siglas da Anatomia'}>
                     <ListItem><Name>A.  <Sig value="Artéria" /></Name></ListItem>
                     <ListItem><Name>Aa.  <Sig value="Artérias" /></Name></ListItem>
                     <ListItem><Name>Art.  <Sig value="Articulação" /></Name></ListItem>

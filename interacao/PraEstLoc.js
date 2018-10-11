@@ -64,11 +64,11 @@ class PraEstLoc extends Component {
 
     }
 
-    componentWillUpdate(nextProps, nextState) {
-        if (JSON.stringify(this.state.parte) != JSON.stringify(nextState.parte)) {
-            this.setState({ open: true })
-        }
-    }
+    // componentWillUpdate(nextProps, nextState) {
+    //     if (JSON.stringify(this.state.parte) != JSON.stringify(nextState.parte)) {
+    //         this.setState({ open: true })
+    //     }
+    // }
 
 
 
@@ -90,38 +90,29 @@ class PraEstLoc extends Component {
                 </View>
                 <Instrucoes
                     info={[
-                        'Selecione uma parte na lista de partes para visualizar sua localização nas peças físicas.',
+                        'Escolha uma parte na lista de partes para visualizar sua localização nas peças físicas.',
                         'Caso deseje, utilize o filtro a seguir para encontrar uma parte.'
                     ]}
                 />
-                <Card style={{ marginBottom: 10 }}>
-                    <Card.Header title='Filtro de partes' />
-                    <Card.Body>
+                <Card>
+                    <Card.Header title='Partes a selecionar' />
+                    <Card.Body >
                         <Input
                             value={this.state.pesquisa}
                             onChange={this.onFilter}
-                            name={'Nome da parte'}
+                            name={'Filtro de partes'}
                         />
-                    </Card.Body>
-                </Card>
-                <Card>
-                    <Card.Header title='Partes a selecionar' />
-                    <Card.Body>
                         <List>
-                            {filtered.map(c => (
-                                <List.Item wrap multipleLine key={c._id}>
-                                    <Checkbox checked={c._id == selected} onChange={this.onSelectParte(c)} >
-                                        <View style={{ marginLeft: 15 }} >
-                                            <Text>{c.nome}</Text>
-                                        </View>
-                                    </Checkbox>
+                            {filtered.length > 0 ? filtered.map(c => (
+                                <List.Item wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
+                                    <Text>{c.nome}</Text>
                                 </List.Item>
-                            ))}
+                            )) : <List.Item wrap multipleLine>Nenhuma parte encontrada</List.Item>}
                         </List>
                     </Card.Body>
                 </Card>
                 <Modal
-                    title="Localização da parte nas peças"
+                    title={null}
                     transparent
                     onClose={this.onClose}
                     maskClosable
@@ -133,13 +124,14 @@ class PraEstLoc extends Component {
                     ]}
                 >
                     {parte != undefined && <View>
+                        <Text style={{ padding: 5, textAlign: 'center', fontSize: 18 }}>{parte.nome}</Text>
                         <List style={{ marginTop: 10 }} ref={r => this.localizacao = r} accessibilityLabel={`Parte ${parte.nome} selecionada. Prossiga para ouvir a localização nas peças físicas.`}>
                             {Object.keys(pecasFisicas).map(key => {
                                 const pf = pecasFisicas[key];
                                 const l = pf.localizacao.find(m => m.parte._id == parte._id)
                                 return l ? (
                                     <ListItem key={l._id}>
-                                        <Text><Text style={{ fontWeight: 'bold' }}>{pf.nome}:</Text>  <Text>{l.numero}</Text></Text>
+                                        <Text><Text style={{ color: '#108ee9' }}>{pf.nome}:</Text>  <Text>Parte {l.numero}</Text></Text>
                                     </ListItem>
                                 ) : null;
                             })}
@@ -174,7 +166,7 @@ class PraEstLoc extends Component {
     }
 
     onSelectParte = parte => e => {
-        this.setState({ parte }, () => {
+        this.setState({ parte, open: true }, () => {
             setTimeout(() => {
                 focusOnView(this.localizacao)
             }, 500)
