@@ -130,22 +130,24 @@ class PraTreloc extends Component {
 
         let acertou = this.checkAcertos(data[count]);
 
-        if (acertou) {
-            Toast.success('Acertou!', 3);
-            announceForAccessibility('Acertou!')
-            setTimeout(this.onNext(acertou), 3200)
-        } else {
-            this.setState({ tentativas: tentativas + 1 })
-            if (tentativas == this.props.screenProps.inputConfig.chances - 1 || timer == 0) {
-                Toast.fail('Você errou.', 3)
-                announceForAccessibility('Você errou.')
-                setTimeout(this.onNext(acertou), 3200)
+        if(timer > 0){
+            if (acertou) {
+                Toast.success('Acertou!', 3, this.onNext(acertou));
+                announceForAccessibility('Acertou!')
             } else {
-                const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
-                const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
-                Toast.fail(msg, 3, () => this.onSetFocus(count))
-                announceForAccessibility(msg)
-            }
+                this.setState({ tentativas: tentativas + 1 })
+                if (tentativas == this.props.screenProps.inputConfig.chances - 1) {
+                    Toast.fail('Você errou.', 3, this.onNext(acertou))
+                    announceForAccessibility('Você errou.')
+                } else {
+                    const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
+                    const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
+                    Toast.fail(msg, 3, () => this.onSetFocus(count))
+                    announceForAccessibility(msg)
+                }
+            }            
+        }else{
+            this.onNext(false)()
         }
 
     }
@@ -181,14 +183,13 @@ class PraTreloc extends Component {
 
     onSetFocus = (count, idx = 0) => {
         const { config } = this.props.screenProps;
-        if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
-            this.fieldRef[count][idx].focus()
-        } else {
-            if (config.indexOf('talkback') !== -1) {
-                focusOnView(this.fieldRef[count][idx])
-            }
-        }
-
+        if (config.indexOf('talkback') !== -1) {
+            focusOnView(this.fieldRef[count][idx])
+        }else{
+            if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
+                this.fieldRef[count][idx].focus()
+            }            
+        }        
     }
 
     checkAcertos = item => {

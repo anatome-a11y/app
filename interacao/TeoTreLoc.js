@@ -10,8 +10,6 @@ import FormTreLoc from './FormTreLoc'
 
 import BC from '../components/Breadcrumbs'
 
-const _maxTentativa = 3;
-const _tempoMax = 60;
 
 class TeoTreLoc extends Component {
     timer = null;
@@ -21,7 +19,7 @@ class TeoTreLoc extends Component {
         data: [],
         count: 0,
         total: 0,
-        timer: _tempoMax,
+        timer: this.props.screenProps.inputConfig.tempo,
         pecasFisicas: [],
         tentativas: 0,
     }
@@ -91,7 +89,7 @@ class TeoTreLoc extends Component {
         }
 
         if (this.state.count != nextState.count) {
-            this.setState({ timer: _tempoMax });
+            this.setState({ timer: this.props.screenProps.inputConfig.tempo });
         }
     }
 
@@ -134,7 +132,7 @@ class TeoTreLoc extends Component {
         this.setState({
             data: dados,
             count: 0,
-            timer: _tempoMax,
+            timer: this.props.screenProps.inputConfig.tempo,
             tentativas: 0
         }, () => this.onCount())
     }
@@ -146,22 +144,24 @@ class TeoTreLoc extends Component {
 
         let acertou = this.checkAcertos(data[count]);
 
-        if (acertou) {
-            Toast.success('Acertou!', 3);
-            announceForAccessibility('Acertou!')
-            setTimeout(this.onNext(acertou), 3200)
-        } else {
-            this.setState({ tentativas: tentativas + 1 })
-            if (tentativas == _maxTentativa - 1 || timer == 0) {
-                Toast.fail('Você errou.', 3)
-                announceForAccessibility('Você errou.')
-                setTimeout(this.onNext(acertou), 3200)
+        if(timer > 0){
+            if (acertou) {
+                Toast.success('Acertou!', 3, this.onNext(acertou));
+                announceForAccessibility('Acertou!')
             } else {
-                const num = _maxTentativa - tentativas - 1;
-                const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
-                Toast.fail(msg, 3, () => this.onSetFocus(count))
-                announceForAccessibility(msg)
+                this.setState({ tentativas: tentativas + 1 })
+                if (tentativas == this.props.screenProps.inputConfig.chances - 1) {
+                    Toast.fail('Você errou.', 3, this.onNext(acertou))
+                    announceForAccessibility('Você errou.')
+                } else {
+                    const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
+                    const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
+                    Toast.fail(msg, 3, () => this.onSetFocus(count))
+                    announceForAccessibility(msg)
+                }
             }
+        }else{
+            this.onNext(false)()
         }
 
     }
@@ -172,7 +172,7 @@ class TeoTreLoc extends Component {
 
         this.setState({
             count: count + 1,
-            timer: _tempoMax,
+            timer: this.props.screenProps.inputConfig.tempo,
             tentativas: 0,
             data: [
                 ...data.slice(0, count),
@@ -197,14 +197,13 @@ class TeoTreLoc extends Component {
 
     onSetFocus = (count, idx = 0) => {
         const { config } = this.props.screenProps;
-        if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
-            this.fieldRef[count][idx].focus()
-        } else {
-            if (config.indexOf('talkback') !== -1) {
-                focusOnView(this.fieldRef[count][idx])
+        if (config.indexOf('talkback') !== -1) {
+            focusOnView(this.fieldRef[count][idx])
+        }else{
+            if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
+                this.fieldRef[count][idx].focus()
             }
-        }
-
+        }        
     }
 
     checkAcertos = item => {

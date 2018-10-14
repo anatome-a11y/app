@@ -25,7 +25,7 @@ import Instrucoes from '../components/Instrucoes'
 
 
 class FormContainer extends React.Component {
-
+    initialFocus= null;
     nomeDaPeca = null;
     dicaDaParte = null;
     listRef = null;
@@ -37,7 +37,7 @@ class FormContainer extends React.Component {
 
     componentDidMount() {
         this.time2Focus = setTimeout(() => {
-            focusOnView(this.nomeDaPeca)
+            focusOnView(this.initialFocus)
         }, 500)
     }
 
@@ -74,9 +74,9 @@ class FormContainer extends React.Component {
 
         return (
             <View>
-                <BC body={['Roteiros', anatomp.nome]} head={'Treinamento-Prático-Nomear'} />
+                <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={'Treinamento-Prático-Nomear'} />
                 <Instrucoes info={[
-                    'Para cada parte (ie. sua localização) em cada peça física, selecione o nome da parte e em seguida pressione o botão "Próximo" para submeter',
+                    'Para cada parte (isto é, sua localização) em cada peça física, selecione o nome da parte e em seguida pressione o botão "Próximo" para submeter',
                     'Utilize o campo "Nome da parte" para buscar a parte desejada.',
                     `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
                 ]} />
@@ -84,7 +84,7 @@ class FormContainer extends React.Component {
                     <Card.Header ref={r => this.nomeDaPeca = r} accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a parte anatômica`} title={title} />
                     <Card.Body>
                         <View>
-                            <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`Parte ${data[count].numero}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Parte {data[count].numero}</Text>
+                            <Text accessible ref={r => this.dicaDaParte = r} accessibilityLabel={`Parte ${data[count].numero}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Parte {data[count].numero}</Text>
                             <Input
                                 _ref={onGetRef(count)}
                                 value={this.state.pesquisa}
@@ -94,7 +94,7 @@ class FormContainer extends React.Component {
                             />
                             {!found || pesquisa == '' && <Text style={{ padding: 5 }}>Nenhuma parte foi identificada</Text>}
                         </View>
-                        <Button disabled={!found} accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
+                        <Button disabled={!found && timer > 0} accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
                     </Card.Body>
                 </Card>
 
@@ -131,6 +131,8 @@ class FormContainer extends React.Component {
 
             if (found) {
                 this.onChange(found);
+            }else{
+                announceForAccessibility(`Parte não encontrada`)
             }
 
             this.setState({ found })
@@ -267,21 +269,27 @@ class PraTreNom extends Component {
 
         let acertou = this.checkAcertos(data[count]);
 
-        if (acertou) {
-            Toast.success('Acertou!', 3, this.onNext(acertou));
-            announceForAccessibility('Acertou!')
-        } else {
-            this.setState({ tentativas: tentativas + 1 })
-            if (tentativas == this.props.screenProps.inputConfig.chances - 1 || timer == 0) {
-                Toast.fail('Você errou.', 3, this.onNext(acertou))
-                announceForAccessibility('Você errou.')
+        if(timer > 0){
+            if (acertou) {
+                Toast.success('Acertou!', 3, this.onNext(acertou));
+                announceForAccessibility('Acertou!')
             } else {
-                const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
-                const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
-                Toast.fail(msg, 3, () => this.onSetFocus(count))
-                announceForAccessibility(msg)
+                this.setState({ tentativas: tentativas + 1 })
+                if (tentativas == this.props.screenProps.inputConfig.chances - 1) {
+                    Toast.fail('Você errou.', 3, this.onNext(acertou))
+                    announceForAccessibility('Você errou.')
+                } else {
+                    const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
+                    const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
+                    Toast.fail(msg, 3, () => this.onSetFocus(count))
+                    announceForAccessibility(msg)
+                }
             }
+        }else{
+            this.onNext(false)()
         }
+
+
 
     }
 
@@ -312,13 +320,14 @@ class PraTreNom extends Component {
 
     onSetFocus = (count) => {
         const { config } = this.props.screenProps;
-        if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
-            this.fieldRef[count].focus()
-        } else {
-            if (config.indexOf('talkback') !== -1) {
-                focusOnView(this.fieldRef[count])
-            }
-        }
+        if (config.indexOf('talkback') != -1) {
+           setTimeout(() =>  focusOnView(this.fieldRef[count]), 500)
+        }else{
+            if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
+                this.fieldRef[count].focus()
+            }            
+        }        
+         
     }
 
     checkAcertos = item => {

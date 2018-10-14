@@ -6,8 +6,6 @@ import List from 'antd-mobile-rn/lib/list';
 import Toast from 'antd-mobile-rn/lib/toast';
 import Button from 'antd-mobile-rn/lib/button';
 import Checkbox from 'antd-mobile-rn/lib/checkbox';
-
-import Modal from 'antd-mobile-rn/lib/modal';
 import Card from 'antd-mobile-rn/lib/card';
 
 import { norm } from '../utils'
@@ -16,6 +14,7 @@ import { norm } from '../utils'
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 import Input from '../components/Input'
 import Option from '../components/Option'
+import Modal from '../components/Modal'
 
 import BC from '../components/Breadcrumbs'
 import Instrucoes from '../components/Instrucoes'
@@ -70,8 +69,10 @@ class TeoEstLoc extends Component {
         })
 
         this.setState({ loading: false, conteudos, filtered: conteudos, pecasFisicas }, () => {
-            Toast.hide();
-            focusOnView(this.initialFocus)
+            setTimeout(() => {
+                Toast.hide();
+                focusOnView(this.initialFocus)
+            }, 500)
         })
 
     }  
@@ -81,16 +82,10 @@ class TeoEstLoc extends Component {
         const { open, conteudo, filtered, pecasFisicas } = this.state;
 
         const selected = conteudo == undefined ? '' : conteudo._id;
-
-        const btnNovoConteudo = this.props.screenProps.config.indexOf('talkback') != -1 ? [{
-            text: 'Selecionar outro conteúdo',
-            onPress: () => focusOnView(this.initialFocus)
-        }] : []        
+     
         return (
             <Container navigation={navigation}>
-            <View ref={r => this.initialFocus = r} accessibilityLabel={'Seleção de conteúdo teórico. Prossiga para selecionar um conteúdo.'}>
-                <BC body={['Roteiros', screenProps.anatomp.nome]} head={'Estudo-Teórico-Localizar'} />
-                </View>
+            <BC _ref={r => this.initialFocus = r} body={['Roteiros', screenProps.anatomp.nome]} head={'Estudo-Teórico-Localizar'} />
                 <Instrucoes
                     info={[
                         'Escolha um conteúdo teórico na lista de conteúdos para visualizar o nome da parte e sua localização nas peças físicas',
@@ -98,37 +93,33 @@ class TeoEstLoc extends Component {
                     ]}
                 />
                 <Card>
-                    <Card.Header title='Conteúdos a selecionar' />
+                    <Card.Header title='Conteúdos a selecionar' accessibilityLabel='Conteúdos a selecionar. A seguir informe uma parte para filtrar a lista de partes' />
                     <Card.Body>
                     <Input
                             value={this.state.pesquisa}
                             onChange={this.onFilter}
                             name={'Filtro de conteúdo teórico'}
                         />                        
-                        <List>
+                        <List accessibilityLabel='Lista de conteúdos teóricos filtrados. Prossiga para ouvir os conteúdos.'>
                             {filtered.length > 0 ? filtered.map(c => (
-                                <List.Item wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
+                                <List.Item accessible accessibilityLabel={`${c.texto}. Botão. Toque duas vezes para abrir.`} wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
                                     <Text>{c.texto}</Text>
                                 </List.Item>
-                            )) : <List.Item wrap multipleLine>Nenhum conteúdo foi encontrado</List.Item>}
+                            )) : <List.Item accessibilityLabel='Nenhuma parte encontrada. Altere as palavras chave do campo de busca.' wrap multipleLine>Nenhum conteúdo foi encontrado</List.Item>}
                         </List>
                     </Card.Body>
                 </Card>
                 <Modal
-                    title={null}
-                    transparent
-                    onClose={this.onClose}
-                    maskClosable
-                    visible={open}
-                    closable={false}
+                    talkback={screenProps.config.indexOf('talkback') != -1}
+                    open={open}
+                    title={conteudo ? conteudo.texto : null}
+                    acc={`Detalhes da Parte ${conteudo ? conteudo.texto : ''}. Aberto. Prossiga para ouvir o nome da parte e sua localização nas peças físicas.`}
                     footer={[
-                        { text: 'Fechar', onPress: this.onClose },
-                        ...btnNovoConteudo
+                        { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar os detalhes do conteúdo ${conteudo ? conteudo.texto : ''}` },
                     ]}
                 >
                     {conteudo != undefined && <View>
-                        <Text style={{textAlign: 'center', fontSize: 18, padding: 5}}>{conteudo.texto}</Text>
-                        <List style={{ marginTop: 10 }} ref={r => this.localizacao = r} accessibilityLabel={`COnteúdo ${conteudo.texto} selecionado. Prossiga para ouvir a localização nas peças físicas.`}>
+                        <List style={{ marginTop: 10 }}>
                             {Object.keys(pecasFisicas).map(key => {
                                 const pf = pecasFisicas[key];
 
@@ -160,11 +151,7 @@ class TeoEstLoc extends Component {
     }
 
     onSelectParte = conteudo => e => {
-        this.setState({ conteudo, open: true }, () => {
-            setTimeout(() => {
-                focusOnView(this.localizacao)
-            }, 500)
-        })
+        this.setState({ conteudo, open: true })
     }
 
     onOpen = () => this.setState({ open: true })
@@ -182,7 +169,7 @@ class TeoEstLoc extends Component {
             const filtered = _filtered != undefined ? _filtered : null
 
             this.setState({ filtered }, () => {
-                // announceForAccessibility(`Na lista ${found.length} partes: ${found.map(f => f.nome).join(', ')}`)
+                announceForAccessibility(`Na lista ${filtered.length} conteúdos. Prossiga para selecionar um destes conteúdos: ${filtered.map(f => f.texto).join(', ')}`)
             })
         })
     }

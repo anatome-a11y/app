@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 import withAppContext from './AppContextHOC'
 
-import { View, Text } from 'react-native';
+import { View, Text, Keyboard } from 'react-native';
 import List from 'antd-mobile-rn/lib/list';
 import Icon from 'antd-mobile-rn/lib/icon';
 import Button from 'antd-mobile-rn/lib/button';
@@ -25,7 +25,7 @@ class Input extends React.Component {
             <View style={{ marginBottom: 10 }}>
                 <Button
                     ref={_ref}
-                    accessibilityLabel={`${name}. Botão. Mantenha pressionado e aproxime de uma etiqueta de RF aidí`}
+                    accessibilityLabel={`${name}. Botão. Toque duas vezes, Mantenha pressionado e aproxime de uma etiqueta de RF aidí`}
                     style={{ flex: 1, margin: 5, display: 'flex', alignItems: 'center' }}
                     onPressIn={onReadNFC(onChange)}
                     onPressOut={() => { onStopNFC(); onDone() }}
@@ -35,11 +35,11 @@ class Input extends React.Component {
                 <Text style={{ flex: 1, margin: 5, fontSize: 15 }} >Valor Lido: <Text style={{ color: '#108ee9' }}>{value ? value : 'Nenhum'}</Text></Text>
             </View>
         ) : (
-                (config.indexOf('voz') != -1) ? (
+                (config.indexOf('voz') != -1 || config.indexOf('talkback') != -1) ? (
                     <View style={{ marginBottom: 10 }}>
                         <Button
                             ref={_ref}
-                            accessibilityLabel={'Filtrar. Botão. Mantenha pressionado e fale após o sinal '}
+                            accessibilityLabel={`${name}. Botão. Toque duas vezes, Mantenha pressionado e fale após o sinal`}
                             style={{ flex: 1, margin: 5 }}
                             onPressIn={onStartListen(this.onChange, isTag)}
                             onPressOut={onStopListen}>
@@ -49,7 +49,7 @@ class Input extends React.Component {
                         <Text style={{ fontSize: 15, margin: 5, flex: 1 }} >Texto detectado: <Text style={{ color: '#108ee9' }}>{value ? value : 'Nenhum'}</Text></Text>
                         {this.state.voiceWords.length > 0 && <View style={{ flex: 1, margin: 5, flexWrap: 'wrap', alignItems: 'flex-start', flexDirection: 'row' }}>
                             <Text>Alternativas: </Text>
-                            {this.state.voiceWords.map(v => <Button onPressOut={() => this.props.onChange(v)} key={v} size='small' type='ghost' style={{ marginRight: 3 }}>{v}</Button>)}
+                            {this.state.voiceWords.map(v => <Button accessibilityLabel={`Texto alternativo. ${v}. Toque duas vezes para substituir o texto detectado`} onPressOut={() => {this.props.onChange(v); announceForAccessibility(`Novo texto detectado: ${v}`)}} key={v} size='small' type='ghost' style={{ marginRight: 3 }}>{v}</Button>)}
                         </View>}
                     </View>
                 ) : (
@@ -58,7 +58,7 @@ class Input extends React.Component {
                             value={value}
                             onChange={onChange}
                             placeholder={name}
-                            clear={true}
+                            clear={config.indexOf('talkback') ==  -1}
                             onSubmitEditing={onDone}
                             {...InputProps}
                         />

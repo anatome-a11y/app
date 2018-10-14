@@ -6,7 +6,7 @@ import List from 'antd-mobile-rn/lib/list';
 import Toast from 'antd-mobile-rn/lib/toast';
 import Button from 'antd-mobile-rn/lib/button';
 import Checkbox from 'antd-mobile-rn/lib/checkbox';
-import Modal from 'antd-mobile-rn/lib/modal';
+
 import Card from 'antd-mobile-rn/lib/card';
 
 import { norm } from '../utils'
@@ -16,7 +16,8 @@ import Instrucoes from '../components/Instrucoes'
 
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 import Input from '../components/Input'
-import Option from '../components/Option'
+import Modal from '../components/Modal'
+
 
 
 const ListItem = List.Item;
@@ -25,7 +26,8 @@ const ListItem = List.Item;
 class PraEstLoc extends Component {
     initialFocus = null;
     modalBody = null;
-    localizacao = null;
+    refListaPartes = null;
+    refNovaParte = null;
 
     state = {
         loading: true,
@@ -78,16 +80,15 @@ class PraEstLoc extends Component {
 
         const selected = parte == undefined ? '' : parte._id;
 
-        const btnNovaParte = this.props.screenProps.config.indexOf('talkback') != -1 ? [{
-            text: 'Selecionar nova parte',
-            onPress: () => focusOnView(this.initialFocus)
-        }] : []
+        // const btnNovaParte = screenProps.config.indexOf('talkback') != -1 ? [{
+        //     text: 'Selecionar nova parte',
+        //     acc: `Selecionar nova parte. Botão. Toque duas vezes para selecionar uma nova parte`,
+        //     onPress: () => this.setState({open: false}, () => setTimeout(() => {focusOnView(this.refNovaParte)}, 1000)),
+        // }] : []
 
         return (
             <Container navigation={navigation}>
-                <View ref={r => this.initialFocus = r} accessibilityLabel={'Seleção de parte anatômica. Prossiga para selecionar uma parte.'}>
-                    <BC body={['Roteiros', screenProps.anatomp.nome]} head={'Estudo-Prático-Localizar'} />
-                </View>
+                <BC _ref={r => this.initialFocus = r} body={['Roteiros', screenProps.anatomp.nome]} head={'Estudo-Prático-Localizar'} acc='Prossiga para ouvir as instruções' />
                 <Instrucoes
                     info={[
                         'Escolha uma parte na lista de partes para visualizar sua localização nas peças físicas.',
@@ -95,37 +96,33 @@ class PraEstLoc extends Component {
                     ]}
                 />
                 <Card>
-                    <Card.Header title='Partes a selecionar' />
+                    <Card.Header ref={r => this.refNovaParte = r} title='Partes a selecionar' accessibilityLabel='Partes a selecionar. A seguir informe uma parte para filtrar a lista de partes' />
                     <Card.Body >
                         <Input
                             value={this.state.pesquisa}
                             onChange={this.onFilter}
-                            name={'Filtro de partes'}
+                            name={'Filtro de partes'}                            
                         />
-                        <List>
+                        <List accessibilityLabel='Lista de partes filtradas. Prossiga para ouvir os nomes das partes.' ref={r => this.refListaPartes = r}>
                             {filtered.length > 0 ? filtered.map(c => (
-                                <List.Item wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
+                                <List.Item accessible accessibilityLabel={`${c.nome}. Botão. Toque duas vezes para abrir.`} wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
                                     <Text>{c.nome}</Text>
                                 </List.Item>
-                            )) : <List.Item wrap multipleLine>Nenhuma parte encontrada</List.Item>}
+                            )) : <List.Item accessibilityLabel='Nenhuma parte encontrada. Altere as palavras chave do campo de busca.' wrap multipleLine>Nenhuma parte encontrada</List.Item>}
                         </List>
                     </Card.Body>
                 </Card>
                 <Modal
-                    title={null}
-                    transparent
-                    onClose={this.onClose}
-                    maskClosable
-                    visible={open}
-                    closable={false}
+                    talkback={screenProps.config.indexOf('talkback') != -1}
+                    open={open}
+                    title={parte ? parte.nome : null}
+                    acc={`Detalhes da Parte ${parte ? parte.nome : ''}. Aberto. Prossiga para ouvir a localização nas peças físicas.`}
                     footer={[
-                        { text: 'Fechar', onPress: this.onClose },
-                        ...btnNovaParte
+                        { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar os detalhes da Parte ${parte ? parte.nome : ''}` },
                     ]}
                 >
-                    {parte != undefined && <View>
-                        <Text style={{ padding: 5, textAlign: 'center', fontSize: 18 }}>{parte.nome}</Text>
-                        <List style={{ marginTop: 10 }} ref={r => this.localizacao = r} accessibilityLabel={`Parte ${parte.nome} selecionada. Prossiga para ouvir a localização nas peças físicas.`}>
+                    {parte != undefined ? <View>
+                        <List style={{ marginTop: 10 }} >
                             {Object.keys(pecasFisicas).map(key => {
                                 const pf = pecasFisicas[key];
                                 const l = pf.localizacao.find(m => m.parte._id == parte._id)
@@ -136,7 +133,7 @@ class PraEstLoc extends Component {
                                 ) : null;
                             })}
                         </List>
-                    </View>}
+                    </View> : null}
                 </Modal>
             </Container>
         )
@@ -153,7 +150,7 @@ class PraEstLoc extends Component {
             const filtered = _filtered != undefined ? _filtered : null
 
             this.setState({ filtered }, () => {
-                // announceForAccessibility(`Na lista ${found.length} partes: ${found.map(f => f.nome).join(', ')}`)
+                announceForAccessibility(`Na lista ${filtered.length} partes: ${filtered.map(f => f.nome).join(', ')}. Prossiga para selecionar.`)
             })
         })
     }
@@ -166,11 +163,7 @@ class PraEstLoc extends Component {
     }
 
     onSelectParte = parte => e => {
-        this.setState({ parte, open: true }, () => {
-            setTimeout(() => {
-                focusOnView(this.localizacao)
-            }, 500)
-        })
+        this.setState({ parte, open: true })
     }
 
 }

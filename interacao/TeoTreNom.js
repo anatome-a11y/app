@@ -123,7 +123,7 @@ class FormContainer extends React.Component {
                             count={count}
                             total={total}
                             tentativas={tentativas}
-                            _maxTentativa={_maxTentativa}
+                            _maxTentativa={this.props.screenProps.inputConfig.chances}
                             timer={timer}
                         />
                     </Card.Body>
@@ -154,8 +154,6 @@ class FormContainer extends React.Component {
 
 const ListItem = List.Item;
 
-const _maxTentativa = 3;
-const _tempoMax = 60;
 const _ni = 'Não identificado'
 
 class TeoTreNom extends Component {
@@ -166,7 +164,7 @@ class TeoTreNom extends Component {
         data: [],
         count: 0,
         total: 0,
-        timer: _tempoMax,
+        timer: this.props.screenProps.inputConfig.tempo,
         conteudos: [],
         tentativas: 0,
         loading: true
@@ -231,7 +229,7 @@ class TeoTreNom extends Component {
         }
 
         if (this.state.count != nextState.count) {
-            this.setState({ timer: _tempoMax });
+            this.setState({ timer: this.props.screenProps.inputConfig.tempo });
         }
     }
 
@@ -271,7 +269,7 @@ class TeoTreNom extends Component {
         this.setState({
             data: dados,
             count: 0,
-            timer: _tempoMax,
+            timer: this.props.screenProps.inputConfig.tempo,
             tentativas: 0
         }, () => this.onCount())
     }
@@ -283,20 +281,24 @@ class TeoTreNom extends Component {
 
         let acertou = this.checkAcertos(data[count]);
 
-        if (acertou) {
-            Toast.success('Acertou!', 3, this.onNext(acertou));
-            announceForAccessibility('Acertou!')
-        } else {
-            this.setState({ tentativas: tentativas + 1 })
-            if (tentativas == _maxTentativa - 1 || timer == 0) {
-                Toast.fail('Você errou.', 3, this.onNext(acertou))
-                announceForAccessibility('Você errou.')
+        if(timer > 0){
+            if (acertou) {
+                Toast.success('Acertou!', 3, this.onNext(acertou));
+                announceForAccessibility('Acertou!')
             } else {
-                const num = _maxTentativa - tentativas - 1;
-                const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
-                Toast.fail(msg, 3, () => this.onSetFocus(count))
-                announceForAccessibility(msg)
+                this.setState({ tentativas: tentativas + 1 })
+                if (tentativas == this.props.screenProps.inputConfig.chances - 1) {
+                    Toast.fail('Você errou.', 3, this.onNext(acertou))
+                    announceForAccessibility('Você errou.')
+                } else {
+                    const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
+                    const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
+                    Toast.fail(msg, 3, () => this.onSetFocus(count))
+                    announceForAccessibility(msg)
+                }
             }
+        }else{
+            this.onNext(false)();
         }
 
     }
@@ -307,7 +309,7 @@ class TeoTreNom extends Component {
 
         this.setState({
             count: count + 1,
-            timer: _tempoMax,
+            timer: this.props.screenProps.inputConfig.tempo,
             tentativas: 0,
             data: [
                 ...data.slice(0, count),
@@ -328,13 +330,13 @@ class TeoTreNom extends Component {
 
     onSetFocus = (count) => {
         const { config } = this.props.screenProps;
-        if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
-            this.fieldRef[count].focus()
-        } else {
-            if (config.indexOf('talkback') !== -1) {
-                focusOnView(this.fieldRef[count])
-            }
-        }
+        if (config.indexOf('talkback') !== -1) {
+            setTimeout(() => focusOnView(this.fieldRef[count]), 1500)
+        }else{
+            if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
+                this.fieldRef[count].focus()
+            }            
+        }        
     }
 
     checkAcertos = item => {

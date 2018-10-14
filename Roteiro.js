@@ -20,6 +20,14 @@ const { Panel } = Accordion;
 
 const getCode = name => name.charAt(0).toUpperCase() + name.slice(1,3)
 
+const getLabel = nm => {
+    switch(nm){
+        case 'pratico': return 'prático';
+        case 'teorico': return 'teórico';
+        default: return nm;
+    }
+}
+
 
 class Roteiro extends Component {
 
@@ -73,24 +81,26 @@ class Roteiro extends Component {
         const { navigation, screenProps } = this.props;
         const { tipoConteudo, modoAprendizagem, sentidoIdentificacao } = screenProps.modoInteracao;
 
-        const { anatomp } = screenProps;
+        const { anatomp, config } = screenProps;
         const isComplete = tipoConteudo != '' && modoAprendizagem != '' && sentidoIdentificacao != '';
 
+        const exibeSelecionados = config.indexOf('talkback') == -1;
+
+        const accSelected = getLabel(modoAprendizagem) + ', '+ getLabel(tipoConteudo) + ', '+getLabel(sentidoIdentificacao);
+
         return (
-            <Container navigation={navigation}>
-                <View accessible={true} ref={r => this.initialFocus = r} accessibilityLabel={`Roteiro: ${anatomp.nome} selecionado. Prossiga para configurar a interação.`}>
-                    <BC body={['Roteiros']} head={anatomp.nome} />
-                </View>   
-                <Text style={{ padding: 10, paddingTop: 0, textAlign: 'justify', lineHeight: 22 }}>
+            <Container navigation={navigation}> 
+                <BC _ref={r => this.initialFocus = r} body={['Roteiros']} head={anatomp.nome} acc='Prossiga para configurar a interação.' />
+                {exibeSelecionados && <Text style={{ padding: 10, paddingTop: 0, textAlign: 'justify', lineHeight: 22 }}>
                     <Text style={{ fontWeight: 'bold'}}>Selecionados: </Text>                    
                     <Text style={{ color: '#108ee9' }}>{modoAprendizagem == 'estudo' ? 'Estudo' : 'Treinamento'}</Text><Text> | </Text>
                     <Text style={{ color: '#108ee9' }}>{tipoConteudo == 'pratico' ? 'Prático' : 'Teórico'}</Text><Text> | </Text>
                     <Text style={{ color: '#108ee9' }}>{sentidoIdentificacao == 'nomear' ? 'Nomear' : 'Localizar'}</Text>
-                </Text>           
+                </Text> }          
                 <Accordion style={{ backgroundColor: '#f5f5f9' }} onChange={active => this.setState({ active })} activeKey={active}>
                     <Panel
                         style={{ justifyContent: 'space-between', padding: 10, color: '#000' }}
-                        header={<Text accessibilityLabel={`Seleção do Modo de aprendizagem. ${active == '1' ? 'Prossiga para selecionar um modo de aprendizagem' : 'Toque duas vezes para abrir'}`}>Modo de aprendizagem</Text>}
+                        header={<Text accessibilityLabel={`Seleção do Modo de aprendizagem. ${active == '0' ? 'Prossiga para selecionar um modo de aprendizagem' : 'Toque duas vezes para abrir'}`}>Modo de aprendizagem</Text>}
                     >
                         <List>
                             <List.Item wrap multipleLine>
@@ -118,7 +128,7 @@ class Roteiro extends Component {
                     </Panel>
                     <Panel
                         style={{ justifyContent: 'space-between', padding: 10, color: '#000' }}
-                        header={<Text accessibilityLabel={`Seleção do Tipo de conteúdo. ${active == '0' ? 'Prossiga para selecionar um tipo de conteúdo' : 'Toque duas vezes para abrir'}`}>Tipo de conteúdo</Text>}
+                        header={<Text accessibilityLabel={`Seleção do Tipo de conteúdo. ${active == '1' ? 'Prossiga para selecionar um tipo de conteúdo' : 'Toque duas vezes para abrir'}`}>Tipo de conteúdo</Text>}
                     >
                         <List>
                             <List.Item wrap multipleLine>
@@ -175,7 +185,7 @@ class Roteiro extends Component {
                 </Accordion>
                 <Flex style={{ marginTop: 15 }}>
                     {/* <Button onPressOut={() => navigation.goBack()} style={{ flex: 1 }}><Text>Voltar</Text></Button> */}
-                    <Button accessibilityLabel='Iniciar interação. Botão. Toque duas vezes para iniciar.' onPressOut={this.onStart} style={{ flex: 1 }} disabled={!isComplete} type='primary'><Text>Iniciar</Text></Button>
+                    <Button accessibilityLabel={`Iniciar interação do tipo ${accSelected}. Botão. Toque duas vezes para iniciar.`} onPressOut={this.onStart} style={{ flex: 1 }} disabled={!isComplete} type='primary'><Text>Iniciar</Text></Button>
                 </Flex>
             </Container>
         )

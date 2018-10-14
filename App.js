@@ -129,8 +129,8 @@ class App extends Component {
 
     return (
       <Container navigation={navigation}>
-        <BC head='Roteiros' />
-        <List ref={r => this.initialFocus = r} accessibilityLabel={`Roteiros de Aprendizagem. Lista com ${anatomps.length} itens. Prossiga para escolher um roteiro`} renderHeader={() => 'Roteiros de aprendizagem'}>
+        <BC _ref={r => this.initialFocus = r} head='Roteiros' acc='Prossiga para acessar a lista de roteiros' />
+        <List accessibilityLabel={`Roteiros de Aprendizagem. Lista com ${anatomps.length} itens. Prossiga para escolher um roteiro`} renderHeader={() => 'Roteiros de aprendizagem'}>
           {
             anatomps.map(anatomp => (
               <ListItem
