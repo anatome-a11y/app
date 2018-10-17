@@ -24,9 +24,11 @@ const ListItem = List.Item;
 
 class TeoEstLoc extends Component {
     timer = null;
-    fieldRef = []
+    fieldRef = [];
+    inputRef = null;
     localizacao = null;
-    initialFocus
+    initialFocus = null;
+    refListaConteudo = null;
 
     state = {
         loading: true,
@@ -96,24 +98,27 @@ class TeoEstLoc extends Component {
                     <Card.Header title='Conteúdos a selecionar' accessibilityLabel='Conteúdos a selecionar. A seguir informe uma parte para filtrar a lista de partes' />
                     <Card.Body>
                     <Input
+                            _ref={r => this.inputRef = r}
                             value={this.state.pesquisa}
                             onChange={this.onFilter}
                             name={'Filtro de conteúdo teórico'}
+                            onSkipAlternatives={() => focusOnView(this.refListaConteudo)}
                         />                        
-                        <List accessibilityLabel='Lista de conteúdos teóricos filtrados. Prossiga para ouvir os conteúdos.'>
+                        <List ref={r => this.refListaConteudo = r} accessibilityLabel={`Conteúdos teóricos filtrados. Lista com ${filtered.length} itens. Prossiga para ouvir os conteúdos.`}>
                             {filtered.length > 0 ? filtered.map(c => (
                                 <List.Item accessible accessibilityLabel={`${c.texto}. Botão. Toque duas vezes para abrir.`} wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
                                     <Text>{c.texto}</Text>
                                 </List.Item>
                             )) : <List.Item accessibilityLabel='Nenhuma parte encontrada. Altere as palavras chave do campo de busca.' wrap multipleLine>Nenhum conteúdo foi encontrado</List.Item>}
                         </List>
+                        {screenProps.config.indexOf('talkback') != -1 && <Button type='primary' onPressOut={() => focusOnView(this.inputRef)}>Voltar para o filtro</Button>}
                     </Card.Body>
                 </Card>
                 <Modal
                     talkback={screenProps.config.indexOf('talkback') != -1}
                     open={open}
                     title={conteudo ? conteudo.texto : null}
-                    acc={`Detalhes da Parte ${conteudo ? conteudo.texto : ''}. Aberto. Prossiga para ouvir o nome da parte e sua localização nas peças físicas.`}
+                    acc={`Informações do conteúdo. Aberto. Prossiga para ouvir o nome da parte e sua localização nas peças físicas.`}
                     footer={[
                         { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar os detalhes do conteúdo ${conteudo ? conteudo.texto : ''}` },
                     ]}
@@ -169,7 +174,7 @@ class TeoEstLoc extends Component {
             const filtered = _filtered != undefined ? _filtered : null
 
             this.setState({ filtered }, () => {
-                announceForAccessibility(`Na lista ${filtered.length} conteúdos. Prossiga para selecionar um destes conteúdos: ${filtered.map(f => f.texto).join(', ')}`)
+                announceForAccessibility(filtered.length > 0 ? `Na lista ${filtered.length} conteúdos. Prossiga para selecionar um destes conteúdos: ${filtered.map(f => f.texto).join(', ')}` : 'Nenhum conteúdo encontrado. Altere as palavras chave e tente novamente.')
             })
         })
     }

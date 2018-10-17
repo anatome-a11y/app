@@ -28,6 +28,7 @@ class PraEstLoc extends Component {
     modalBody = null;
     refListaPartes = null;
     refNovaParte = null;
+    inputRef = null;
 
     state = {
         loading: true,
@@ -99,17 +100,20 @@ class PraEstLoc extends Component {
                     <Card.Header ref={r => this.refNovaParte = r} title='Partes a selecionar' accessibilityLabel='Partes a selecionar. A seguir informe uma parte para filtrar a lista de partes' />
                     <Card.Body >
                         <Input
+                            _ref={this.getRef}
                             value={this.state.pesquisa}
                             onChange={this.onFilter}
-                            name={'Filtro de partes'}                            
+                            name={'Filtro de partes'}  
+                            onSkipAlternatives={() => focusOnView(this.refListaPartes)}                          
                         />
-                        <List accessibilityLabel='Lista de partes filtradas. Prossiga para ouvir os nomes das partes.' ref={r => this.refListaPartes = r}>
+                        <List accessibilityLabel={`Lista de partes filtradas. Na lista ${filtered.length} partes. Prossiga para ouvir os nomes das partes.`} ref={r => this.refListaPartes = r}>
                             {filtered.length > 0 ? filtered.map(c => (
                                 <List.Item accessible accessibilityLabel={`${c.nome}. Botão. Toque duas vezes para abrir.`} wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
                                     <Text>{c.nome}</Text>
                                 </List.Item>
                             )) : <List.Item accessibilityLabel='Nenhuma parte encontrada. Altere as palavras chave do campo de busca.' wrap multipleLine>Nenhuma parte encontrada</List.Item>}
                         </List>
+                        {screenProps.config.indexOf('talkback') != -1 && <Button type='primary' onPressOut={() => focusOnView(this.inputRef)}>Voltar para o filtro</Button>}
                     </Card.Body>
                 </Card>
                 <Modal
@@ -138,6 +142,8 @@ class PraEstLoc extends Component {
             </Container>
         )
     }
+
+    getRef = r => this.inputRef = r
 
     onFilter = pesquisa => {
         this.setState({

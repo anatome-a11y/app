@@ -47,10 +47,10 @@ class Input extends React.Component {
                         </Button>
                         {/* <Button type='ghost' style={{ flex: 1, margin: 5 }} onPressOut={() => onChange('')}>Limpar detecção</Button> */}
                         <Text style={{ fontSize: 15, margin: 5, flex: 1 }} >Texto detectado: <Text style={{ color: '#108ee9' }}>{value ? value : 'Nenhum'}</Text></Text>
-                        {this.state.voiceWords.length > 0 && <View style={{ flex: 1, margin: 5, flexWrap: 'wrap', alignItems: 'flex-start', flexDirection: 'row' }}>
-                            <Text>Alternativas: </Text>
-                            {this.state.voiceWords.map(v => <Button accessibilityLabel={`Texto alternativo. ${v}. Toque duas vezes para substituir o texto detectado`} onPressOut={() => {this.props.onChange(v); announceForAccessibility(`Novo texto detectado: ${v}`)}} key={v} size='small' type='ghost' style={{ marginRight: 3 }}>{v}</Button>)}
-                        </View>}
+                        {this.state.voiceWords.length > 0 && value ? <View style={{ flex: 1, margin: 5, flexWrap: 'wrap', alignItems: 'flex-start', flexDirection: 'row' }}>
+                            {config.indexOf('talkback') == -1 ? <Text>Alternativas: </Text> : <Button accessibilityLabel={`Detecções alternativas. Botão. Toque duas vezes para pular ou prossiga para ouvi-las.`} onPressOut={this.props.onSkipAlternatives} size='small' type='primary' style={{ marginRight: 3 }}>Alternativas</Button>}                            
+                            {this.state.voiceWords.map(v => <Button accessibilityLabel={`Texto alternativo. ${v}. Botão. Toque duas vezes para substituir o texto detectado`} onPressOut={() => {this.props.onChange(v); announceForAccessibility(`Novo texto detectado: ${v}`)}} key={v} size='small' type='ghost' style={{ marginRight: 3 }}>{v}</Button>)}
+                        </View> : null}
                     </View>
                 ) : (
                         <InputItem

@@ -165,7 +165,7 @@ class Roteiro extends Component {
                                     title='Localizar'
                                     label='Sentido de identificação. Localizar'
                                     checked={sentidoIdentificacao == 'localizar'}
-                                    onChange={this.onChange('sentidoIdentificacao', 'localizar', 'Loaclizar')}
+                                    onChange={this.onChange('sentidoIdentificacao', 'localizar', 'Localizar')}
                                 >
                                     Partindo-se do nome ou teoria, encontra-se a localização da parte
                                 </Option>

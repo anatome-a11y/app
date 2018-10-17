@@ -46,13 +46,19 @@ class FormContainer extends React.Component {
 
         //Se mudou a peça física, foco na peça física
         if (mainState.data[mainState.count].pecaFisica.nome != next.mainState.data[next.mainState.count].pecaFisica.nome) {
-            focusOnView(this.nomeDaPeca)
-            this.setState({ found: null, pesquisa: '' })
+            this.setState({ found: null, pesquisa: '' }, () => {
+                setTimeout(() => {
+                    focusOnView(this.nomeDaPeca)
+                }, 500);
+            })
         } else {
             //Se muou apenas a parte: foco na parte
             if (mainState.count != next.mainState.count) {
-                this.setState({ found: null, pesquisa: '' })
-                focusOnView(this.dicaDaParte)
+                this.setState({ found: null, pesquisa: '' }, () => {
+                    setTimeout(() => {
+                        focusOnView(this.dicaDaParte)
+                    }, 500);                    
+                })
             }
         }
 
@@ -84,7 +90,7 @@ class FormContainer extends React.Component {
                     <Card.Header ref={r => this.nomeDaPeca = r} accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a parte anatômica`} title={title} />
                     <Card.Body>
                         <View>
-                            <Text accessible ref={r => this.dicaDaParte = r} accessibilityLabel={`Parte ${data[count].numero}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Parte {data[count].numero}</Text>
+                            <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`Parte ${data[count].numero}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Parte {data[count].numero}</Text>
                             <Input
                                 _ref={onGetRef(count)}
                                 value={this.state.pesquisa}
@@ -238,7 +244,7 @@ class PraTreNom extends Component {
                     onSubmit={this.onSubmit}
                     maxTentativa={this.props.screenProps.inputConfig.chances}
                 />
-            ) : <Resultados data={data} onRepeat={this.onRepeat} formatter={e => `Numero ${e.numero}, peça ${e.pecaFisica.nome}`} />
+            ) : <Resultados bc={['Roteiros', screenProps.anatomp.nome, 'Treinamento-Prático-Nomear']} data={data} onRepeat={this.onRepeat} formatter={e => `Numero ${e.numero}, peça ${e.pecaFisica.nome}`} />
         )
 
         return (
@@ -288,9 +294,6 @@ class PraTreNom extends Component {
         }else{
             this.onNext(false)()
         }
-
-
-
     }
 
 

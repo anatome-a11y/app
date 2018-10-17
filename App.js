@@ -60,7 +60,7 @@ const getMediaLabel = (media, idx) => {
     case 'docx': code = 'Documento de texto'; break;
     case 'xls':
     case 'xlsx': code = 'Planilha'; break;
-  }  
+  }
 
 
   return code != null ? (code + ' ' + type.toUpperCase()) : null;
@@ -68,14 +68,14 @@ const getMediaLabel = (media, idx) => {
 
 
 const Midias = ({ value }) => {
-//   const unicos = value.filter(function(item, pos) {
+  //   const unicos = value.filter(function(item, pos) {
 
-//     return value.findIndex(v => v.media == item.media) == pos;
-// })
+  //     return value.findIndex(v => v.media == item.media) == pos;
+  // })
   return <View>
     <View style={{ flexWrap: 'wrap', alignItems: 'flex-start', flexDirection: 'row' }}>
       <Brief >Formatos de saída: </Brief>
-      <View accessibilityLabel={'Leitor de tela'}><Icon style={{padding: 5}} type={'\uE698'} /></View>
+      <View accessibilityLabel={'Leitor de tela'}><Icon style={{ padding: 5 }} type={'\uE698'} /></View>
       {value.map((v, idx) => <View key={idx} accessibilityLabel={getMediaLabel(v)}>{getMediaIcon(v)}</View>)}
     </View>
   </View>
@@ -93,7 +93,6 @@ class App extends Component {
 
   componentDidMount() {
 
-
     announceForAccessibility('Carregando...');
     Toast.loading('Carregando...', 0)
 
@@ -106,7 +105,7 @@ class App extends Component {
       .then(r => r.json())
       .then(r => {
         Toast.hide()
-        focusOnView(this.initialFocus)
+        setTimeout(() => { focusOnView(this.initialFocus) }, 300)
         if (r.status == 200) {
           this.setState({ anatomps: r.data })
         } else {
@@ -122,6 +121,7 @@ class App extends Component {
       .finally(() => this.setState({ loading: false }))
 
   }
+
 
   render() {
     const { anatomps, msg } = this.state;

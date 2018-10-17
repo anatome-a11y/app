@@ -68,8 +68,8 @@ class Root extends Component {
             anatomp: null,
             modoInteracao: {
                 tipoConteudo: 'pratico',
-                modoAprendizagem: 'treinamento',
-                sentidoIdentificacao: 'nomear',
+                modoAprendizagem: 'estudo',
+                sentidoIdentificacao: 'localizar',
             },
             supported: true,
             // enabled: false,
@@ -86,6 +86,14 @@ class Root extends Component {
         AccessibilityInfo.fetch().then((isEnabled) => {
             if(isEnabled){
                 this.setState({config: [...config, 'talkback']})
+            }            
+        });   
+        
+        AccessibilityInfo.addEventListener('change', (isEnabled) => {
+            if(isEnabled){
+                this.setState({config: [...config, 'talkback']})
+            }else{
+                this.setState({config: this.state.config.filter(i => i != 'talkback')})
             }            
         });        
         NfcManager.isSupported()

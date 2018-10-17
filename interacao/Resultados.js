@@ -6,6 +6,8 @@ import List from 'antd-mobile-rn/lib/list';
 import Card from 'antd-mobile-rn/lib/card';
 import Button from 'antd-mobile-rn/lib/button';
 
+import BC from '../components/Breadcrumbs'
+
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 const ListItem = List.Item;
 
@@ -16,14 +18,13 @@ class Resultados extends React.Component {
     mainView = null;
 
     componentDidMount() {
-        setTimeout(() => {
-            this.mainView && focusOnView(this.mainView)
-        }, 1000)
+        setTimeout(() => {focusOnView(this.mainView)}, 500)
+
     }
 
 
     render() {
-        const { data, onRepeat, formatter } = this.props;
+        const { data, onRepeat, formatter, bc } = this.props;
 
         const erros = data.filter(d => d.acertou == false);
         const total = data.length;
@@ -34,7 +35,8 @@ class Resultados extends React.Component {
 
         return (
             <View>
-                <View ref={r => this.mainView = r} accessible={true} accessibilityLabel={accLabel}>
+                <BC _ref={r => this.mainView = r} body={bc} head={'Resultado'} acc='Prossiga para ouvir o resultado' />
+                <View accessible={true} accessibilityLabel={accLabel}>
                     <Card style={{ marginBottom: 15 }}>
                         <Card.Header title='Placar (acertos)' />
                         <Card.Body>
@@ -60,7 +62,6 @@ class Resultados extends React.Component {
                         </Card>
                     )
                 }
-
                 <Button style={{ flex: 1, marginTop: 15 }} accessibilityLabel='Treinar novamente. Botão. Toque para repetir o treinamento' onPressOut={onRepeat} type='primary'>Treinar novamente</Button>
             </View>
         )

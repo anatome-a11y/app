@@ -7,9 +7,8 @@ import Toast from 'antd-mobile-rn/lib/toast';
 
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 import Input from '../components/Input'
-import Option from '../components/Option'
+import {Simple as Option} from '../components/Option'
 
-import Modal from 'antd-mobile-rn/lib/modal';
 import Card from 'antd-mobile-rn/lib/card';
 import Button from 'antd-mobile-rn/lib/button';
 
@@ -18,11 +17,13 @@ const ListItem = List.Item;
 
 import BC from '../components/Breadcrumbs'
 import Instrucoes from '../components/Instrucoes'
+import Modal from '../components/Modal'
 
 
 class FormEstNom extends Component {
     fieldRef = []
     initialFocus = null;
+    refBtnDetalhes = null;
 
     state = {
         pecasFisicas: {},
@@ -51,7 +52,10 @@ class FormEstNom extends Component {
         })
 
         this.setState({ loading: false, pecasFisicas, pecaFisica: Object.keys(pecasFisicas)[0] }, () => {
-            Toast.hide();
+            setTimeout(() => {
+                Toast.hide();
+                focusOnView(this.initialFocus)
+            }, 500)
         })
 
     }
@@ -60,23 +64,24 @@ class FormEstNom extends Component {
         const { navigation, screenProps, isTeoria, interaction } = this.props;
         const { value, pecasFisicas, pecaFisica, parte, conteudos, open } = this.state;
 
-        const btnNovoFluxo = this.props.screenProps.config.indexOf('talkback') != -1 ? [{
-            text: 'Nova seleção',
-            onPress: () => focusOnView(this.initialFocus)
-        }] : []
+        // const btnNovoFluxo = this.props.screenProps.config.indexOf('talkback') != -1 ? [{
+        //     text: 'Nova seleção',
+        //     onPress: () => focusOnView(this.initialFocus)
+        // }] : []
 
         const view = isTeoria ? 'nome e os conteúdos associados.' : 'nome.';
+        const instrucaoModal = isTeoria ? 'Prossiga para ouvir os conteúdos associados' : 'Prossiga para fechar'
 
         return (
             <Container navigation={navigation}>
-                    <BC body={['Roteiros', screenProps.anatomp.nome]} head={interaction} />
+                    <BC _ref={r => this.initialFocus = r}  body={['Roteiros', screenProps.anatomp.nome]} head={interaction} />
                 <Instrucoes
                     info={[
                         'Selecione uma peça física e informe uma parte para visualizar seu '+view,
                     ]}
                 />
-                <Card ref={r => this.initialFocus = r} style={{ marginBottom: 10 }}>
-                    <Card.Header title='Peças físicas' />
+                <Card style={{ marginBottom: 10 }}>
+                    <Card.Header title='Peças físicas' accessibilityLabel='Peças físicas. Prossiga para selecionar uma peça física.' />
                     <Card.Body>
                         <List>
                             {
@@ -86,10 +91,9 @@ class FormEstNom extends Component {
                                         <ListItem key={pf._id}>
                                             <Option
                                                 checked={pecaFisica == pf._id}
-                                                onChange={this.onSelectPF(pf._id)}
-                                            >
-                                                {pf.nome}
-                                            </Option>
+                                                onChange={this.onSelectPF(pf)}
+                                                label={pf.nome}
+                                            />
                                         </ListItem>
                                     )
                                 })
@@ -99,14 +103,21 @@ class FormEstNom extends Component {
                 </Card>
 
                 <Card style={{ marginBottom: 10 }}>
-                    <Card.Header title='Parte anatômica' />
+                    <Card.Header title='Parte anatômica' accessibilityLabel='Parte anatômica. A seguir informe a localização de uma parte para obter suas informações' />
                     <Card.Body>
                         <Input
                             isTag
                             _ref={this.onGetRef}
                             value={value}
+                            onSkipAlternatives={() => {
+                                if(this.props.isTeoria){
+                                    focusOnView(this.refBtnDetalhes)
+                                }else{
+                                    focusOnView(this.fieldRef)
+                                }
+                            }}
                             onChange={this.onChange}
-                            name='Localização'
+                            name='Localização da parte'
                             onDone={this.onOpen}
                             InputProps={{
                                 type: 'number',
@@ -114,24 +125,21 @@ class FormEstNom extends Component {
                                 onErrorClick: this.onErrorClick,
                             }}
                         />
-                        <Button style={{margin: 5}} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Pesquisar</Button>
+                        {this.props.isTeoria && <Button ref={r => this.refBtnDetalhes = r} accessibilityLabel='Conteúdos da parte. Botão. Toque duas vezes para pesquisar a parte informada.' style={{margin: 5}} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Conteúdos da parte</Button>}
+                        {screenProps.config.indexOf('talkback') != -1 && <Button type='primary' onPressOut={() => focusOnView(this.fieldRef)}>Voltar para o filtro</Button>}
                     </Card.Body>
                 </Card>
 
                 <Modal
-                    title={null}
-                    transparent
-                    onClose={this.onClose}
-                    maskClosable
-                    visible={open}
-                    closable={false}
+                    talkback={screenProps.config.indexOf('talkback') != -1}
+                    open={open}
+                    title={parte ? parte.parte.nome : null}
+                    acc={`Parte ${parte ? parte.parte.nome : ''}. Aberto.` + instrucaoModal}
                     footer={[
-                        { text: 'Fechar', onPress: this.onClose },
-                        ...btnNovoFluxo
-                    ]}
+                        { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar` },
+                    ]}                    
                 >
                     {parte != undefined ? <View>
-                        <Text style={{ textAlign: 'center', padding: 5, fontSize: 18 }}>{parte.parte.nome}</Text>
                         {isTeoria && <List>
                             {
                                 conteudos.length == 0 ? (
@@ -162,11 +170,22 @@ class FormEstNom extends Component {
     onChange = value => {
         const { pecasFisicas, pecaFisica } = this.state;
         const parte = pecasFisicas[pecaFisica].partesNumeradas.find(p => p.numero == value);
+
+        if(parte != undefined){
+            const detalhes = this.props.isTeoria ? '. Prossiga para ouvir os conteúdos associados' : '';
+            announceForAccessibility(parte.parte.nome + detalhes)
+        }else{
+            announceForAccessibility('Parte não localizada')
+        }
+
         const conteudos = (parte == undefined || !this.props.isTeoria) ? [] : this.props.screenProps.anatomp.roteiro.conteudos.filter(c => c.partes.find(p => p._id == parte.parte._id)).map(c => c.singular)
         this.setState({ value, parte, conteudos })
     }
 
-    onSelectPF = pecaFisica => e => this.setState({ pecaFisica, parte: undefined, value: '' })
+    onSelectPF = pecaFisica => e => {
+        this.setState({ pecaFisica: pecaFisica._id, parte: undefined, value: '' })
+        announceForAccessibility(`${pecaFisica.nome} selecionado.`)
+    }
 
     onGetRef = r => { this.fieldRef = r }
 }

@@ -14,7 +14,7 @@ import { announceForAccessibility, focusOnView } from 'react-native-accessibilit
 import Resultados from './Resultados'
 import Placar from './Placar'
 import Input from '../components/Input'
-import {norm} from '../utils'
+import { norm } from '../utils'
 
 import BC from '../components/Breadcrumbs'
 import Instrucoes from '../components/Instrucoes'
@@ -53,7 +53,7 @@ class FormContainer extends React.Component {
                 this.setState({
                     filtered: this.props.mainState.conteudos,
                     pesquisa: ''
-                })                
+                })
             }
         }
     }
@@ -67,7 +67,7 @@ class FormContainer extends React.Component {
         const { screenProps, mainState, onGetRef, onSubmit } = this.props;
         const { anatomp } = screenProps;
         const { count, total, data, timer, tentativas } = mainState;
-        const title = data[count].pecaFisica.nome ;
+        const title = data[count].pecaFisica.nome;
         const { filtered } = this.state;
 
         const value = data[count].valores[0];
@@ -96,30 +96,24 @@ class FormContainer extends React.Component {
                 <Card style={{ marginBottom: 10 }}>
                     <Card.Header accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a parte anatômica`} ref={r => this.nomeDaPeca = r} title={title} />
                     <Card.Body>
-                        <View>
-                            <Text ref={r => this.dicaDaParte = r} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Parte {data[count].numero}</Text>
-                            <Button disabled={!value} accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
-                            <List>
-                                <ListItem>
-                                    <Input
-                                        _ref={onGetRef(count)}
-                                        value={this.state.pesquisa}
-                                        onChange={this.onFilter}
-                                        name={'Filtrar'}
-                                        // onDone={onSubmit}
-                                    />
-                                </ListItem>
-                            </List>
-                            <List ref={r => this.listRef = r} accessibilityLabel={`Conteúdos teóricos. Lista com ${filtered.length} itens. Prossiga para escolher um conteúdo`}>
-                                {_Itens}
-                            </List>                            
-                        </View>                        
+                        <Text ref={r => this.dicaDaParte = r} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Parte {data[count].numero}</Text>
+                        <Input
+                            _ref={onGetRef(count)}
+                            value={this.state.pesquisa}
+                            onChange={this.onFilter}
+                            name={'Filtro de conteúdos'}
+                        // onDone={onSubmit}
+                        />
+                        <List ref={r => this.listRef = r} accessibilityLabel={`Conteúdos teóricos. Lista com ${filtered.length} itens. Prossiga para escolher um conteúdo`}>
+                            {_Itens}
+                        </List>
+                        <Button disabled={!value} accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
                     </Card.Body>
                 </Card>
                 <Card>
-                    <Card.Header title='Resumo'/>
+                    <Card.Header title='Resumo' />
                     <Card.Body>
-                    <Placar
+                        <Placar
                             count={count}
                             total={total}
                             tentativas={tentativas}
@@ -140,13 +134,16 @@ class FormContainer extends React.Component {
                 return norm(c.texto).indexOf(norm(this.state.pesquisa)) != -1
             });
 
-            this.setState({ filtered })
+            this.setState({ filtered }, () => {
+                announceForAccessibility(filtered.length > 0 ? `Na lista ${filtered.length} conteúdos. Prossiga para selecionar um destes conteúdos: ${filtered.map(f => f.texto).join(', ')}` : 'Nenhum conteúdo encontrado. Altere as palavras chave e tente novamente.')
+            })
         })
     }
 
 
     onChange = conteudo => () => {
         this.props.onChangeValor(conteudo)
+        announceForAccessibility(`${conteudo.texto} Selecionado`)
     }
 }
 
@@ -281,7 +278,7 @@ class TeoTreNom extends Component {
 
         let acertou = this.checkAcertos(data[count]);
 
-        if(timer > 0){
+        if (timer > 0) {
             if (acertou) {
                 Toast.success('Acertou!', 3, this.onNext(acertou));
                 announceForAccessibility('Acertou!')
@@ -297,7 +294,7 @@ class TeoTreNom extends Component {
                     announceForAccessibility(msg)
                 }
             }
-        }else{
+        } else {
             this.onNext(false)();
         }
 
@@ -332,11 +329,11 @@ class TeoTreNom extends Component {
         const { config } = this.props.screenProps;
         if (config.indexOf('talkback') !== -1) {
             setTimeout(() => focusOnView(this.fieldRef[count]), 1500)
-        }else{
+        } else {
             if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
                 this.fieldRef[count].focus()
-            }            
-        }        
+            }
+        }
     }
 
     checkAcertos = item => {
