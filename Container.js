@@ -11,6 +11,13 @@ const _fechar = '\ue633';
 
 class Container extends Component {
 
+  scroll = null;
+
+  componentWillReceiveProps(next){
+    if(this.props.sinalScroll != next.sinalScroll){
+      this.scroll.scrollTo({y: 0})
+    }
+  }
 
   render() {
     const { children, footer } = this.props;
@@ -23,7 +30,7 @@ class Container extends Component {
           <FlexItem><Button accessibilityLabel={this.getAcc('Config')}  onPressOut={this.onNavigate('Config')}><Icon type={this.getIcone('Config', '\ue672')} size='md' /></Button></FlexItem>
         </Flex>
         <KeyboardAvoidingView style={styles.scroll}>
-          <ScrollView contentContainerStyle={{flexGrow: 1}}>
+          <ScrollView ref={r => this.scroll = r} contentContainerStyle={{flexGrow: 1}}>
             <View style={{flex: 10, padding: 5, marginBottom: 30}}>
             {children}
             </View>

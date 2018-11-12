@@ -22,6 +22,8 @@ class TeoTreLoc extends Component {
         timer: this.props.screenProps.inputConfig.tempo,
         pecasFisicas: [],
         tentativas: 0,
+        sinalScroll: 0,
+        sinalTexto: 0
     }
 
     componentDidMount() {
@@ -99,13 +101,15 @@ class TeoTreLoc extends Component {
 
     render() {
         const { navigation, screenProps } = this.props;
-        const { data, count } = this.state;
+        const { data, count, sinalScroll, sinalTexto } = this.state;
 
         return (
-            <Container navigation={navigation}>
+            <Container sinalScroll={sinalScroll} navigation={navigation} >
                 {count < data.length ? (
                     <FormTreLoc
                         screenProps={screenProps}
+                        sinalTexto={sinalTexto}
+                        onSetSinalScroll={s => this.setState({sinalScroll: s})}
                         mainState={this.state}
                         onGetRef={this.onGetRef}
                         onSetFocus={this.onSetFocus}
@@ -156,7 +160,7 @@ class TeoTreLoc extends Component {
                 } else {
                     const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
                     const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
-                    Toast.fail(msg, 3, () => this.onSetFocus(count))
+                    Toast.fail(msg, 3, () => this.setState({sinalTexto: + new Date()}))
                     announceForAccessibility(msg)
                 }
             }
@@ -186,7 +190,11 @@ class TeoTreLoc extends Component {
             clearInterval(this.timer)
             this.onCount()
             if (count + 1 < data.length) {
-                this.onSetFocus(count + 1)
+                if (this.props.screenProps.config.indexOf('talkback') == -1) {
+                    if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
+                        this.fieldRef[count+1][idx].focus()
+                    }
+                } 
             }
 
         })
@@ -198,7 +206,7 @@ class TeoTreLoc extends Component {
     onSetFocus = (count, idx = 0) => {
         const { config } = this.props.screenProps;
         if (config.indexOf('talkback') !== -1) {
-            focusOnView(this.fieldRef[count][idx])
+            focusOnView(this.fieldRef[count][idx]);            
         } else {
             if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
                 this.fieldRef[count][idx].focus()

@@ -98,17 +98,29 @@ class FormTreLoc extends React.Component {
     }
 
     componentWillReceiveProps(next) {
-        const { mainState } = this.props;
+        const { mainState, onSetSinalScroll, sinalTexto } = this.props;
 
         //Se mudou a peça física, foco na peça física
         if (mainState.data[mainState.count].pecaFisica.nome != next.mainState.data[next.mainState.count].pecaFisica.nome) {
-            focusOnView(this.nomeDaPeca)
+            onSetSinalScroll(+ new Date())
+            setTimeout(() => {
+                focusOnView(this.nomeDaPeca)
+            }, 500)
         } else {
             //Se muou apenas a parte: foco na parte
             if (mainState.count != next.mainState.count) {
-                console.log('mudou')
-                focusOnView(this.dicaDaParte)
+                onSetSinalScroll(+ new Date())
+                setTimeout(() => {
+                    focusOnView(this.dicaDaParte)
+                }, 500)
             }
+        }
+
+        if(sinalTexto != next.sinalTexto){
+            onSetSinalScroll(+ new Date())
+            setTimeout(() => {
+                focusOnView(this.dicaDaParte)
+            }, 500)
         }
     }
 
@@ -130,7 +142,9 @@ class FormTreLoc extends React.Component {
                 <Card style={{ marginBottom: 10 }}>
                     <Card.Header accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a dica da parte.`} ref={r => this.nomeDaPeca = r} title={title} />
                     <Card.Body>
-                            <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`Dica: ${data[count].texto}. Prossiga para informar ${data[count].valores.length > 1 ? 'os nomes das partes' : 'o nome da parte'}`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{data[count].texto}</Text>
+                        <View accessible={true} ref={r => this.dicaDaParte = r} accessibilityLabel={`Dica: ${data[count].texto}. Prossiga para informar ${data[count].valores.length > 1 ? 'os nomes das partes' : 'o nome da parte'}`}>
+                        <Text style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{data[count].texto}</Text>
+                        </View>                            
                                 {data[count].valores.map((value, idx) => (
                                     <View key={count + '-' + idx}>
                                         <Form

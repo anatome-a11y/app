@@ -13,8 +13,11 @@ const ListItem = List.Item
 
 class Input extends React.Component {
 
+    tituloAlternativas = null
+
     state = {
-        voiceWords: []
+        voiceWords: [],
+        toggleAlternativas: this.props.config.indexOf('talkback') == -1
     }
 
     render() {
@@ -45,10 +48,15 @@ class Input extends React.Component {
                             onPressOut={onStopListen}>
                             <Icon type={'\ue677'} style={{ color: '#fff' }} />{name}
                         </Button>
+                        {config.indexOf('talkback') == -1 ? (
+                            <Text style={{ fontSize: 15, margin: 5, flex: 1 }} >Texto detectado: <Text style={{ color: '#108ee9' }}>{value ? value : 'Nenhum'}</Text></Text>
+                        ) : (
+                            <Button onPressOut={this.onToggleAlternativas} accessibilityLabel={`Texto Detectado. ${value ? value : 'Nenhum'}. Botão. Toque duas vezes para selecionar um texto alternativo ou prossiga para continuar`} size='small' type='ghost' style={{ marginRight: 3 }}>Texto Detectado: {value ? value : 'Nenhum'}</Button>
+                        )}
                         {/* <Button type='ghost' style={{ flex: 1, margin: 5 }} onPressOut={() => onChange('')}>Limpar detecção</Button> */}
-                        <Text style={{ fontSize: 15, margin: 5, flex: 1 }} >Texto detectado: <Text style={{ color: '#108ee9' }}>{value ? value : 'Nenhum'}</Text></Text>
-                        {this.state.voiceWords.length > 0 && value ? <View style={{ flex: 1, margin: 5, flexWrap: 'wrap', alignItems: 'flex-start', flexDirection: 'row' }}>
-                            {config.indexOf('talkback') == -1 ? <Text>Alternativas: </Text> : <Button accessibilityLabel={`Detecções alternativas. Botão. Toque duas vezes para pular ou prossiga para ouvi-las.`} onPressOut={this.props.onSkipAlternatives} size='small' type='primary' style={{ marginRight: 3 }}>Alternativas</Button>}                            
+                        
+                        {this.state.voiceWords.length > 0 && value && this.state.toggleAlternativas ? <View style={{ flex: 1, margin: 5, flexWrap: 'wrap', alignItems: 'flex-start', flexDirection: 'row' }}>
+                            <Text ref={r => this.tituloAlternativas = r} accessibilityLabel='Textos alternativos. Prossiga para selecionar um novo texto' >Alternativas: </Text>                           
                             {this.state.voiceWords.map(v => <Button accessibilityLabel={`Texto alternativo. ${v}. Botão. Toque duas vezes para substituir o texto detectado`} onPressOut={() => {this.props.onChange(v); announceForAccessibility(`Novo texto detectado: ${v}`)}} key={v} size='small' type='ghost' style={{ marginRight: 3 }}>{v}</Button>)}
                         </View> : null}
                     </View>
@@ -64,6 +72,21 @@ class Input extends React.Component {
                         />
                     )
             )
+    }
+
+
+    onToggleAlternativas = () => {
+        const {toggleAlternativas} = this.state;
+
+        if(toggleAlternativas){
+            this.setState({toggleAlternativas: false})
+        }else{
+            this.setState({toggleAlternativas: true}, () => {
+                setTimeout(() => {
+                    focusOnView(this.tituloAlternativas)
+                }, 500);
+            })
+        }
     }
 
     onChange = val => {

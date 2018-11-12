@@ -24,6 +24,7 @@ class FormContainer extends React.Component {
 
     nomeDaPeca = null;
     dicaDaParte = null;
+    initialFocus = null;
 
     state = {
         filtered: this.props.mainState.conteudos,
@@ -32,7 +33,7 @@ class FormContainer extends React.Component {
 
     componentDidMount() {
         this.time2Focus = setTimeout(() => {
-            focusOnView(this.nomeDaPeca)
+            focusOnView(this.initialFocus)
         }, 500)
     }
 
@@ -87,7 +88,7 @@ class FormContainer extends React.Component {
 
         return (
             <View>
-                <BC body={['Roteiros', anatomp.nome]} head={'Treinamento-Teórico-Nomear'} />
+                <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={'Treinamento-Teórico-Nomear'} />
                 <Instrucoes info={[
                     'Para cada parte de cada peça física selecione o conteúdo teórico correspondente e em seguida pressione o botão "Próximo" no fim da lista.',
                     'Caso necessário, utilize o filtro para buscar um conteúdo',
