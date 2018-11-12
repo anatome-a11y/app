@@ -90,7 +90,7 @@ class FormContainer extends React.Component {
                     <Card.Header ref={r => this.nomeDaPeca = r} accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a parte anatômica`} title={title} />
                     <Card.Body>
                         <View>
-                            <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`Parte ${data[count].numero}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Parte {data[count].numero}</Text>
+                            <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`Parte anatômica. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Parte</Text>
                             <Input
                                 _ref={onGetRef(count)}
                                 value={this.state.pesquisa}

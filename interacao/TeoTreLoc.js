@@ -56,11 +56,12 @@ class TeoTreLoc extends Component {
                     //Substitui as partes do conteudo por partes numeradas
                     const partes = pecasFisicas[key].partesNumeradas.filter(pn => conteudo.partes.find(p => p._id == pn.parte._id) != undefined);
 
-                    if (conteudo.singular != '') {
-                        flatData.push({ pecaFisica: { nome, _id }, modo: 'singular', texto: conteudo.singular, partes })
-                    }
                     if (conteudo.plural != '') {
                         flatData.push({ pecaFisica: { nome, _id }, modo: 'plural', texto: conteudo.plural, partes })
+                    }else{
+                        if (conteudo.singular != '') {
+                            flatData.push({ pecaFisica: { nome, _id }, modo: 'singular', texto: conteudo.singular, partes })
+                        }
                     }
                 }
             })
@@ -72,7 +73,6 @@ class TeoTreLoc extends Component {
 
         this.setState({ data: dados, total: dados.length, pecasFisicas: { ...pecasFisicas } }, () => {
             this.onCount();
-            this.onSetFocus(0)
             Toast.hide();
         })
 
@@ -199,11 +199,11 @@ class TeoTreLoc extends Component {
         const { config } = this.props.screenProps;
         if (config.indexOf('talkback') !== -1) {
             focusOnView(this.fieldRef[count][idx])
-        }else{
+        } else {
             if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
                 this.fieldRef[count][idx].focus()
             }
-        }        
+        }     
     }
 
     checkAcertos = item => {

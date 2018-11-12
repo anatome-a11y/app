@@ -67,7 +67,7 @@ class Roteiro extends Component {
         }
 
         if (active !== '1' && nextState.active == '1') {
-            announceForAccessibility('Aberto. Seleção do modo de aprendizagem. Prossiga para selecionar o modo de aprendizagem');
+            announceForAccessibility('Aberto. Seleção da atividade. Prossiga para selecionar a atividade');
         }
 
         if (active !== '2' && nextState.active == '2') {
@@ -100,14 +100,14 @@ class Roteiro extends Component {
                 <Accordion style={{ backgroundColor: '#f5f5f9' }} onChange={active => this.setState({ active })} activeKey={active}>
                     <Panel
                         style={{ justifyContent: 'space-between', padding: 10, color: '#000' }}
-                        header={<Text accessibilityLabel={`Seleção do Modo de aprendizagem. ${active == '0' ? 'Prossiga para selecionar um modo de aprendizagem' : 'Toque duas vezes para abrir'}`}>Modo de aprendizagem</Text>}
+                        header={<Text accessibilityLabel={`Seleção da atividade. ${active == '0' ? 'Prossiga para selecionar uma atividade' : 'Toque duas vezes para abrir'}`}>Atividade</Text>}
                     >
                         <List>
                             <List.Item wrap multipleLine>
                                 <Option
                                     _ref={r => this.initialFocusMA = r}
                                     title='Estudo'
-                                    label='Modo de aprendizagem. Estudo'
+                                    label='Atividade. Estudo'
                                     checked={modoAprendizagem == 'estudo'}
                                     onChange={this.onChange('modoAprendizagem', 'estudo', 'Estudo')}
                                 >
@@ -117,7 +117,7 @@ class Roteiro extends Component {
                             <List.Item wrap multipleLine>
                                 <Option
                                     title='Treinamento'
-                                    label='Modo de aprendizagem. Treinamento'
+                                    label='Atividade. Treinamento'
                                     checked={modoAprendizagem == 'treinamento'}
                                     onChange={this.onChange('modoAprendizagem', 'treinamento', 'treinamento')}
                                 >
@@ -162,20 +162,20 @@ class Roteiro extends Component {
                             <List.Item wrap multipleLine>
                                 <Option
                                     _ref={r => this.initialFocusSI = r}
-                                    title='Localizar'
-                                    label='Sentido de identificação. Localizar'
+                                    title='Do nome da parte para a localização'
+                                    label='Sentido de identificação. Do nome da parte para a localização'
                                     checked={sentidoIdentificacao == 'localizar'}
-                                    onChange={this.onChange('sentidoIdentificacao', 'localizar', 'Localizar')}
+                                    onChange={this.onChange('sentidoIdentificacao', 'localizar', 'Do nome da parte para a localização')}
                                 >
                                     Partindo-se do nome ou teoria, encontra-se a localização da parte
                                 </Option>
                             </List.Item>
                             <List.Item wrap multipleLine>
                                 <Option
-                                    title='Nomear'
-                                    label='Sentido de identificação. Nomear'
+                                    title='Da localização para o nome da parte'
+                                    label='Sentido de identificação. Da localização para o nome da parte'
                                     checked={sentidoIdentificacao == 'nomear'}
-                                    onChange={this.onChange('sentidoIdentificacao', 'nomear', 'Nomear')}
+                                    onChange={this.onChange('sentidoIdentificacao', 'nomear', 'Da localização para o nome da parte')}
                                 >
                                     Partindo-se da localização da parte define-se o nome ou a informação teórica correta
                                 </Option>

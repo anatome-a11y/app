@@ -57,8 +57,10 @@ class PraTreloc extends Component {
 
         this.setState({ data: dados, total: dados.length, pecasFisicas: { ...pecasFisicas } }, () => {
             this.onCount();
-            this.onSetFocus(0)
             Toast.hide();
+            setTimeout(() => {
+                this.onSetFocus(0)
+            }, 500)
         })
 
     }

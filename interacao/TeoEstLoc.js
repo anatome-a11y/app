@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { View, Text, TouchableHighlight, TextInput } from 'react-native';
+import { ScrollView, View, Text, TouchableHighlight, TextInput } from 'react-native';
 import Container from '../Container';
 import List from 'antd-mobile-rn/lib/list';
 import Toast from 'antd-mobile-rn/lib/toast';
@@ -90,7 +90,7 @@ class TeoEstLoc extends Component {
             <BC _ref={r => this.initialFocus = r} body={['Roteiros', screenProps.anatomp.nome]} head={'Estudo-Teórico-Localizar'} />
                 <Instrucoes
                     info={[
-                        'Escolha um conteúdo teórico na lista de conteúdos para visualizar o nome da parte e sua localização nas peças físicas',
+                        'Escolha um conteúdo teórico na lista de conteúdos para obter o nome da parte e sua localização nas peças físicas',
                         'Caso deseje, utilize o filtro a seguir para encontrar um conteúdo específico.'
                     ]}
                 />
@@ -106,7 +106,7 @@ class TeoEstLoc extends Component {
                         />                        
                         <List ref={r => this.refListaConteudo = r} accessibilityLabel={`Conteúdos teóricos filtrados. Lista com ${filtered.length} itens. Prossiga para ouvir os conteúdos.`}>
                             {filtered.length > 0 ? filtered.map(c => (
-                                <List.Item accessible accessibilityLabel={`${c.texto}. Botão. Toque duas vezes para abrir.`} wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
+                                <List.Item accessible accessibilityLabel={`${c.texto}. Botão. Toque duas vezes para abrir ou prossiga para obter mais opções.`} wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
                                     <Text>{c.texto}</Text>
                                 </List.Item>
                             )) : <List.Item accessibilityLabel='Nenhuma parte encontrada. Altere as palavras chave do campo de busca.' wrap multipleLine>Nenhum conteúdo foi encontrado</List.Item>}
@@ -117,14 +117,14 @@ class TeoEstLoc extends Component {
                 <Modal
                     talkback={screenProps.config.indexOf('talkback') != -1}
                     open={open}
+                    // title={null}
                     title={conteudo ? conteudo.texto : null}
                     acc={`Informações do conteúdo. Aberto. Prossiga para ouvir o nome da parte e sua localização nas peças físicas.`}
                     footer={[
                         { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar os detalhes do conteúdo ${conteudo ? conteudo.texto : ''}` },
                     ]}
                 >
-                    {conteudo != undefined && <View>
-                        <List style={{ marginTop: 10 }}>
+                    {conteudo != undefined && <ScrollView style={{maxHeight: 280}}>
                             {Object.keys(pecasFisicas).map(key => {
                                 const pf = pecasFisicas[key];
 
@@ -133,9 +133,9 @@ class TeoEstLoc extends Component {
 
                                     if (l) {
                                         return (
-                                            <ListItem key={l._id}>
-                                                <Text><Text style={{color: '#108ee9'}}>{p.nome}</Text> - Parte {l.numero}</Text>
-                                            </ListItem>
+                                            <View key={l._id} style={{marginBottom: 8}}>
+                                                <Text><Text style={{fontWeight: 'bold'}}>{p.nome}</Text> - Parte {l.numero} na peça {l.pecaFisica.nome}</Text>
+                                            </View>
                                         )
                                     } else {
                                         return null
@@ -148,8 +148,7 @@ class TeoEstLoc extends Component {
                                     return null;
                                 }
                             })}
-                        </List>
-                    </View>}
+                    </ScrollView>}
                 </Modal>
             </Container>
         )

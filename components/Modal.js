@@ -26,7 +26,7 @@ class CustomModal extends Component {
                 closable={false}
                 footer={footer}
             >
-                <Text accessible={true} ref={r => this.title = r} accessibilityLabel={acc} style={{ padding: 5, textAlign: 'center', fontSize: 18 }}>{title}</Text>
+                <Text accessible={true} ref={r => this.title = r} accessibilityLabel={acc} style={{ textAlign: 'center', fontSize: 18, marginBottom: 15, color: '#000' }}>{title}</Text>
                 {children}
                 {talkback && <Flex>
                     {footer.map(f => <Button accessibilityLabel={f.acc} type='ghost' style={{flex: 1, margin: 3}} key={f.text} children={f.text} onPressOut={f.onPress} />)}

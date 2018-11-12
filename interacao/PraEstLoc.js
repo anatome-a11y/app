@@ -92,7 +92,7 @@ class PraEstLoc extends Component {
                 <BC _ref={r => this.initialFocus = r} body={['Roteiros', screenProps.anatomp.nome]} head={'Estudo-Prático-Localizar'} acc='Prossiga para ouvir as instruções' />
                 <Instrucoes
                     info={[
-                        'Escolha uma parte na lista de partes para visualizar sua localização nas peças físicas.',
+                        'Escolha uma parte na lista de partes para obter sua localização nas peças físicas.',
                         'Caso deseje, utilize o filtro a seguir para encontrar uma parte.'
                     ]}
                 />
@@ -108,7 +108,7 @@ class PraEstLoc extends Component {
                         />
                         <List accessibilityLabel={`Lista de partes filtradas. Na lista ${filtered.length} partes. Prossiga para ouvir os nomes das partes.`} ref={r => this.refListaPartes = r}>
                             {filtered.length > 0 ? filtered.map(c => (
-                                <List.Item accessible accessibilityLabel={`${c.nome}. Botão. Toque duas vezes para abrir.`} wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
+                                <List.Item accessible accessibilityLabel={`${c.nome}. Botão. Toque duas vezes para abrir ou prossiga para retornar ao filtro.`} wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
                                     <Text>{c.nome}</Text>
                                 </List.Item>
                             )) : <List.Item accessibilityLabel='Nenhuma parte encontrada. Altere as palavras chave do campo de busca.' wrap multipleLine>Nenhuma parte encontrada</List.Item>}
@@ -125,19 +125,17 @@ class PraEstLoc extends Component {
                         { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar os detalhes da Parte ${parte ? parte.nome : ''}` },
                     ]}
                 >
-                    {parte != undefined ? <View>
-                        <List style={{ marginTop: 10 }} >
+                    {parte != undefined ? <ScrollView style={{maxHeight: 280}}>
                             {Object.keys(pecasFisicas).map(key => {
                                 const pf = pecasFisicas[key];
                                 const l = pf.localizacao.find(m => m.parte._id == parte._id)
                                 return l ? (
-                                    <ListItem key={l._id}>
-                                        <Text><Text style={{ color: '#108ee9' }}>{pf.nome}:</Text>  <Text>Parte {l.numero}</Text></Text>
-                                    </ListItem>
+                                    <View key={l._id} style={{marginBottom: 8}}>
+                                        <Text><Text style={{ fontWeight: 'bold' }}>{pf.nome}:</Text>  <Text>Parte {l.numero}</Text></Text>
+                                    </View>
                                 ) : null;
                             })}
-                        </List>
-                    </View> : null}
+                    </ScrollView> : null}
                 </Modal>
             </Container>
         )

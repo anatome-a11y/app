@@ -56,15 +56,15 @@ class Form extends Component {
             helper = pt == undefined ? _ni : pt.parte.nome;
         }
 
-        const placeholder = modo == 'singular' ? 'Parte' : `Parte ${idx + 1}`;
+        const placeholder = 'Parte';
 
         const label = value == '' ? placeholder : helper;
 
         return (timer > 0 && tentativas < this.props.maxTentativas) ? (
-            <ListItem key={idx} >
                 <Input
                     isTag
                     _ref={onGetRef(count, idx)}
+                    onSkipAlternatives={() => modo == 'singular' || idx == limite ? onSubmit() : onSetFocus(count, idx + 1)}                    
                     value={value}
                     onChange={onChangeValor(idx)}
                     name={placeholder}
@@ -75,10 +75,6 @@ class Form extends Component {
                         onErrorClick: onErrorClick,
                     }}
                 />
-                {/* <View style={{ marginTop: 5, paddingLeft: 10 }}>
-                    <Brief >{helper}</Brief>
-                </View> */}
-            </ListItem>
         ) : (
                 value == '' ? <ListItem key={idx} >{_ni}</ListItem> : <ListItem key={idx} >{value + ' - ' + label}</ListItem>
             )
@@ -93,10 +89,11 @@ class FormTreLoc extends React.Component {
 
     nomeDaPeca = null;
     dicaDaParte = null;
+    initialFocus = null;
 
     componentDidMount() {
         this.time2Focus = setTimeout(() => {
-            focusOnView(this.nomeDaPeca)
+            focusOnView(this.initialFocus)
         }, 500)
     }
 
@@ -109,6 +106,7 @@ class FormTreLoc extends React.Component {
         } else {
             //Se muou apenas a parte: foco na parte
             if (mainState.count != next.mainState.count) {
+                console.log('mudou')
                 focusOnView(this.dicaDaParte)
             }
         }
@@ -127,14 +125,12 @@ class FormTreLoc extends React.Component {
 
         return (
             <View>
-                <BC body={['Roteiros', anatomp.nome]} head={interaction} />
+                <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={interaction} />
                 <Instrucoes info={info} />
                 <Card style={{ marginBottom: 10 }}>
                     <Card.Header accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a dica da parte.`} ref={r => this.nomeDaPeca = r} title={title} />
                     <Card.Body>
-                        <View>
                             <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`Dica: ${data[count].texto}. Prossiga para informar ${data[count].valores.length > 1 ? 'os nomes das partes' : 'o nome da parte'}`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{data[count].texto}</Text>
-                            <List>
                                 {data[count].valores.map((value, idx) => (
                                     <View key={count + '-' + idx}>
                                         <Form
@@ -157,8 +153,6 @@ class FormTreLoc extends React.Component {
                                         />
                                     </View>
                                 ))}
-                            </List>
-                        </View>
                         <Button  accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
                     </Card.Body>
                 </Card>
