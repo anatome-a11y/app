@@ -67,8 +67,8 @@ class Root extends Component {
             },
             anatomp: null,
             modoInteracao: {
-                tipoConteudo: 'teorico',
-                modoAprendizagem: 'treinamento',
+                tipoConteudo: 'pratico',
+                modoAprendizagem: 'estudo',
                 sentidoIdentificacao: 'nomear',
             },
             supported: true,

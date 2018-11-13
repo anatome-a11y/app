@@ -90,6 +90,7 @@ class FormTreLoc extends React.Component {
     nomeDaPeca = null;
     dicaDaParte = null;
     initialFocus = null;
+    btnProximo = null;
 
     componentDidMount() {
         this.time2Focus = setTimeout(() => {
@@ -122,6 +123,15 @@ class FormTreLoc extends React.Component {
                 focusOnView(this.dicaDaParte)
             }, 500)
         }
+
+
+        if (this.props.mainState.timer != 0 && next.mainState.timer == 0) {
+            if (next.mainState.count !== next.mainState.data.length) {
+                setTimeout(() => {
+                    focusOnView(this.btnProximo)
+                }, 1500)                
+            }
+        }     
     }
 
     componentWillUnmount() {
@@ -134,16 +144,20 @@ class FormTreLoc extends React.Component {
         const { anatomp, onReadNFC, onStopNFC } = screenProps;
         const { count, total, data, timer, pecasFisicas, tentativas } = mainState;
         const title = data[count].pecaFisica.nome;
+        const dica = data[count].valores.length > 1 ? 'as partes' : 'a parte';
+
+        const identificador = (!data[count].referenciaRelativa || data[count].referenciaRelativa.referencia == '') ? (data[count].texto) : (data[count].referenciaRelativa.referenciaParaReferenciado + ' da parte '+ data[count].texto)
+
 
         return (
             <View>
                 <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={interaction} />
                 <Instrucoes info={info} />
                 <Card style={{ marginBottom: 10 }}>
-                    <Card.Header accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a dica da parte.`} ref={r => this.nomeDaPeca = r} title={title} />
+                    <Card.Header accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a dica d${dica}.`} ref={r => this.nomeDaPeca = r} title={title} />
                     <Card.Body>
-                        <View accessible={true} ref={r => this.dicaDaParte = r} accessibilityLabel={`Dica: ${data[count].texto}. Prossiga para informar ${data[count].valores.length > 1 ? 'os nomes das partes' : 'o nome da parte'}`}>
-                        <Text style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{data[count].texto}</Text>
+                        <View accessible={true} ref={r => this.dicaDaParte = r} accessibilityLabel={`Dica: ${identificador}. Prossiga para informar ${dica}`}>
+                        <Text style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
                         </View>                            
                                 {data[count].valores.map((value, idx) => (
                                     <View key={count + '-' + idx}>
@@ -167,7 +181,7 @@ class FormTreLoc extends React.Component {
                                         />
                                     </View>
                                 ))}
-                        <Button  accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
+                        <Button ref={r => this.btnProximo = r}  accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
                     </Card.Body>
                 </Card>
 

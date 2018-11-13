@@ -41,7 +41,7 @@ class TeoTreLoc extends Component {
         //Seta as partes e seus numeros para cada peça física
         anatomp.mapa.forEach(mapa => {
             mapa.localizacao.forEach(loc => {
-                pecasFisicas[loc.pecaFisica._id].partesNumeradas.push({ parte: mapa.parte, numero: loc.numero })
+                pecasFisicas[loc.pecaFisica._id].partesNumeradas.push({ parte: mapa.parte, numero: loc.numero, referenciaRelativa: loc.referenciaRelativa })
             })
         })
 

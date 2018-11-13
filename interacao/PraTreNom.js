@@ -78,6 +78,8 @@ class FormContainer extends React.Component {
 
         const value = data[count].valores[0];
 
+        const identificador = data[count].referenciaRelativa.referencia == '' ? ('Parte ' + data[count].numero) : (data[count].referenciaRelativa.referenciaParaReferenciado + ' da parte '+ data[count].numero)
+
         return (
             <View>
                 <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={'Treinamento-Prático-Nomear'} />
@@ -90,7 +92,7 @@ class FormContainer extends React.Component {
                     <Card.Header ref={r => this.nomeDaPeca = r} accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a parte anatômica`} title={title} />
                     <Card.Body>
                         <View>
-                            <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`Parte anatômica. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>Parte</Text>
+                            <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`${identificador}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
                             <Input
                                 _ref={onGetRef(count)}
                                 value={this.state.pesquisa}
@@ -186,7 +188,7 @@ class PraTreNom extends Component {
 
         //Seta as partes e seus numeros para cada peça física
         anatomp.mapa.forEach(mapa => {
-            mapa.localizacao.map(loc => pecasFisicas[loc.pecaFisica._id].partesNumeradas.push({ parte: mapa.parte, numero: loc.numero }))
+            mapa.localizacao.map(loc => pecasFisicas[loc.pecaFisica._id].partesNumeradas.push({ parte: mapa.parte, numero: loc.numero, referenciaRelativa: loc.referenciaRelativa }))
         })
 
 

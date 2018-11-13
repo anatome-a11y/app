@@ -103,8 +103,8 @@ class PraEstLoc extends Component {
                             _ref={this.getRef}
                             value={this.state.pesquisa}
                             onChange={this.onFilter}
-                            name={'Filtro de partes'}  
-                            onSkipAlternatives={() => focusOnView(this.refListaPartes)}                          
+                            name={'Filtro de partes'}
+                            onSkipAlternatives={() => focusOnView(this.refListaPartes)}
                         />
                         <List accessibilityLabel={`Lista de partes filtradas. Na lista ${filtered.length} partes. Prossiga para ouvir os nomes das partes.`} ref={r => this.refListaPartes = r}>
                             {filtered.length > 0 ? filtered.map(c => (
@@ -125,16 +125,29 @@ class PraEstLoc extends Component {
                         { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar os detalhes da Parte ${parte ? parte.nome : ''}` },
                     ]}
                 >
-                    {parte != undefined ? <ScrollView style={{maxHeight: 280}}>
-                            {Object.keys(pecasFisicas).map(key => {
-                                const pf = pecasFisicas[key];
-                                const l = pf.localizacao.find(m => m.parte._id == parte._id)
-                                return l ? (
-                                    <View key={l._id} style={{marginBottom: 8}}>
-                                        <Text><Text style={{ fontWeight: 'bold' }}>{pf.nome}:</Text>  <Text>Parte {l.numero}</Text></Text>
+                    {parte != undefined ? <ScrollView style={{ maxHeight: 280 }}>
+                        {Object.keys(pecasFisicas).map(key => {
+                            const pf = pecasFisicas[key];
+                            const l = pf.localizacao.find(m => m.parte._id == parte._id);
+                            const referenciaAsPartes = pf.localizacao.filter(m => m.referenciaRelativa.referencia == parte._id)
+                            const RefRel = referenciaAsPartes.map(r => <Text style={{ marginBottom: 8 }} key={r._id}>{r.referenciaRelativa.referenciadoParaReferencia} da <Text style={{ fontWeight: 'bold' }}>parte {r.numero}</Text> ({r.parte.nome})</Text>)
+                            if (l) {
+                                const localizacao = l.referenciaRelativa.referencia == '' ? ('Parte ' + l.numero) : (l.referenciaRelativa.referenciaParaReferenciado + ' da parte ' + l.numero)
+                                return (
+                                    <View key={l._id} style={{ marginBottom: 8 }}>
+                                        <Text><Text style={{ fontWeight: 'bold' }}>{pf.nome}:</Text>  <Text>{localizacao}</Text></Text>
+                                        {RefRel.length > 0 && <View accessible={true}>
+                                            <Text style={{ fontWeight: 'bold' }}>Referências relativas: </Text>
+                                            {RefRel}
+                                        </View>}
+                                        
+
                                     </View>
-                                ) : null;
-                            })}
+                                )
+                            } else {
+                                return null;
+                            }
+                        })}
                     </ScrollView> : null}
                 </Modal>
             </Container>

@@ -49,7 +49,7 @@ class FormEstNom extends Component {
 
         //Seta as partes e seus numeros para cada peça física
         anatomp.mapa.forEach(mapa => {
-            mapa.localizacao.map(loc => pecasFisicas[loc.pecaFisica._id].partesNumeradas.push({ parte: mapa.parte, numero: loc.numero }));
+            mapa.localizacao.map(loc => pecasFisicas[loc.pecaFisica._id].partesNumeradas.push({ parte: mapa.parte, numero: loc.numero, referenciaRelativa: loc.referenciaRelativa }));
         })
 
         this.setState({ loading: false, pecasFisicas, pecaFisica: Object.keys(pecasFisicas)[0] }, () => {
@@ -171,11 +171,13 @@ class FormEstNom extends Component {
 
     onChange = value => {
         const { pecasFisicas, pecaFisica } = this.state;
-        const parte = pecasFisicas[pecaFisica].partesNumeradas.find(p => p.numero == value);
+        const parte = pecasFisicas[pecaFisica].partesNumeradas.find(p => p.numero == value);   
 
         if(parte != undefined){
+            const referenciaAsPartes = parte.referenciaRelativa.filter(m => m.referenciaRelativa.referencia == parte._id)
+            const rel = referenciaAsPartes.map(r => r.referenciaRelativa.referenciadoParaReferencia + ' da parte ' + r.numero +  '(' + r.parte.nome + ')')                 
             const detalhes = this.props.isTeoria ? '. Prossiga para ouvir os conteúdos associados' : '';
-            announceForAccessibility(parte.parte.nome + detalhes)
+            announceForAccessibility(parte.parte.nome + detalhes + rel.join('. '))
         }else{
             announceForAccessibility('Parte não setada nesta peça física')
         }

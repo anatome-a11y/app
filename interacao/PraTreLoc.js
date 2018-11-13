@@ -19,6 +19,8 @@ class PraTreloc extends Component {
         timer: this.props.screenProps.inputConfig.tempo,
         pecasFisicas: [],
         tentativas: 0,
+        sinalScroll: 0,
+        sinalTexto: 0        
     }
 
     componentDidMount() {
@@ -36,7 +38,7 @@ class PraTreloc extends Component {
         //Seta as partes e seus numeros para cada peça física
         anatomp.mapa.forEach(mapa => {
             mapa.localizacao.forEach(loc => {
-                pecasFisicas[loc.pecaFisica._id].partesNumeradas.push({ parte: mapa.parte, numero: loc.numero })
+                pecasFisicas[loc.pecaFisica._id].partesNumeradas.push({ parte: mapa.parte, numero: loc.numero, referenciaRelativa: loc.referenciaRelativa })
             })
         })
 
@@ -48,7 +50,7 @@ class PraTreloc extends Component {
             pecasFisicas[key].partesNumeradas.forEach(pn => {
                 const texto = pn.parte.nome;
 
-                dados.push({ pecaFisica: { nome, _id }, texto, modo: 'singular', partes: [pn], acertou: false, valores: [''] })
+                dados.push({ pecaFisica: { nome, _id }, referenciaRelativa: pn.referenciaRelativa, texto, modo: 'singular', partes: [pn], acertou: false, valores: [''] })
             })
 
         })
@@ -58,9 +60,6 @@ class PraTreloc extends Component {
         this.setState({ data: dados, total: dados.length, pecasFisicas: { ...pecasFisicas } }, () => {
             this.onCount();
             Toast.hide();
-            setTimeout(() => {
-                this.onSetFocus(0)
-            }, 500)
         })
 
     }
@@ -86,13 +85,15 @@ class PraTreloc extends Component {
 
     render() {
         const { navigation, screenProps } = this.props;
-        const { data, count } = this.state;
+        const { data, count, sinalScroll, sinalTexto } = this.state;
 
 
         return (
-            <Container navigation={navigation}>
+            <Container sinalScroll={sinalScroll} navigation={navigation}>
                 {count < data.length ? (
                     <FormTreLoc
+                        sinalTexto={sinalTexto}
+                        onSetSinalScroll={s => this.setState({sinalScroll: s})}                    
                         screenProps={screenProps}
                         mainState={this.state}
                         onGetRef={this.onGetRef}
@@ -144,7 +145,7 @@ class PraTreloc extends Component {
                 } else {
                     const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
                     const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
-                    Toast.fail(msg, 3, () => this.onSetFocus(count))
+                    Toast.fail(msg, 3, () => this.setState({sinalTexto: + new Date()}))
                     announceForAccessibility(msg)
                 }
             }            
