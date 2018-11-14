@@ -235,7 +235,12 @@ class TeoTreNom extends Component {
         clearInterval(this.timer)
     }
 
-    render() {
+
+    render(){
+        return <Text>Indisponível</Text>
+    }
+
+    _render() {
         const { navigation, screenProps } = this.props;
         const { data, count, loading } = this.state;
 

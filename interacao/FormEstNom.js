@@ -71,7 +71,6 @@ class FormEstNom extends Component {
         // }] : []
 
         const view = isTeoria ? 'nome e os conteúdos associados.' : 'nome.';
-        const instrucaoModal = isTeoria ? 'Prossiga para ouvir os conteúdos associados' : 'Prossiga para fechar'
 
         return (
             <Container navigation={navigation}>
@@ -126,8 +125,8 @@ class FormEstNom extends Component {
                                 onErrorClick: this.onErrorClick,
                             }}
                         />
-                        {this.props.isTeoria && <Button ref={r => this.refBtnDetalhes = r} accessibilityLabel='Conteúdos da parte. Botão. Toque duas vezes para pesquisar a parte informada.' style={{margin: 5}} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Conteúdos da parte</Button>}
-                        {(this.props.isTeoria && screenProps.config.indexOf('talkback') == -1) && <Button ref={r => this.refBtnDetalhes = r} accessibilityLabel='Nome da parte. Botão. Toque duas vezes para obter o nome da parte' style={{margin: 5}} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Nome da parte</Button>}
+                        {this.state.conteudos.length > 0 && <Button ref={r => this.refBtnDetalhes = r} accessibilityLabel='Informações da parte. Botão. Toque duas vezes para obter mais informações sobre a parte' style={{margin: 5}} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Informações da parte</Button>}
+                        {/* {(this.props.isTeoria && screenProps.config.indexOf('talkback') == -1) && <Button ref={r => this.refBtnDetalhes = r} accessibilityLabel='Nome da parte. Botão. Toque duas vezes para obter o nome da parte' style={{margin: 5}} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Nome da parte</Button>} */}
                         {screenProps.config.indexOf('talkback') != -1 && <Button type='primary' onPressOut={() => focusOnView(this.fieldRef)}>Voltar para o filtro</Button>}
                     </Card.Body>
                 </Card>
@@ -136,17 +135,16 @@ class FormEstNom extends Component {
                     talkback={screenProps.config.indexOf('talkback') != -1}
                     open={open}
                     title={parte ? parte.parte.nome : null}
-                    acc={`Parte ${parte ? parte.parte.nome : ''}. Aberto.` + instrucaoModal}
+                    acc={`Parte ${parte ? parte.parte.nome : ''}. Aberto. Prossiga para ouvir as informações da parte`}
                     footer={[
                         { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar` },
                     ]}                    
                 >
                     {parte != undefined ? <ScrollView style={{maxHeight: 280}}>
-                        {isTeoria && <View>
                             {
                                 conteudos.length == 0 ? (
                                     <View key='emptyList'>
-                                        <Text>Nenhum conteúdo foi encontrado</Text>
+                                        <Text>Nenhuma informação adicional</Text>
                                     </View>
                                 ) : (conteudos.map(c => (
                                     <View key={c} style={{marginBottom: 8}}>
@@ -154,7 +152,6 @@ class FormEstNom extends Component {
                                     </View>
                                 )))
                             }
-                        </View>}
                     </ScrollView> : <Text style={{padding: 5, textAlign: 'center'}}>Parte não setada nesta peça física</Text>}
                 </Modal>
             </Container>
@@ -172,17 +169,25 @@ class FormEstNom extends Component {
     onChange = value => {
         const { pecasFisicas, pecaFisica } = this.state;
         const parte = pecasFisicas[pecaFisica].partesNumeradas.find(p => p.numero == value);   
-
+        let conteudos = [];
         if(parte != undefined){
-            const referenciaAsPartes = parte.referenciaRelativa.filter(m => m.referenciaRelativa.referencia == parte._id)
-            const rel = referenciaAsPartes.map(r => r.referenciaRelativa.referenciadoParaReferencia + ' da parte ' + r.numero +  '(' + r.parte.nome + ')')                 
-            const detalhes = this.props.isTeoria ? '. Prossiga para ouvir os conteúdos associados' : '';
-            announceForAccessibility(parte.parte.nome + detalhes + rel.join('. '))
+            
+            if(this.props.isTeoria){
+                announceForAccessibility(parte.parte.nome + '. Prossiga para ouvir os conteúdos associados')
+                conteudos = this.props.screenProps.anatomp.roteiro.conteudos.filter(c => c.partes.find(p => p._id == parte.parte._id)).map(c => c.singular);
+            }else{
+                const referenciaAsPartes = pecasFisicas[pecaFisica].partesNumeradas.filter(m => m.referenciaRelativa.referencia == parte.parte._id)
+                const localizacaoRelativa = referenciaAsPartes.map(r => r.referenciaRelativa.referenciadoParaReferencia + ' da parte ' + r.numero +  '(' + r.parte.nome + ')');                                 
+                if(localizacaoRelativa.length > 0){
+                    conteudos = localizacaoRelativa;
+                    announceForAccessibility(parte.parte.nome + '. Prossiga para ouvir as informações de localização')
+                }else{
+                    announceForAccessibility(parte.parte.nome)
+                }
+            }
         }else{
             announceForAccessibility('Parte não setada nesta peça física')
         }
-
-        const conteudos = (parte == undefined || !this.props.isTeoria) ? [] : this.props.screenProps.anatomp.roteiro.conteudos.filter(c => c.partes.find(p => p._id == parte.parte._id)).map(c => c.singular)
         this.setState({ value, parte, conteudos })
     }
 

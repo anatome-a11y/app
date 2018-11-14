@@ -69,7 +69,7 @@ class Root extends Component {
             modoInteracao: {
                 tipoConteudo: 'pratico',
                 modoAprendizagem: 'estudo',
-                sentidoIdentificacao: 'nomear',
+                sentidoIdentificacao: 'localizar',
             },
             supported: true,
             // enabled: false,

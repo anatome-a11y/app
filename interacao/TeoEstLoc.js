@@ -132,11 +132,20 @@ class TeoEstLoc extends Component {
                                     const l = pf.localizacao.find(m => m.parte._id == p._id)
 
                                     if (l) {
-                                        return (
-                                            <View key={l._id} style={{marginBottom: 8}}>
-                                                <Text><Text style={{fontWeight: 'bold'}}>{p.nome}</Text> - Parte {l.numero} na peça {l.pecaFisica.nome}</Text>
-                                            </View>
-                                        )
+                                        if(l.referenciaRelativa.referencia == ''){
+                                            return (
+                                                <View key={l._id} style={{marginBottom: 8}}>
+                                                    <Text><Text style={{fontWeight: 'bold'}}>{p.nome}</Text> - Parte {l.numero} na peça {l.pecaFisica.nome}</Text>
+                                                </View>
+                                            )
+                                        }else{
+                                            const referencia = pf.localizacao.find(m => m.parte._id == l.referenciaRelativa.referencia)
+                                            return (
+                                                <View key={l._id} style={{marginBottom: 8}}>
+                                                    <Text><Text style={{fontWeight: 'bold'}}>{p.nome}</Text> - {l.referenciaRelativa.referenciaParaReferenciado} da parte {referencia.numero} ({referencia.parte.nome}) na peça {l.pecaFisica.nome}</Text>
+                                                </View>
+                                            )                                            
+                                        }
                                     } else {
                                         return null
                                     }

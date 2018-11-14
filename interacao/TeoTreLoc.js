@@ -173,6 +173,7 @@ class TeoTreLoc extends Component {
 
     onNext = acertou => () => {
         const { data, count, tentativas } = this.state;
+        const {config} = this.props.screenProps;
 
         this.setState({
             count: count + 1,
@@ -190,9 +191,9 @@ class TeoTreLoc extends Component {
             clearInterval(this.timer)
             this.onCount()
             if (count + 1 < data.length) {
-                if (this.props.screenProps.config.indexOf('talkback') == -1) {
+                if (config.indexOf('talkback') == -1) {
                     if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
-                        this.fieldRef[count+1][idx].focus()
+                        this.fieldRef[count+1][0].focus()
                     }
                 } 
             }
