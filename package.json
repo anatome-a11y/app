@@ -12,6 +12,7 @@
     "react-native": "0.56.0",
     "react-native-accessibility": "^1.0.7",
     "react-native-autocomplete-input": "^3.5.0",
+    "react-native-fit-image": "^1.5.4",
     "react-native-nfc-manager": "^0.5.5",
     "react-native-voice": "^0.2.6",
     "react-navigation": "^2.12.1"

@@ -76,7 +76,7 @@ class Container extends Component {
       case 'Ajuda': return <Text accessibilityLabel='Ajuda. Título' style={styles.title}>Ajuda</Text>;
       case 'Config': return <Text accessibilityLabel='Configurações. Título' style={styles.title}>Configurações</Text>;
       case 'Roteiro': return <Text accessibilityLabel='Interações. Título' style={styles.title}>Interações</Text>;
-      default: return <Text accessibilityLabel='anatom P. Título' style={styles.title}>An@tom-P</Text>;
+      default: return <Text accessibilityLabel='anatom P. Título' style={styles.title}>Anatome-AT</Text>;
     }
   }
 

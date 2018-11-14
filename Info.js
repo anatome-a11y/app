@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import Container from './Container';
 
 import List from 'antd-mobile-rn/lib/list';
@@ -28,6 +28,11 @@ class Info extends Component {
             {label: 'Propósito', value: anatomp.roteiro.proposito ? anatomp.roteiro.proposito : 'Não informado'},
         ] : []
 
+        const generalidades = anatomp ? [
+            ...anatomp.generalidades,
+            ...anatomp.roteiro.generalidades
+        ] : []
+
         return (
             <Container navigation={navigation}>
                     <List style={{marginBottom: 10}} renderHeader={() => 'Peças físicas do roteiro'}>
@@ -37,7 +42,16 @@ class Info extends Component {
                     </List>                
                     <List style={{marginBottom: 10}} renderHeader={() => 'Informações sobre o roteiro'}>
                             {anatomp ? dados.map(d => <ListItem key={d.label} wrap multipleLine><Name>{d.label}</Name><Sig value={d.value} /></ListItem>) : <ListItem wrap multipleLine><Text>Selecione um roteiro para visualizar suas informações</Text></ListItem>}
-                    </List>            
+                    </List> 
+                    <List style={{marginBottom: 10}} renderHeader={() => 'Generalidades'}>
+                            {generalidades.length > 0 ? generalidades.map(g => <ListItem key={g._id} wrap multipleLine>
+                            <Text style={styles.listItem}>{g.texto}</Text>
+                            <Image
+                                resizeMode="stretch"
+                                source={{uri: 'http://imgs.steps.dragoart.com/how-to-draw-a-pony-step-7_1_000000053055_5.jpg'}}
+                                style={styles.canvas} />                            
+                            </ListItem>) : <ListItem wrap multipleLine><Text>Selecione um roteiro para visualizar suas generalidades</Text></ListItem>}
+                    </List>                                
                 <List style={{marginBottom: 10}} renderHeader={() => 'Lista de siglas da Anatomia'}>
                     <ListItem><Name>A.  <Sig value="Artéria" /></Name></ListItem>
                     <ListItem><Name>Aa.  <Sig value="Artérias" /></Name></ListItem>
@@ -89,7 +103,14 @@ const styles = StyleSheet.create({
     },
     listItem: {
         fontWeight: "200",
-    }    
+    },
+    canvas: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0,
+      },        
   });
 
 export default Info;

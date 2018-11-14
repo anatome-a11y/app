@@ -67,15 +67,15 @@ const getMediaLabel = (media, idx) => {
 }
 
 
-const Midias = ({ value }) => {
+const Midias = ({ value, color }) => {
   //   const unicos = value.filter(function(item, pos) {
 
   //     return value.findIndex(v => v.media == item.media) == pos;
   // })
   return <View>
     <View style={{ flexWrap: 'wrap', alignItems: 'flex-start', flexDirection: 'row' }}>
-      <Brief >Formatos de saída: </Brief>
-      <View accessibilityLabel={'Leitor de tela'}><Icon style={{ padding: 5 }} type={'\uE698'} /></View>
+      <Brief style={{color}} >Formatos de saída: </Brief>
+      <View accessibilityLabel={'Leitor de tela'}><Icon style={{ padding: 5, color }} type={'\uE698'} /></View>
       {value.map((v, idx) => <View key={idx} accessibilityLabel={getMediaLabel(v)}>{getMediaIcon(v)}</View>)}
     </View>
   </View>
@@ -92,7 +92,6 @@ class App extends Component {
   }
 
   componentDidMount() {
-
     announceForAccessibility('Carregando...');
     Toast.loading('Carregando...', 0)
 
@@ -125,28 +124,34 @@ class App extends Component {
 
   render() {
     const { anatomps, msg } = this.state;
-    const { navigation } = this.props;
+    const { navigation, screenProps } = this.props;
+
+    const selected = screenProps.anatomp != null ? screenProps.anatomp._id : false
 
     return (
       <Container navigation={navigation}>
         <BC _ref={r => this.initialFocus = r} head='Roteiros' acc='Prossiga para acessar a lista de roteiros' />
         <List accessibilityLabel={`Roteiros de Aprendizagem. Lista com ${anatomps.length} itens. Prossiga para escolher um roteiro`} renderHeader={() => 'Roteiros de aprendizagem'}>
           {
-            anatomps.map(anatomp => (
-              <ListItem
-                onClick={this.onSelectRoteiro(anatomp)}
-                key={anatomp.roteiro._id}
-                wrap
-                multipleLine
-                align="center"
-                arrow="horizontal"
-              >
-                <Text style={styles.listItemTitle} accessibilityLabel={'Roteiro. ' + anatomp.nome}>{anatomp.nome}</Text>
-                <Brief>{anatomp.roteiro.curso} | {anatomp.roteiro.disciplina} | {anatomp.instituicao}</Brief>
-                <Text accessibilityLabel='Toque duas vezes para selecionar.'></Text>
-                <Midias value={anatomp.roteiro.resumoMidias} />
-              </ListItem>
-            ))
+            anatomps.map(anatomp => {
+              const color = selected == anatomp._id ? '#108ee9' : '#00000070'
+              return (
+                <ListItem
+                  onClick={this.onSelectRoteiro(anatomp)}
+                  style={{backgroundColor: selected == anatomp._id ? '#108ee930' : '#fff'}}
+                  key={anatomp.roteiro._id}
+                  wrap
+                  multipleLine
+                  align="center"
+                  arrow="horizontal"
+                >
+                  <Text style={{fontWeight: 'bold', fontSize: 15, color}} accessibilityLabel={'Roteiro. ' + anatomp.nome}>{anatomp.nome}</Text>
+                  <Brief style={{color}}>{anatomp.roteiro.curso} | {anatomp.roteiro.disciplina} | {anatomp.instituicao}</Brief>
+                  <Text accessibilityLabel='Toque duas vezes para selecionar.'></Text>
+                  <Midias color={color} value={anatomp.roteiro.resumoMidias} />
+                </ListItem>
+              )
+            })
           }
         </List>
       </Container>
