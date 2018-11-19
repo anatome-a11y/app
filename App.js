@@ -92,44 +92,18 @@ class App extends Component {
   }
 
   componentDidMount() {
-    announceForAccessibility('Carregando...');
-    Toast.loading('Carregando...', 0)
-
-    fetch('https://frozen-thicket-97625.herokuapp.com/anatomp', {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-    })
-      .then(r => r.json())
-      .then(r => {
-        Toast.hide()
-        setTimeout(() => { focusOnView(this.initialFocus) }, 300)
-        if (r.status == 200) {
-          this.setState({ anatomps: r.data })
-        } else {
-          throw r.error
-        }
-      })
-      .catch(e => {
-        const msg = typeof e == 'string' ? e : 'Não foi possível obter os roteiros de aprendizagem'
-        Toast.hide()
-        Toast.fail(msg)
-        announceForAccessibility(msg)
-      })
-      .finally(() => this.setState({ loading: false }))
-
+    this.onGetData();
   }
 
 
   render() {
-    const { anatomps, msg } = this.state;
+    const { anatomps, msg, loading } = this.state;
     const { navigation, screenProps } = this.props;
 
     const selected = screenProps.anatomp != null ? screenProps.anatomp._id : false
 
     return (
-      <Container navigation={navigation}>
+      <Container navigation={navigation} refreshing={loading} onRefresh={this.onGetData} >
         <BC _ref={r => this.initialFocus = r} head='Roteiros' acc='Prossiga para acessar a lista de roteiros' />
         <List accessibilityLabel={`Roteiros de Aprendizagem. Lista com ${anatomps.length} itens. Prossiga para escolher um roteiro`} renderHeader={() => 'Roteiros de aprendizagem'}>
           {
@@ -156,6 +130,37 @@ class App extends Component {
         </List>
       </Container>
     );
+  }
+
+
+
+  onGetData = () => {
+    announceForAccessibility('Carregando...');
+    Toast.loading('Carregando...', 0)
+
+    fetch('https://frozen-thicket-97625.herokuapp.com/anatomp', {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+    })
+      .then(r => r.json())
+      .then(r => {
+        Toast.hide()
+        setTimeout(() => { focusOnView(this.initialFocus) }, 300)
+        if (r.status == 200) {
+          this.setState({ anatomps: r.data })
+        } else {
+          throw r.error
+        }
+      })
+      .catch(e => {
+        const msg = typeof e == 'string' ? e : 'Não foi possível obter os roteiros de aprendizagem'
+        Toast.hide()
+        Toast.fail(msg)
+        announceForAccessibility(msg)
+      })
+      .finally(() => this.setState({ loading: false }))    
   }
 
 

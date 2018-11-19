@@ -2,6 +2,7 @@ package com.anatomp;
 
 import android.app.Application;
 
+import com.brentvatne.react.ReactVideoPackage;
 import com.facebook.react.ReactApplication;
 import com.wenkesj.voice.VoicePackage;
 import com.reactlibrary.RNReactNativeAccessibilityPackage;
@@ -28,7 +29,8 @@ public class MainApplication extends Application implements ReactApplication {
           new MainReactPackage(),
             new VoicePackage(),
             new RNReactNativeAccessibilityPackage(),
-            new NfcManagerPackage()
+            new NfcManagerPackage(),
+            new ReactVideoPackage()
       );
     }
 

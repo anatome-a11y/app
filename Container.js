@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, ScrollView, View, Text, Image, KeyboardAvoidingView } from 'react-native';
+import { StyleSheet, ScrollView, View, Text, RefreshControl, KeyboardAvoidingView } from 'react-native';
 
 import Icon from 'antd-mobile-rn/lib/icon';
 import Button from 'antd-mobile-rn/lib/button';
@@ -13,36 +13,40 @@ class Container extends Component {
 
   scroll = null;
 
-  componentWillReceiveProps(next){
-    if(this.props.sinalScroll != next.sinalScroll){
-      this.scroll.scrollTo({y: 0})
+  componentWillReceiveProps(next) {
+    if (this.props.sinalScroll != next.sinalScroll) {
+      this.scroll.scrollTo({ y: 0 })
     }
   }
 
   render() {
-    const { children, footer } = this.props;
+    const { children, footer, onRefresh, refreshing } = this.props;
 
     return (
       <View style={styles.container}>
         <Flex>
           <FlexItem><Button accessibilityLabel={this.getAcc('Ajuda')} onPressOut={this.onNavigate('Ajuda')} ><Icon type={this.getIcone('Ajuda', '\ue63c')} size='md' /></Button></FlexItem>
           <FlexItem style={styles.spacer}>{this.getTitle()}</FlexItem>
-          <FlexItem><Button accessibilityLabel={this.getAcc('Config')}  onPressOut={this.onNavigate('Config')}><Icon type={this.getIcone('Config', '\ue672')} size='md' /></Button></FlexItem>
+          <FlexItem><Button accessibilityLabel={this.getAcc('Config')} onPressOut={this.onNavigate('Config')}><Icon type={this.getIcone('Config', '\ue672')} size='md' /></Button></FlexItem>
         </Flex>
         <KeyboardAvoidingView style={styles.scroll}>
-          <ScrollView ref={r => this.scroll = r} contentContainerStyle={{flexGrow: 1}}>
-            <View style={{flex: 10, padding: 5, marginBottom: 30}}>
-            {children}
+          <ScrollView
+            ref={r => this.scroll = r}
+            contentContainerStyle={{ flexGrow: 1 }}
+            refreshControl={onRefresh ? <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> : undefined }
+          >
+            <View style={{ flex: 10, padding: 5, marginBottom: 30 }}>
+              {children}
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
-        <Flex style={{marginBottom: 5}}>
-              <FlexItem><Button accessibilityLabel={this.getAcc('Contexto')} ><Icon type={'\ue616'} size='md' /></Button></FlexItem>
-              <FlexItem style={styles.spacer}>
-                {footer}
-              </FlexItem>
-              <FlexItem><Button accessibilityLabel={this.getAcc('Info')} onPressOut={this.onNavigate('Info')}><Icon type={this.getIcone('Info', '\ue629')} size='md' /></Button></FlexItem>
-            </Flex>        
+        <Flex style={{ marginBottom: 5 }}>
+          <FlexItem><Button accessibilityLabel={this.getAcc('Contexto')} ><Icon type={'\ue616'} size='md' /></Button></FlexItem>
+          <FlexItem style={styles.spacer}>
+            {footer}
+          </FlexItem>
+          <FlexItem><Button accessibilityLabel={this.getAcc('Info')} onPressOut={this.onNavigate('Info')}><Icon type={this.getIcone('Info', '\ue629')} size='md' /></Button></FlexItem>
+        </Flex>
       </View>
     );
   }
@@ -51,13 +55,13 @@ class Container extends Component {
   getAcc = (tela) => {
     const { navigation } = this.props;
 
-    if(navigation.state.routeName == tela){
+    if (navigation.state.routeName == tela) {
       switch (tela) {
         case 'Ajuda': return 'Fechar Ajuda geral. Botão';
         case 'Config': return 'Fechar Configurações. Botão';
         case 'Info': return 'Fechar Informações da peça física. Botão';
       }
-    }else{
+    } else {
       switch (tela) {
         case 'Ajuda': return 'Abrir Ajuda geral. Botão';
         case 'Config': return 'Abrir Configurações. Botão';
@@ -65,7 +69,7 @@ class Container extends Component {
         case 'Info': return 'Abrir informações do roteiro Botão';
       }
     }
-  }  
+  }
 
 
   getTitle = () => {
@@ -106,7 +110,8 @@ class Container extends Component {
 
 Container.defaultProps = {
   footer: null,
-  disabled: []
+  disabled: [],
+  onRefresh: false
 }
 
 const styles = StyleSheet.create({

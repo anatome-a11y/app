@@ -47,13 +47,13 @@ class Config extends Component {
                             <Text style={{flex: 2}}>Leitor de tela</Text>
                             <View style={{flex: 1}}><Tag size='small'>{config.indexOf('talkback') != -1 ? 'Ativado' : <Text>Desativado<Text style={{ color: '#108ee9' }}>*</Text></Text>}</Tag></View>
                         </Flex>
-                    </List.Item>
+                    </List.Item>                  
                     <List.Item>
                         <Option
-                            checked={config.indexOf('video') != -1}
-                            onChange={this.onChange('video')}
+                            checked={config.indexOf('video_imagem') != -1}
+                            onChange={this.onChange('video_imagem')}
                         >
-                            Vídeo
+                            Imagem e Vídeo
                         </Option>
                     </List.Item>                    
                 </List>

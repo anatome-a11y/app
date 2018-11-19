@@ -7,17 +7,20 @@ import Toast from 'antd-mobile-rn/lib/toast';
 
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 import Input from '../components/Input'
-import {Simple as Option} from '../components/Option'
+import { Simple as Option } from '../components/Option'
 
 import Card from 'antd-mobile-rn/lib/card';
 import Button from 'antd-mobile-rn/lib/button';
 
 
-const ListItem = List.Item;
+import Imagens from '../components/Imagens'
+import Videos from '../components/Videos'
 
 import BC from '../components/Breadcrumbs'
 import Instrucoes from '../components/Instrucoes'
 import Modal from '../components/Modal'
+
+const ListItem = List.Item;
 
 
 class FormEstNom extends Component {
@@ -74,10 +77,10 @@ class FormEstNom extends Component {
 
         return (
             <Container navigation={navigation}>
-                    <BC _ref={r => this.initialFocus = r}  body={['Roteiros', screenProps.anatomp.nome]} head={interaction} />
+                <BC _ref={r => this.initialFocus = r} body={['Roteiros', screenProps.anatomp.nome]} head={interaction} />
                 <Instrucoes
                     info={[
-                        'Selecione uma peça física e informe uma parte para obter seu '+view,
+                        'Selecione uma peça física e informe uma parte para obter seu ' + view,
                     ]}
                 />
                 <Card style={{ marginBottom: 10 }}>
@@ -110,9 +113,9 @@ class FormEstNom extends Component {
                             _ref={this.onGetRef}
                             value={value}
                             onSkipAlternatives={() => {
-                                if(this.props.isTeoria){
+                                if (this.props.isTeoria) {
                                     focusOnView(this.refBtnDetalhes)
-                                }else{
+                                } else {
                                     focusOnView(this.fieldRef)
                                 }
                             }}
@@ -125,7 +128,7 @@ class FormEstNom extends Component {
                                 onErrorClick: this.onErrorClick,
                             }}
                         />
-                        {this.state.conteudos.length > 0 && <Button ref={r => this.refBtnDetalhes = r} accessibilityLabel='Informações da parte. Botão. Toque duas vezes para obter mais informações sobre a parte' style={{margin: 5}} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Informações da parte</Button>}
+                        {this.state.conteudos.length > 0 && <Button ref={r => this.refBtnDetalhes = r} accessibilityLabel='Informações da parte. Botão. Toque duas vezes para obter mais informações sobre a parte' style={{ margin: 5 }} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Informações da parte</Button>}
                         {/* {(this.props.isTeoria && screenProps.config.indexOf('talkback') == -1) && <Button ref={r => this.refBtnDetalhes = r} accessibilityLabel='Nome da parte. Botão. Toque duas vezes para obter o nome da parte' style={{margin: 5}} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Nome da parte</Button>} */}
                         {screenProps.config.indexOf('talkback') != -1 && <Button type='primary' onPressOut={() => focusOnView(this.fieldRef)}>Voltar para o filtro</Button>}
                     </Card.Body>
@@ -138,29 +141,35 @@ class FormEstNom extends Component {
                     acc={`Parte ${parte ? parte.parte.nome : ''}. Aberto. Prossiga para ouvir as informações da parte`}
                     footer={[
                         { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar` },
-                    ]}                    
+                    ]}
                 >
-                    {parte != undefined ? <ScrollView style={{maxHeight: 280}}>
-                            {
-                                conteudos.length == 0 ? (
-                                    <View key='emptyList'>
-                                        <Text>Nenhuma informação adicional</Text>
-                                    </View>
-                                ) : (conteudos.map(c => (
-                                    <View key={c} style={{marginBottom: 8}}>
-                                        <Text>{c}</Text>
-                                    </View>
-                                )))
-                            }
-                    </ScrollView> : <Text style={{padding: 5, textAlign: 'center'}}>Parte não setada nesta peça física</Text>}
+                    {parte != undefined ? <ScrollView style={{ maxHeight: 280 }}>
+                        {
+                            conteudos.length == 0 ? (
+                                <View key='emptyList'>
+                                    <Text>Nenhuma informação adicional</Text>
+                                </View>
+                            ) : (conteudos.map(c => (
+                                <View key={c.texto} style={{ marginBottom: 8 }}>
+                                    <Text>{c.texto}</Text>
+                                    {isTeoria && (
+                                        <View>
+                                            <Imagens config={screenProps.config} midias={c.midias} />
+                                            <Videos config={screenProps.config} midias={c.midias} />
+                                        </View>
+                                    )}
+                                </View>
+                            )))
+                        }
+                    </ScrollView> : <Text style={{ padding: 5, textAlign: 'center' }}>Parte não setada nesta peça física</Text>}
                 </Modal>
             </Container>
         )
     }
 
-    onOpen = () => this.setState({open: true})
+    onOpen = () => this.setState({ open: true })
 
-    onClose = () => this.setState({open: false})
+    onClose = () => this.setState({ open: false })
 
     onErrorClick = () => { Toast.info('Parte não registrada'); announceForAccessibility('Parte não registrada') }
 
@@ -168,24 +177,24 @@ class FormEstNom extends Component {
 
     onChange = value => {
         const { pecasFisicas, pecaFisica } = this.state;
-        const parte = pecasFisicas[pecaFisica].partesNumeradas.find(p => p.numero == value);   
+        const parte = pecasFisicas[pecaFisica].partesNumeradas.find(p => p.numero == value);
         let conteudos = [];
-        if(parte != undefined){
-            
-            if(this.props.isTeoria){
+        if (parte != undefined) {
+
+            if (this.props.isTeoria) {
                 announceForAccessibility(parte.parte.nome + '. Prossiga para ouvir os conteúdos associados')
-                conteudos = this.props.screenProps.anatomp.roteiro.conteudos.filter(c => c.partes.find(p => p._id == parte.parte._id)).map(c => c.singular);
-            }else{
+                conteudos = this.props.screenProps.anatomp.roteiro.conteudos.filter(c => c.partes.find(p => p._id == parte.parte._id)).map(c => ({texto: c.singular, midias: c.midias}));
+            } else {
                 const referenciaAsPartes = pecasFisicas[pecaFisica].partesNumeradas.filter(m => m.referenciaRelativa.referencia == parte.parte._id)
-                const localizacaoRelativa = referenciaAsPartes.map(r => r.referenciaRelativa.referenciadoParaReferencia + ' da parte ' + r.numero +  '(' + r.parte.nome + ')');                                 
-                if(localizacaoRelativa.length > 0){
+                const localizacaoRelativa = referenciaAsPartes.map(r => ({texto: r.referenciaRelativa.referenciadoParaReferencia + ' da parte ' + r.numero + '(' + r.parte.nome + ')'}));
+                if (localizacaoRelativa.length > 0) {
                     conteudos = localizacaoRelativa;
                     announceForAccessibility(parte.parte.nome + '. Prossiga para ouvir as informações de localização')
-                }else{
+                } else {
                     announceForAccessibility(parte.parte.nome)
                 }
             }
-        }else{
+        } else {
             announceForAccessibility('Parte não setada nesta peça física')
         }
         this.setState({ value, parte, conteudos })
@@ -197,7 +206,7 @@ class FormEstNom extends Component {
         setTimeout(() => {
             focusOnView(this.headerParte)
         }, 2000)
-        
+
     }
 
     onGetRef = r => { this.fieldRef = r }

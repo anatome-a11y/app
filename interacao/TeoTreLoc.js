@@ -8,6 +8,7 @@ import { announceForAccessibility, focusOnView } from 'react-native-accessibilit
 import Resultados from './Resultados'
 import FormTreLoc from './FormTreLoc'
 
+
 import BC from '../components/Breadcrumbs'
 
 
@@ -59,10 +60,10 @@ class TeoTreLoc extends Component {
                     const partes = pecasFisicas[key].partesNumeradas.filter(pn => conteudo.partes.find(p => p._id == pn.parte._id) != undefined);
 
                     if (conteudo.plural != '') {
-                        flatData.push({ pecaFisica: { nome, _id }, modo: 'plural', texto: conteudo.plural, partes })
+                        flatData.push({ pecaFisica: { nome, _id }, modo: 'plural', texto: conteudo.plural, partes, midias: conteudo.midias })
                     }else{
                         if (conteudo.singular != '') {
-                            flatData.push({ pecaFisica: { nome, _id }, modo: 'singular', texto: conteudo.singular, partes })
+                            flatData.push({ pecaFisica: { nome, _id }, modo: 'singular', texto: conteudo.singular, partes, midias: conteudo.midias })
                         }
                     }
                 }
@@ -117,6 +118,7 @@ class TeoTreLoc extends Component {
                         onErrorClick={this.onErrorClick}
                         onSubmit={this.onSubmit}
                         interaction='Treinamento-Teórico-Localizar'
+                        isTeoria={true}
                         info={[
                             'Para cada conteúdo teórico informe a parte correspondente e em seguida pressione o botão "Próximo" para submeter.',
                             `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`

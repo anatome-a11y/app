@@ -16,6 +16,8 @@ import Input from '../components/Input'
 import Option from '../components/Option'
 import Modal from '../components/Modal'
 
+import Imagens from '../components/Imagens'
+import Videos from '../components/Videos'
 import BC from '../components/Breadcrumbs'
 import Instrucoes from '../components/Instrucoes'
 
@@ -108,6 +110,8 @@ class TeoEstLoc extends Component {
                             {filtered.length > 0 ? filtered.map(c => (
                                 <List.Item accessible accessibilityLabel={`${c.texto}. Botão. Toque duas vezes para abrir ou prossiga para obter mais opções.`} wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
                                     <Text>{c.texto}</Text>
+                                    <Imagens config={screenProps.config} midias={c.midias} />
+                                    <Videos config={screenProps.config} midias={c.midias} />                                    
                                 </List.Item>
                             )) : <List.Item accessibilityLabel='Nenhuma parte encontrada. Altere as palavras chave do campo de busca.' wrap multipleLine>Nenhum conteúdo foi encontrado</List.Item>}
                         </List>

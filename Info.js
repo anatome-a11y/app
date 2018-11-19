@@ -3,29 +3,33 @@ import React, { Component } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import Container from './Container';
 
+import Videos from './components/Videos'
+import Imagens from './components/Imagens'
+
 import List from 'antd-mobile-rn/lib/list';
-import Card from 'antd-mobile-rn/lib/card';
 const ListItem = List.Item;
 
-const Sig = ({value}) => (
+const Sig = ({ value }) => (
     <Text style={styles.listItem}>{value}</Text>
 )
 
-const Name = ({children}) => (
+const Name = ({ children }) => (
     <Text style={styles.listItemTitle}>{children}</Text>
 )
 
 class Info extends Component {
+
+
     render() {
         const { navigation, screenProps } = this.props;
-        const {anatomp} = screenProps;
+        const { anatomp, config } = screenProps;
 
         const dados = anatomp ? [
-            {label: 'Nome', value: anatomp.roteiro.nome},
-            {label: 'Curso', value: anatomp.roteiro.curso},
-            {label: 'Disciplina', value: anatomp.roteiro.disciplina},
-            {label: 'Intituição', value: anatomp.instituicao},
-            {label: 'Propósito', value: anatomp.roteiro.proposito ? anatomp.roteiro.proposito : 'Não informado'},
+            { label: 'Nome', value: anatomp.roteiro.nome },
+            { label: 'Curso', value: anatomp.roteiro.curso },
+            { label: 'Disciplina', value: anatomp.roteiro.disciplina },
+            { label: 'Intituição', value: anatomp.instituicao },
+            { label: 'Propósito', value: anatomp.roteiro.proposito ? anatomp.roteiro.proposito : 'Não informado' },
         ] : []
 
         const generalidades = anatomp ? [
@@ -35,24 +39,22 @@ class Info extends Component {
 
         return (
             <Container navigation={navigation}>
-                    <List style={{marginBottom: 10}} renderHeader={() => 'Peças físicas do roteiro'}>
-                        {anatomp ? anatomp.pecasFisicas.map(p => (
-                            <ListItem wrap multipleLine key={p._id}><Name>{p.nome}</Name><Sig value={p.descricao ? p.descricao : 'Nenhuma descrição'} /></ListItem>
-                        )) : <ListItem wrap multipleLine><Text>Selecione um roteiro para visualizar as informações das peças físicas</Text></ListItem>}
-                    </List>                
-                    <List style={{marginBottom: 10}} renderHeader={() => 'Informações sobre o roteiro'}>
-                            {anatomp ? dados.map(d => <ListItem key={d.label} wrap multipleLine><Name>{d.label}</Name><Sig value={d.value} /></ListItem>) : <ListItem wrap multipleLine><Text>Selecione um roteiro para visualizar suas informações</Text></ListItem>}
-                    </List> 
-                    <List style={{marginBottom: 10}} renderHeader={() => 'Generalidades'}>
-                            {generalidades.length > 0 ? generalidades.map(g => <ListItem key={g._id} wrap multipleLine>
-                            <Text style={styles.listItem}>{g.texto}</Text>
-                            <Image
-                                resizeMode="stretch"
-                                source={{uri: 'http://imgs.steps.dragoart.com/how-to-draw-a-pony-step-7_1_000000053055_5.jpg'}}
-                                style={styles.canvas} />                            
-                            </ListItem>) : <ListItem wrap multipleLine><Text>Selecione um roteiro para visualizar suas generalidades</Text></ListItem>}
-                    </List>                                
-                <List style={{marginBottom: 10}} renderHeader={() => 'Lista de siglas da Anatomia'}>
+                <List style={{ marginBottom: 10 }} renderHeader={() => 'Peças físicas do roteiro'}>
+                    {anatomp ? anatomp.pecasFisicas.map(p => (
+                        <ListItem wrap multipleLine key={p._id}><Name>{p.nome}</Name><Sig value={p.descricao ? p.descricao : 'Nenhuma descrição'} /></ListItem>
+                    )) : <ListItem wrap multipleLine><Text>Selecione um roteiro para visualizar as informações das peças físicas</Text></ListItem>}
+                </List>
+                <List style={{ marginBottom: 10 }} renderHeader={() => 'Informações sobre o roteiro'}>
+                    {anatomp ? dados.map(d => <ListItem key={d.label} wrap multipleLine><Name>{d.label}</Name><Sig value={d.value} /></ListItem>) : <ListItem wrap multipleLine><Text>Selecione um roteiro para visualizar suas informações</Text></ListItem>}
+                </List>
+                <List style={{ marginBottom: 10 }} renderHeader={() => 'Generalidades'}>
+                    {generalidades.length > 0 ? generalidades.map(g => <ListItem key={g._id} wrap multipleLine>
+                        <Text style={styles.listItem}>{g.texto}</Text>
+                        <Imagens config={config} midias={g.midias} />
+                        <Videos config={config} midias={g.midias} />
+                    </ListItem>) : <ListItem wrap multipleLine><Text>Selecione um roteiro para visualizar suas generalidades</Text></ListItem>}
+                </List>
+                <List style={{ marginBottom: 10 }} renderHeader={() => 'Lista de siglas da Anatomia'}>
                     <ListItem><Name>A.  <Sig value="Artéria" /></Name></ListItem>
                     <ListItem><Name>Aa.  <Sig value="Artérias" /></Name></ListItem>
                     <ListItem><Name>Art.  <Sig value="Articulação" /></Name></ListItem>
@@ -98,8 +100,8 @@ class Info extends Component {
 
 const styles = StyleSheet.create({
     listItemTitle: {
-      fontWeight: 'bold',
-      fontSize: 15,
+        fontWeight: 'bold',
+        fontSize: 15,
     },
     listItem: {
         fontWeight: "200",
@@ -110,8 +112,8 @@ const styles = StyleSheet.create({
         left: 0,
         bottom: 0,
         right: 0,
-      },        
-  });
+    },
+});
 
 export default Info;
 

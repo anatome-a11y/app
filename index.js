@@ -60,15 +60,15 @@ class Root extends Component {
         Voice.onSpeechEnd = this.onSpeechEnd;
 
         this.state = {
-            config: [],
+            config: ['video_imagem'],
             inputConfig: {
                 chances: 3,
                 tempo: 60
             },
             anatomp: null,
             modoInteracao: {
-                tipoConteudo: 'pratico',
-                modoAprendizagem: 'estudo',
+                tipoConteudo: 'teorico',
+                modoAprendizagem: 'treinamento',
                 sentidoIdentificacao: 'localizar',
             },
             supported: true,

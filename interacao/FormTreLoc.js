@@ -15,6 +15,9 @@ import Input from '../components/Input'
 import BC from '../components/Breadcrumbs'
 import Instrucoes from '../components/Instrucoes'
 
+import Imagens from '../components/Imagens'
+import Videos from '../components/Videos'
+
 
 const ListItem = List.Item;
 
@@ -61,20 +64,20 @@ class Form extends Component {
         const label = value == '' ? placeholder : helper;
 
         return (timer > 0 && tentativas < this.props.maxTentativas) ? (
-                <Input
-                    isTag
-                    _ref={onGetRef(count, idx)}
-                    onSkipAlternatives={() => modo == 'singular' || idx == limite ? onSubmit() : onSetFocus(count, idx + 1)}                    
-                    value={value}
-                    onChange={onChangeValor(idx)}
-                    name={placeholder}
-                    onDone={() => modo == 'singular' || idx == limite ? onSubmit() : onSetFocus(count, idx + 1)}
-                    InputProps={{
-                        type: 'number',
-                        error: label == _ni,
-                        onErrorClick: onErrorClick,
-                    }}
-                />
+            <Input
+                isTag
+                _ref={onGetRef(count, idx)}
+                onSkipAlternatives={() => modo == 'singular' || idx == limite ? onSubmit() : onSetFocus(count, idx + 1)}
+                value={value}
+                onChange={onChangeValor(idx)}
+                name={placeholder}
+                onDone={() => modo == 'singular' || idx == limite ? onSubmit() : onSetFocus(count, idx + 1)}
+                InputProps={{
+                    type: 'number',
+                    error: label == _ni,
+                    onErrorClick: onErrorClick,
+                }}
+            />
         ) : (
                 value == '' ? <ListItem key={idx} >{_ni}</ListItem> : <ListItem key={idx} >{value + ' - ' + label}</ListItem>
             )
@@ -117,7 +120,7 @@ class FormTreLoc extends React.Component {
             }
         }
 
-        if(sinalTexto != next.sinalTexto){
+        if (sinalTexto != next.sinalTexto) {
             onSetSinalScroll(+ new Date())
             setTimeout(() => {
                 focusOnView(this.dicaDaParte)
@@ -129,9 +132,9 @@ class FormTreLoc extends React.Component {
             if (next.mainState.count !== next.mainState.data.length) {
                 setTimeout(() => {
                     focusOnView(this.btnProximo)
-                }, 1500)                
+                }, 1500)
             }
-        }     
+        }
     }
 
     componentWillUnmount() {
@@ -140,15 +143,15 @@ class FormTreLoc extends React.Component {
 
 
     render() {
-        const { screenProps, mainState, onGetRef, onSetFocus, onChangeValor, onErrorClick, onSubmit, interaction, info } = this.props;
-        const { anatomp, onReadNFC, onStopNFC } = screenProps;
+        const { screenProps, mainState, onGetRef, onSetFocus, onChangeValor, onErrorClick, onSubmit, interaction, info, isTeoria } = this.props;
+        const { anatomp, onReadNFC, onStopNFC, config } = screenProps;
         const { count, total, data, timer, pecasFisicas, tentativas } = mainState;
         const title = data[count].pecaFisica.nome;
         const dica = data[count].valores.length > 1 ? 'as partes' : 'a parte';
         const qtdRefRel = data[count].partes.filter(p => p.referenciaRelativa.referencia != '').length;
-        const dicaRefRel = qtdRefRel > 0 ? ` (${qtdRefRel} referências relativas)` : ''
-        
-        const identificador = (!data[count].referenciaRelativa || data[count].referenciaRelativa.referencia == '') ? (data[count].texto + dicaRefRel) : (data[count].referenciaRelativa.referenciadoParaReferencia + ' da parte '+ data[count].texto)
+        const dicaRefRel = qtdRefRel > 0 ? (qtdRefRel == 1 ? ` (1 referência relativa)` : ` (${qtdRefRel} referências relativas)`) : ''
+
+        const identificador = (!data[count].referenciaRelativa || data[count].referenciaRelativa.referencia == '') ? (data[count].texto + dicaRefRel) : (data[count].referenciaRelativa.referenciadoParaReferencia + ' da parte ' + data[count].texto)
 
 
         return (
@@ -159,44 +162,50 @@ class FormTreLoc extends React.Component {
                     <Card.Header accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a dica d${dica}.`} ref={r => this.nomeDaPeca = r} title={title} />
                     <Card.Body>
                         <View accessible={true} ref={r => this.dicaDaParte = r} accessibilityLabel={`Dica: ${identificador}. Prossiga para informar ${dica}`}>
-                        <Text style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
-                        </View>                            
-                                {data[count].valores.map((value, idx) => (
-                                    <View key={count + '-' + idx}>
-                                        <Form
-                                            data={data[count]}
-                                            timer={timer}
-                                            tentativas={tentativas}
-                                            maxTentativas={this.props.screenProps.inputConfig.chances}
-                                            pecasFisicas={pecasFisicas}
-                                            limite={data[count].valores.length - 1}
-                                            count={count}
-                                            onReadNFC={onReadNFC}
-                                            onStopNFC={onStopNFC}
-                                            onGetRef={onGetRef}
-                                            onSetFocus={onSetFocus}
-                                            onChangeValor={onChangeValor}
-                                            onErrorClick={onErrorClick}
-                                            onSubmit={onSubmit}
-                                            value={value}
-                                            idx={idx}
-                                        />
-                                    </View>
-                                ))}
-                        <Button ref={r => this.btnProximo = r}  accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
+                            <Text style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
+                            {isTeoria && (
+                                <View>
+                                    <Imagens config={config} midias={data[count].midias} />
+                                    <Videos config={config} midias={data[count].midias} />
+                                </View>
+                            )}
+                        </View>
+                        {data[count].valores.map((value, idx) => (
+                            <View key={count + '-' + idx}>
+                                <Form
+                                    data={data[count]}
+                                    timer={timer}
+                                    tentativas={tentativas}
+                                    maxTentativas={this.props.screenProps.inputConfig.chances}
+                                    pecasFisicas={pecasFisicas}
+                                    limite={data[count].valores.length - 1}
+                                    count={count}
+                                    onReadNFC={onReadNFC}
+                                    onStopNFC={onStopNFC}
+                                    onGetRef={onGetRef}
+                                    onSetFocus={onSetFocus}
+                                    onChangeValor={onChangeValor}
+                                    onErrorClick={onErrorClick}
+                                    onSubmit={onSubmit}
+                                    value={value}
+                                    idx={idx}
+                                />
+                            </View>
+                        ))}
+                        <Button ref={r => this.btnProximo = r} accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
                     </Card.Body>
                 </Card>
 
                 <Card>
                     <Card.Header title='Resumo' />
                     <Card.Body>
-                    <Placar
-                                    count={count}
-                                    total={total}
-                                    tentativas={tentativas}
-                                    _maxTentativa={this.props.screenProps.inputConfig.chances}
-                                    timer={timer}
-                                />
+                        <Placar
+                            count={count}
+                            total={total}
+                            tentativas={tentativas}
+                            _maxTentativa={this.props.screenProps.inputConfig.chances}
+                            timer={timer}
+                        />
                     </Card.Body>
                 </Card>
             </View>
