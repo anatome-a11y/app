@@ -4,7 +4,7 @@ import { View } from 'react-native';
 import Video from 'react-native-video-controls';
 
 const Videos = ({ midias, config }) => (
-    config.indexOf('video_imagem') != -1 && (
+    (config.indexOf('video_imagem') != -1 && config.indexOf('talkback') == -1) && (
         <View style={{marginTop: 5}} accessible={true} accessibilityLabel='Vídeos ilustrativos' >
             {
                 midias.filter(midia => midia.type.indexOf('video') != -1).map(midia => (

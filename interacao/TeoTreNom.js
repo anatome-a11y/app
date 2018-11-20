@@ -17,6 +17,8 @@ import Resultados from './Resultados'
 import Placar from './Placar'
 
 import Input from '../components/Input'
+import Modal from '../components/Modal'
+import Option from '../components/Option'
 
 import { norm } from '../utils'
 
@@ -25,13 +27,13 @@ import Instrucoes from '../components/Instrucoes'
 
 
 class FormContainer extends React.Component {
-    initialFocus= null;
+    initialFocus = null;
     nomeDaPeca = null;
     dicaDaParte = null;
     listRef = null;
 
     state = {
-
+        open: false
     }
 
     componentDidMount() {
@@ -43,20 +45,16 @@ class FormContainer extends React.Component {
     componentWillReceiveProps(next) {
         const { mainState, screenProps } = this.props;
         //Se mudou a peça física, foco na peça física
-        if (mainState.data[mainState.count].pecaFisica.nome != next.mainState.data[next.mainState.count].pecaFisica.nome) {
-            this.setState({ found: null, pesquisa: '' }, () => {
-                setTimeout(() => {
-                    focusOnView(this.nomeDaPeca)
-                }, 500);
-            })
+        if (mainState.data[mainState.count].localizacao.pecaFisica.nome != next.mainState.data[next.mainState.count].localizacao.pecaFisica.nome) {
+            setTimeout(() => {
+                focusOnView(this.nomeDaPeca)
+            }, 500);
         } else {
             //Se muou apenas a parte: foco na parte
             if (mainState.count != next.mainState.count) {
-                this.setState({ found: null, pesquisa: '' }, () => {
-                    setTimeout(() => {
-                        focusOnView(this.dicaDaParte)
-                    }, 500);                    
-                })
+                setTimeout(() => {
+                    focusOnView(this.dicaDaParte)
+                }, 500);
             }
         }
 
@@ -68,11 +66,12 @@ class FormContainer extends React.Component {
 
 
     render() {
-        const { screenProps, mainState, onGetRef, onSubmit } = this.props;
+        const { screenProps, mainState, onGetRef, onSubmit, onChange } = this.props;
         const { anatomp } = screenProps;
         const { count, total, data, timer, tentativas } = mainState;
         const title = data[count].localizacao.pecaFisica.nome;
-        const identificador = data[count].localizacao.numero;
+        const identificador = 'Parte ' + data[count].localizacao.numero;
+        const { open } = this.state;
         return (
             <View>
                 <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={'Treinamento-Prático-Nomear'} />
@@ -88,16 +87,60 @@ class FormContainer extends React.Component {
                             <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`${identificador}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
                             <Input
                                 _ref={onGetRef(count)}
-                                value={this.state.pesquisa}
-                                onChange={this.onFind}
+                                value={data[count].respostaParte}
+                                onChange={onChange('respostaParte')}
                                 name={'Nome da parte'}
-                                onDone={onSubmit}
+                                InputProps={{
+                                    disabled: timer <= 0
+                                }}
+                            />
+                            <Input
+                                isTextArea={true}
+                                value={data[count].respostaConteudos}
+                                onChange={onChange('respostaConteudos')}
+                                name={'Conteudos teoricos'}
+                                InputProps={{
+                                    editable: timer > 0
+                                }}
                             />
                         </View>
-                        <Button disabled={!found && timer > 0} accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
+                        <Button disabled={data[count].respostaParte.length == 0 || data[count].respostaConteudos.length == 0} accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={() => this.setState({ open: true })} type='primary'>Verificar respostas</Button>
                     </Card.Body>
                 </Card>
-
+                <Modal
+                    talkback={screenProps.config.indexOf('talkback') != -1}
+                    open={open}
+                    title={identificador}
+                    acc={`${identificador}. Aberto. Prossiga para ouvir as informações da parte`}
+                    footer={[
+                        { text: 'Próximo', onPress: this.onSubmit, acc: `Próximo. Botão. Toque duas vezes para submeter ir para a próxima parte` },
+                    ]}
+                >
+                    <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 3 }}>Sua resposta:</Text>
+                    <Text>{data[count].respostaParte}</Text>
+                    <Text>{data[count].respostaConteudos}</Text>
+                    <Text style={{ color: '#000', marginBottom: 3, marginTop: 6 }}><Text style={{ fontWeight: 'bold' }}>Respostas esperadas </Text>(Marque o que você acertou):</Text>
+                    <List>
+                        <List.Item>
+                            <Option
+                                checked={data[count].correcao[0]}
+                                onChange={this.onChangeCorrecao(0)}
+                            >
+                                {data[count].parte.nome}
+                            </Option>
+                        </List.Item>
+                        {data[count].conteudos.map((c, idx) => (
+                            <List.Item key={idx}>
+                                <Option
+                                    checked={data[count].correcao[idx + 1]}
+                                    onChange={this.onChangeCorrecao(idx + 1)}
+                                >
+                                    {c}
+                                </Option>
+                            </List.Item>
+                        ))}
+                    </List>                   
+                </Modal>
                 <Card>
                     <Card.Header title='Resumo' />
                     <Card.Body>
@@ -114,36 +157,18 @@ class FormContainer extends React.Component {
         )
     }
 
-    onFocus = () => {
-        announceForAccessibility(`Após o sinal, informe uma expressão para filtrar a lista de partes`)
-        setTimeout(() => {
-            this.props.screenProps.onStartRecognizing()
-        }, 5000)
+    onSubmit = () => {
+        this.setState({ open: false }, this.props.onSubmit)
     }
 
-    onFind = pesquisa => {
-        this.setState({
-            pesquisa
-        }, () => {
-            const found = this.props.mainState.partes.find(c => {
-                return norm(c.nome) == norm(this.state.pesquisa)
-            });
-
-            if (found) {
-                this.onChange(found);
-            }else{
-                announceForAccessibility(`Parte não encontrada`)
-            }
-
-            this.setState({ found })
-        })
-    }
-
-
-    onChange = parte => {
-        this.props.onChangeValor(parte)
-        announceForAccessibility(`${parte.nome} selecionado`)
-    }
+    onChangeCorrecao = idx => () => {
+        const {data, count} = this.props.mainState
+        this.props.onChange('correcao')([
+            ...data[count].correcao.slice(0, idx),
+            !data[count].correcao[idx],
+            ...data[count].correcao.slice(idx+1),
+        ])
+    }    
 }
 
 
@@ -174,15 +199,15 @@ class TeoTreNom extends Component {
         //Objeto de indexação
         let partesUnificadas = {};
         anatomp.roteiro.conteudos.forEach(c => {
-            if(c.partes.length == 1){
-                const {_id} = c.partes[0];
-                if(partesUnificadas[_id]){
+            if (c.partes.length == 1) {
+                const { _id } = c.partes[0];
+                if (partesUnificadas[_id]) {
                     partesUnificadas[_id].conteudos.push(c.singular)
                     partesUnificadas[_id].correcao.push(false)
-                }else{
+                } else {
                     const itemMapa = anatomp.mapa.find(m => m.parte._id == _id);
-                    partesUnificadas[_id] = {parte: c.partes[0], localizacao: itemMapa.localizacao[0]   , conteudos: [c.singular], respostaParte: '', respostaConteudos: '', acertou: 0, correcao: [false, false]}
-                }                
+                    partesUnificadas[_id] = { parte: c.partes[0], localizacao: itemMapa.localizacao[0], conteudos: [c.singular], respostaParte: '', respostaConteudos: '', acertou: false, correcao: [false, false] }
+                }
             }
         });
 
@@ -190,7 +215,7 @@ class TeoTreNom extends Component {
 
         this.fieldRef = array.map(fd => [null])
 
-        this.setState({ loading: false, data: array, total: dados.length }, () => {
+        this.setState({ loading: false, data: array, total: array.length }, () => {
             this.onCount();
             Toast.hide();
         })
@@ -230,7 +255,7 @@ class TeoTreNom extends Component {
                     onSubmit={this.onSubmit}
                     maxTentativa={this.props.screenProps.inputConfig.chances}
                 />
-            ) : <Resultados bc={['Roteiros', screenProps.anatomp.nome, 'Treinamento-Teórico-Nomear']} data={data} onRepeat={this.onRepeat} formatter={e => `Numero ${e.numero}, peça ${e.pecaFisica.nome}`} />
+            ) : <Resultados bc={['Roteiros', screenProps.anatomp.nome, 'Treinamento-Teórico-Nomear']} data={data} onRepeat={this.onRepeat} formatter={e => `Numero ${e.localizacao.numero}, peça ${e.localizacao.pecaFisica.nome}`} />
         )
 
         return (
@@ -242,7 +267,7 @@ class TeoTreNom extends Component {
 
     onRepeat = () => {
         const { data } = this.state;
-        const dados = data.map(fd => ({ ...fd, acertou: false, respostaConteudos: '', respostaParte: '', correcao: Array(fd.conteudos.length +1).fill(false) }));
+        const dados = data.map(fd => ({ ...fd, acertou: false, respostaConteudos: '', respostaParte: '', correcao: Array(fd.conteudos.length + 1).fill(false) }));
 
         clearInterval(this.timer)
 
@@ -261,7 +286,7 @@ class TeoTreNom extends Component {
 
         let acertou = this.checkAcertos(data[count]);
 
-        if(timer > 0){
+        if (timer > 0) {
             if (acertou) {
                 Toast.success('Acertou!', 3, this.onNext(acertou));
                 announceForAccessibility('Acertou!')
@@ -272,12 +297,12 @@ class TeoTreNom extends Component {
                     announceForAccessibility('Você errou.')
                 } else {
                     const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
-                    const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
+                    const msg = `Corrija ou complemente sua resposta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
                     Toast.fail(msg, 3, () => this.onSetFocus(count))
                     announceForAccessibility(msg)
                 }
             }
-        }else{
+        } else {
             this.onNext(false)()
         }
     }
@@ -310,17 +335,17 @@ class TeoTreNom extends Component {
     onSetFocus = (count) => {
         const { config } = this.props.screenProps;
         if (config.indexOf('talkback') != -1) {
-           setTimeout(() =>  focusOnView(this.fieldRef[count]), 500)
-        }else{
+            setTimeout(() => focusOnView(this.fieldRef[count]), 500)
+        } else {
             if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
                 this.fieldRef[count].focus()
-            }            
-        }        
-         
+            }
+        }
+
     }
 
     checkAcertos = item => {
-        return item.correcao.every(i => i == true)
+        return item.correcao.every(i => i === true)
     }
 
     onCount = () => {
@@ -329,7 +354,7 @@ class TeoTreNom extends Component {
         }, 1000);
     }
 
-    onChange = (field, value) => {
+    onChange = field => value => {
         const { data, count, timer } = this.state;
 
         this.setState({

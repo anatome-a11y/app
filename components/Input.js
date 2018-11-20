@@ -9,6 +9,7 @@ import Button from 'antd-mobile-rn/lib/button';
 import InputItem from 'antd-mobile-rn/lib/input-item';
 
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
+import TextAreaItem from 'antd-mobile-rn/lib/textarea-item/index.native';
 const ListItem = List.Item
 
 class Input extends React.Component {
@@ -21,7 +22,7 @@ class Input extends React.Component {
     }
 
     render() {
-        const { config, onReadNFC, onStopNFC, onStartListen, onStopListen, ...specificProps } = this.props;
+        const { config, onReadNFC, onStopNFC, onStartListen, onStopListen, isTextArea, ...specificProps } = this.props;
         const { _ref, value, onChange, InputProps, name, isTag, onDone } = specificProps;
 
         return (isTag && config.indexOf('nfc') != -1) ? (
@@ -51,37 +52,50 @@ class Input extends React.Component {
                         {config.indexOf('talkback') == -1 ? (
                             <Text style={{ fontSize: 15, margin: 5, flex: 1 }} >Texto detectado: <Text style={{ color: '#108ee9' }}>{value ? value : 'Nenhum'}</Text></Text>
                         ) : (
-                            <Button onPressOut={this.onToggleAlternativas} accessibilityLabel={`Texto Detectado. ${value ? value : 'Nenhum'}. Botão. Toque duas vezes para selecionar um texto alternativo ou prossiga para continuar`} size='small' type='ghost' style={{ marginRight: 3 }}>Texto Detectado: {value ? value : 'Nenhum'}</Button>
-                        )}
+                                <Button onPressOut={this.onToggleAlternativas} accessibilityLabel={`Texto Detectado. ${value ? value : 'Nenhum'}. Botão. Toque duas vezes para selecionar um texto alternativo ou prossiga para continuar`} size='small' type='ghost' style={{ marginRight: 3 }}>Texto Detectado: {value ? value : 'Nenhum'}</Button>
+                            )}
                         {/* <Button type='ghost' style={{ flex: 1, margin: 5 }} onPressOut={() => onChange('')}>Limpar detecção</Button> */}
-                        
+
                         {this.state.voiceWords.length > 0 && value && this.state.toggleAlternativas ? <View style={{ flex: 1, margin: 5, flexWrap: 'wrap', alignItems: 'flex-start', flexDirection: 'row' }}>
-                            <Text ref={r => this.tituloAlternativas = r} accessibilityLabel='Textos alternativos. Prossiga para selecionar um novo texto' >Alternativas: </Text>                           
-                            {this.state.voiceWords.map(v => <Button accessibilityLabel={`Texto alternativo. ${v}. Botão. Toque duas vezes para substituir o texto detectado`} onPressOut={() => {this.props.onChange(v); announceForAccessibility(`Novo texto detectado: ${v}`)}} key={v} size='small' type='ghost' style={{ marginRight: 3 }}>{v}</Button>)}
+                            <Text ref={r => this.tituloAlternativas = r} accessibilityLabel='Textos alternativos. Prossiga para selecionar um novo texto' >Alternativas: </Text>
+                            {this.state.voiceWords.map(v => <Button accessibilityLabel={`Texto alternativo. ${v}. Botão. Toque duas vezes para substituir o texto detectado`} onPressOut={() => { this.props.onChange(v); announceForAccessibility(`Novo texto detectado: ${v}`) }} key={v} size='small' type='ghost' style={{ marginRight: 3 }}>{v}</Button>)}
                         </View> : null}
                     </View>
                 ) : (
-                        <InputItem
-                            ref={_ref}
-                            value={value}
-                            onChange={onChange}
-                            placeholder={name}
-                            clear={config.indexOf('talkback') ==  -1}
-                            onSubmitEditing={onDone}
-                            {...InputProps}
-                        />
+                        isTextArea ? (
+                            <TextAreaItem
+                                rows={5}
+                                ref={_ref}
+                                value={value}
+                                onChange={onChange}
+                                placeholder={name}
+                                clear={config.indexOf('talkback') == -1}
+                                onSubmitEditing={onDone}
+                                {...InputProps}
+                            />
+                        ) : (
+                                <InputItem
+                                    ref={_ref}
+                                    value={value}
+                                    onChange={onChange}
+                                    placeholder={name}
+                                    clear={config.indexOf('talkback') == -1}
+                                    onSubmitEditing={onDone}
+                                    {...InputProps}
+                                />
+                            )
                     )
             )
     }
 
 
     onToggleAlternativas = () => {
-        const {toggleAlternativas} = this.state;
+        const { toggleAlternativas } = this.state;
 
-        if(toggleAlternativas){
-            this.setState({toggleAlternativas: false})
-        }else{
-            this.setState({toggleAlternativas: true}, () => {
+        if (toggleAlternativas) {
+            this.setState({ toggleAlternativas: false })
+        } else {
+            this.setState({ toggleAlternativas: true }, () => {
                 setTimeout(() => {
                     focusOnView(this.tituloAlternativas)
                 }, 500);
