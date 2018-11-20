@@ -31,8 +31,7 @@ class FormContainer extends React.Component {
     listRef = null;
 
     state = {
-        found: null,
-        pesquisa: ''
+
     }
 
     componentDidMount() {
@@ -43,7 +42,6 @@ class FormContainer extends React.Component {
 
     componentWillReceiveProps(next) {
         const { mainState, screenProps } = this.props;
-
         //Se mudou a peça física, foco na peça física
         if (mainState.data[mainState.count].pecaFisica.nome != next.mainState.data[next.mainState.count].pecaFisica.nome) {
             this.setState({ found: null, pesquisa: '' }, () => {
@@ -73,19 +71,14 @@ class FormContainer extends React.Component {
         const { screenProps, mainState, onGetRef, onSubmit } = this.props;
         const { anatomp } = screenProps;
         const { count, total, data, timer, tentativas } = mainState;
-        const title = data[count].pecaFisica.nome;
-        const { found, pesquisa } = this.state;
-
-        const value = data[count].valores[0];
-
-        const identificador = data[count].referenciaRelativa.referencia == '' ? ('Parte ' + data[count].numero) : (data[count].referenciaRelativa.referenciaParaReferenciado + ' da parte '+ data[count].numero)
-
+        const title = data[count].localizacao.pecaFisica.nome;
+        const identificador = data[count].localizacao.numero;
         return (
             <View>
                 <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={'Treinamento-Prático-Nomear'} />
                 <Instrucoes info={[
-                    'Para cada parte (isto é, sua localização) em cada peça física, selecione o nome da parte e em seguida pressione o botão "Próximo" para submeter',
-                    'Utilize o campo "Nome da parte" para buscar a parte desejada.',
+                    'Dada a localização de cada parte, informe o seu nome e seus respectivos conteúdos teóricos',
+                    'Após informar estes dados, verifique quais você acertou',
                     `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
                 ]} />
                 <Card style={{ marginBottom: 10 }}>
@@ -100,7 +93,6 @@ class FormContainer extends React.Component {
                                 name={'Nome da parte'}
                                 onDone={onSubmit}
                             />
-                            {!found || pesquisa == '' && <Text style={{ padding: 5 }}>Nenhuma parte foi identificada</Text>}
                         </View>
                         <Button disabled={!found && timer > 0} accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
                     </Card.Body>
@@ -183,11 +175,13 @@ class TeoTreNom extends Component {
         let partesUnificadas = {};
         anatomp.roteiro.conteudos.forEach(c => {
             if(c.partes.length == 1){
-                if(partesUnificadas[c.partes[0]._id]){
-                    partesUnificadas[c.partes[0]._id].conteudos.push(c.singular)
-                    partesUnificadas[c.partes[0]._id].correcao.push(false)
+                const {_id} = c.partes[0];
+                if(partesUnificadas[_id]){
+                    partesUnificadas[_id].conteudos.push(c.singular)
+                    partesUnificadas[_id].correcao.push(false)
                 }else{
-                    partesUnificadas[c.partes[0]._id] = {parte: c.partes[0], conteudos: [c.singular], respostaParte: '', respostaConteudos: '', acertou: 0, correcao: [false, false]}
+                    const itemMapa = anatomp.mapa.find(m => m.parte._id == _id);
+                    partesUnificadas[_id] = {parte: c.partes[0], localizacao: itemMapa.localizacao[0]   , conteudos: [c.singular], respostaParte: '', respostaConteudos: '', acertou: 0, correcao: [false, false]}
                 }                
             }
         });
