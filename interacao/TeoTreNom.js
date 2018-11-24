@@ -18,7 +18,7 @@ import Placar from './Placar'
 
 import Input from '../components/Input'
 import Modal from '../components/Modal'
-import Option from '../components/Option'
+import {Simple as Option} from '../components/Option'
 
 import { norm } from '../utils'
 
@@ -48,13 +48,13 @@ class FormContainer extends React.Component {
         if (mainState.data[mainState.count].localizacao.pecaFisica.nome != next.mainState.data[next.mainState.count].localizacao.pecaFisica.nome) {
             setTimeout(() => {
                 focusOnView(this.nomeDaPeca)
-            }, 500);
+            }, 1000);
         } else {
             //Se muou apenas a parte: foco na parte
             if (mainState.count != next.mainState.count) {
                 setTimeout(() => {
                     focusOnView(this.dicaDaParte)
-                }, 500);
+                }, 1000);
             }
         }
 
@@ -84,7 +84,7 @@ class FormContainer extends React.Component {
                     <Card.Header ref={r => this.nomeDaPeca = r} accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a parte anatômica`} title={title} />
                     <Card.Body>
                         <View>
-                            <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`${identificador}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
+                            <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`${identificador}. Prossiga para informar o nome da parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
                             <Input
                                 _ref={onGetRef(count)}
                                 value={data[count].respostaParte}
@@ -98,13 +98,13 @@ class FormContainer extends React.Component {
                                 isTextArea={true}
                                 value={data[count].respostaConteudos}
                                 onChange={onChange('respostaConteudos')}
-                                name={'Conteudos teoricos'}
+                                name={'Conteudos teóricos'}
                                 InputProps={{
                                     editable: timer > 0
                                 }}
                             />
                         </View>
-                        <Button disabled={data[count].respostaParte.length == 0 || data[count].respostaConteudos.length == 0} accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={() => this.setState({ open: true })} type='primary'>Verificar respostas</Button>
+                        <Button disabled={data[count].respostaParte.length == 0 || data[count].respostaConteudos.length == 0} accessibilityLabel={`Verificar respostas. Botão. Toque duas vezes para abrir a verficação de respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={() => this.setState({ open: true })} type='primary'>Verificar respostas</Button>
                     </Card.Body>
                 </Card>
                 <Modal
@@ -116,30 +116,33 @@ class FormContainer extends React.Component {
                         { text: 'Próximo', onPress: this.onSubmit, acc: `Próximo. Botão. Toque duas vezes para submeter ir para a próxima parte` },
                     ]}
                 >
-                    <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 3 }}>Sua resposta:</Text>
-                    <Text>{data[count].respostaParte}</Text>
-                    <Text>{data[count].respostaConteudos}</Text>
-                    <Text style={{ color: '#000', marginBottom: 3, marginTop: 6 }}><Text style={{ fontWeight: 'bold' }}>Respostas esperadas </Text>(Marque o que você acertou):</Text>
+                    <View accessible={true}>
+                        <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 3 }}>Sua resposta:</Text>
+                        <Text>{data[count].respostaParte}</Text>
+                        <Text>{data[count].respostaConteudos}</Text>
+                        <Text accessibilityLabel='Prossiga para ouvir a lista de respostas esperadas'></Text>
+                    </View>
+                    <Text accessibilityLabel={`Respostas esperadas. ${data[count].conteudos.length+1} itens na lista. Prossiga para marcar as opções que você acertou.`} accessible style={{ color: '#000', marginBottom: 3, marginTop: 6 }}><Text style={{ fontWeight: 'bold' }}>Respostas esperadas </Text>(Marque o que você acertou):</Text>
                     <List>
                         <List.Item>
                             <Option
+                                label={`Parte. ${data[count].parte.nome}`}
                                 checked={data[count].correcao[0]}
                                 onChange={this.onChangeCorrecao(0)}
-                            >
-                                {data[count].parte.nome}
-                            </Option>
+                                title={data[count].parte.nome}
+                            />
                         </List.Item>
                         {data[count].conteudos.map((c, idx) => (
                             <List.Item key={idx}>
                                 <Option
+                                    label={c}
                                     checked={data[count].correcao[idx + 1]}
                                     onChange={this.onChangeCorrecao(idx + 1)}
-                                >
-                                    {c}
-                                </Option>
+                                    title={c}
+                                />
                             </List.Item>
                         ))}
-                    </List>                   
+                    </List>
                 </Modal>
                 <Card>
                     <Card.Header title='Resumo' />
@@ -162,13 +165,14 @@ class FormContainer extends React.Component {
     }
 
     onChangeCorrecao = idx => () => {
-        const {data, count} = this.props.mainState
+        const { data, count } = this.props.mainState
+        announceForAccessibility(data[count].correcao[idx] ? `Seleção removida` : 'Selecionado!')
         this.props.onChange('correcao')([
             ...data[count].correcao.slice(0, idx),
             !data[count].correcao[idx],
-            ...data[count].correcao.slice(idx+1),
+            ...data[count].correcao.slice(idx + 1),
         ])
-    }    
+    }
 }
 
 
@@ -356,6 +360,7 @@ class TeoTreNom extends Component {
 
     onChange = field => value => {
         const { data, count, timer } = this.state;
+
 
         this.setState({
             data: [

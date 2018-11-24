@@ -4,6 +4,7 @@ import { StyleSheet, ScrollView, View, Text, RefreshControl, KeyboardAvoidingVie
 import Icon from 'antd-mobile-rn/lib/icon';
 import Button from 'antd-mobile-rn/lib/button';
 import Flex from 'antd-mobile-rn/lib/flex';
+import {version} from './package.json'
 
 const FlexItem = Flex.Item;
 const _fechar = '\ue633';
@@ -43,7 +44,7 @@ class Container extends Component {
         <Flex style={{ marginBottom: 5 }}>
           <FlexItem><Button accessibilityLabel={this.getAcc('Contexto')} ><Icon type={'\ue616'} size='md' /></Button></FlexItem>
           <FlexItem style={styles.spacer}>
-            {footer}
+            <Text style={{textAlign: 'center'}}>Versão {version}</Text>
           </FlexItem>
           <FlexItem><Button accessibilityLabel={this.getAcc('Info')} onPressOut={this.onNavigate('Info')}><Icon type={this.getIcone('Info', '\ue629')} size='md' /></Button></FlexItem>
         </Flex>
