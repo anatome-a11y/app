@@ -80,7 +80,7 @@ class FormEstNom extends Component {
                 <BC _ref={r => this.initialFocus = r} body={['Roteiros', screenProps.anatomp.nome]} head={interaction} />
                 <Instrucoes
                     info={[
-                        'Selecione uma peça física e informe uma parte para obter seu ' + view,
+                        'Selecione uma peça física e informe a localização de uma parte para obter seu ' + view,
                     ]}
                 />
                 <Card style={{ marginBottom: 10 }}>

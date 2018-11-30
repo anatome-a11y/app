@@ -9,9 +9,9 @@ class CustomModal extends Component {
     title = null
 
     componentWillReceiveProps(next){
-        if(!this.props.open && next.open){
-            setTimeout(() => focusOnView(this.title), 1000)
-        }
+        // if(!this.props.open && next.open){
+        //     setTimeout(() => focusOnView(this.title), 1000)
+        // }
     }
 
     render() {

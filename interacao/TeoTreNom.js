@@ -66,12 +66,27 @@ class FormContainer extends React.Component {
 
 
     render() {
-        const { screenProps, mainState, onGetRef, onSubmit, onChange } = this.props;
-        const { anatomp } = screenProps;
+        const { screenProps, mainState, onGetRef, maxTentativa, onChange } = this.props;
+        const { anatomp, config } = screenProps;
         const { count, total, data, timer, tentativas } = mainState;
         const title = data[count].localizacao.pecaFisica.nome;
         const identificador = 'Parte ' + data[count].localizacao.numero;
         const { open } = this.state;
+        const isTB = config.indexOf('talkback') != -1;
+
+        const disabled = data[count].respostaParte.length == 0 || data[count].respostaConteudos.length == 0;
+        const disabledVerificacao = timer == 0 || tentativas == maxTentativa;
+
+
+        const dialogButton = isTB ? { 
+            text: 'Fechar', 
+            onPress: this.toggleDialog(false), 
+            acc: `Fechar. Botão. Toque duas vezes para fechar a verificação de respostas.`
+         } : { 
+            text: 'Próximo', 
+            onPress: this.onSubmit, 
+            acc: `Próximo. Botão. Toque duas vezes para submeter ir para a próxima parte`
+         }
         return (
             <View>
                 <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={'Treinamento-Prático-Nomear'} />
@@ -104,17 +119,16 @@ class FormContainer extends React.Component {
                                 }}
                             />
                         </View>
-                        <Button disabled={data[count].respostaParte.length == 0 || data[count].respostaConteudos.length == 0} accessibilityLabel={`Verificar respostas. Botão. Toque duas vezes para abrir a verficação de respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={() => this.setState({ open: true })} type='primary'>Verificar respostas</Button>
+                        <Button disabled={disabled || disabledVerificacao} accessibilityLabel={(disabled || disabledVerificacao) ? 'Verificar Respostas. Botão. Desabilitado' :`Verificar respostas. Botão. Toque duas vezes para abrir a verficação de respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={this.toggleDialog(true)} type='primary'>Verificar respostas</Button>
+                        {isTB && <Button disabled={disabled} accessibilityLabel={disabled ? 'Próximo. Botão. Desabilitado' :`Próximo. Botão. Toque duas vezes para confirmar suas respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={this.onSubmit} type='primary'>Próximo</Button>}
                     </Card.Body>
                 </Card>
                 <Modal
-                    talkback={screenProps.config.indexOf('talkback') != -1}
+                    talkback={isTB}
                     open={open}
                     title={identificador}
                     acc={`${identificador}. Aberto. Prossiga para ouvir as informações da parte`}
-                    footer={[
-                        { text: 'Próximo', onPress: this.onSubmit, acc: `Próximo. Botão. Toque duas vezes para submeter ir para a próxima parte` },
-                    ]}
+                    footer={[dialogButton]}
                 >
                     <View accessible={true}>
                         <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 3 }}>Sua resposta:</Text>
@@ -159,6 +173,9 @@ class FormContainer extends React.Component {
             </View>
         )
     }
+
+
+    toggleDialog = open => () => this.setState({ open })
 
     onSubmit = () => {
         this.setState({ open: false }, this.props.onSubmit)

@@ -67,12 +67,6 @@ class PraEstLoc extends Component {
 
     }
 
-    // componentWillUpdate(nextProps, nextState) {
-    //     if (JSON.stringify(this.state.parte) != JSON.stringify(nextState.parte)) {
-    //         this.setState({ open: true })
-    //     }
-    // }
-
 
 
     render() {
@@ -106,7 +100,7 @@ class PraEstLoc extends Component {
                             name={'Filtro de partes'}
                             onSkipAlternatives={() => focusOnView(this.refListaPartes)}
                         />
-                        <List accessibilityLabel={`Lista de partes filtradas. Na lista ${filtered.length} partes. Prossiga para ouvir os nomes das partes.`} ref={r => this.refListaPartes = r}>
+                        <List renderHeader={() => `Lista de partes`} accessibilityLabel={`Lista de partes filtradas. Na lista ${filtered.length} partes. Prossiga para ouvir os nomes das partes.`} ref={r => this.refListaPartes = r}>
                             {filtered.length > 0 ? filtered.map(c => (
                                 <List.Item accessible accessibilityLabel={`${c.nome}. Botão. Toque duas vezes para abrir ou prossiga para retornar ao filtro.`} wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
                                     <Text>{c.nome}</Text>
@@ -166,9 +160,8 @@ class PraEstLoc extends Component {
 
             const filtered = _filtered != undefined ? _filtered : null
 
-            this.setState({ filtered }, () => {
-                announceForAccessibility(`Na lista ${filtered.length} partes: ${filtered.map(f => f.nome).join(', ')}. Prossiga para selecionar.`)
-            })
+            // announceForAccessibility(`Na lista ${filtered.length} partes: ${filtered.map(f => f.nome).join(', ')}. Prossiga para selecionar.`)
+            this.setState({ filtered })
         })
     }
 

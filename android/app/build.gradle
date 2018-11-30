@@ -148,10 +148,10 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-video')
     compile project(':react-native-voice')
     compile project(':react-native-accessibility')
     compile project(':react-native-nfc-manager')
-    compile project(':react-native-video')
     compile fileTree(dir: "libs", include: ["*.jar"])
     compile "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
     compile "com.facebook.react:react-native:+"  // From node_modules

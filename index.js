@@ -18,7 +18,6 @@ import { name as appName } from './app.json';
 import Toast from 'antd-mobile-rn/lib/toast';
 
 import NfcManager, { NdefParser } from 'react-native-nfc-manager';
-import Voice from 'react-native-voice';
 
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 
@@ -56,9 +55,6 @@ class Root extends Component {
     constructor(props) {
         super(props);
 
-        Voice.onSpeechStart = this.onSpeechStart;
-        Voice.onSpeechEnd = this.onSpeechEnd;
-
         this.state = {
             config: ['video_imagem'],
             inputConfig: {
@@ -67,14 +63,13 @@ class Root extends Component {
             },
             anatomp: null,
             modoInteracao: {
-                tipoConteudo: 'teorico',
-                modoAprendizagem: 'treinamento',
-                sentidoIdentificacao: 'nomear',
+                tipoConteudo: 'pratico',
+                modoAprendizagem: 'estudo',
+                sentidoIdentificacao: 'localizar',
             },
             supported: true,
             // enabled: false,
             tag: {},
-            gravando: false,
         }
     }
 
@@ -85,13 +80,13 @@ class Root extends Component {
 
         AccessibilityInfo.fetch().then((isEnabled) => {
             if(isEnabled){
-                this.setState({config: [...config, 'talkback']})
+                this.setState({config: [...config, 'talkback', 'voz']})
             }            
         });   
         
         AccessibilityInfo.addEventListener('change', (isEnabled) => {
             if(isEnabled){
-                this.setState({config: [...config, 'talkback']})
+                this.setState({config: [...config, 'talkback', 'voz']})
             }else{
                 this.setState({config: this.state.config.filter(i => i != 'talkback')})
             }            
@@ -113,10 +108,6 @@ class Root extends Component {
             })
     }
 
-    componentWillUnmount() {
-        Voice.destroy().then(Voice.removeAllListeners);
-    }
-
     render() {
 
         const { config, modoInteracao, anatomp, inputConfig } = this.state;
@@ -124,8 +115,6 @@ class Root extends Component {
         return <AppContext.Provider value={{
             config,  
             inputConfig,
-            onStartListen: this._startRecognizing,
-            onStopListen: this._stopRecognizing, 
             onReadNFC: this._startDetection,
             onStopNFC: this._stopDetection,                                 
         }}>
@@ -143,40 +132,6 @@ class Root extends Component {
                 }}
             />
         </AppContext.Provider>
-    }
-
-
-    onSpeechStart = () => {
-        this.setState({ gravando: true })
-    }
-
-    onSpeechEnd = () => {
-        this.setState({ gravando: false })
-    }
-
-    onGetVoice = (cb, isNumber = false) => e => {
-        const val = e.value[0] == 'comando limpar' ? '' : e.value;
-        cb(val)
-    }    
-
-    _startRecognizing = (cb, isNumber = false) => e => {
-        Vibration.vibrate(300)
-        Voice.onSpeechResults = this.onGetVoice(cb, isNumber);
-
-        Voice.start('pt-BR')
-        .then(r => r)
-        .catch(err => {
-            //console.error(err)
-        })
-    }
-
-    async _stopRecognizing(e) {
-        try {
-            Vibration.vibrate(300)
-            await Voice.stop();
-        } catch (e) {
-            //console.error(e);
-        }
     }
 
 

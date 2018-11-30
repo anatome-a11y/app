@@ -27,4 +27,5 @@ const Videos = ({ midias, config }) => (
         </View>)
 )
 
+
 export default Videos;

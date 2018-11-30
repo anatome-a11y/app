@@ -5,6 +5,7 @@ import Icon from 'antd-mobile-rn/lib/icon';
 import Button from 'antd-mobile-rn/lib/button';
 import Flex from 'antd-mobile-rn/lib/flex';
 import {version} from './package.json'
+import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 
 const FlexItem = Flex.Item;
 const _fechar = '\ue633';
@@ -13,6 +14,7 @@ const _fechar = '\ue633';
 class Container extends Component {
 
   scroll = null;
+  refTitle = null;
 
   componentWillReceiveProps(next) {
     if (this.props.sinalScroll != next.sinalScroll) {
@@ -42,7 +44,7 @@ class Container extends Component {
           </ScrollView>
         </KeyboardAvoidingView>
         <Flex style={{ marginBottom: 5 }}>
-          <FlexItem><Button accessibilityLabel={this.getAcc('Contexto')} ><Icon type={'\ue616'} size='md' /></Button></FlexItem>
+          <FlexItem><Button onPressOut={this.goToTop} accessibilityLabel={this.getAcc('Contexto')} ><Icon type={'\ue616'} size='md' /></Button></FlexItem>
           <FlexItem style={styles.spacer}>
             <Text style={{textAlign: 'center'}}>Versão {version}</Text>
           </FlexItem>
@@ -52,6 +54,10 @@ class Container extends Component {
     );
   }
 
+
+  goToTop = () => {
+    focusOnView(this.refTitle)
+  }
 
   getAcc = (tela) => {
     const { navigation } = this.props;
@@ -66,7 +72,7 @@ class Container extends Component {
       switch (tela) {
         case 'Ajuda': return 'Abrir Ajuda geral. Botão';
         case 'Config': return 'Abrir Configurações. Botão';
-        case 'Contexto': return 'Ouvir contexto. Botão';
+        case 'Contexto': return 'Voltar para o topo. Botão. Toque duas vezes para retornar ao título da tela';
         case 'Info': return 'Abrir informações do roteiro Botão';
       }
     }
@@ -77,11 +83,11 @@ class Container extends Component {
     const { navigation } = this.props;
 
     switch (navigation.state.routeName) {
-      case 'Info': return <Text accessibilityLabel='Informações. Título' style={styles.title}>Informações</Text>;
-      case 'Ajuda': return <Text accessibilityLabel='Ajuda. Título' style={styles.title}>Ajuda</Text>;
-      case 'Config': return <Text accessibilityLabel='Configurações. Título' style={styles.title}>Configurações</Text>;
-      case 'Roteiro': return <Text accessibilityLabel='Interações. Título' style={styles.title}>Interações</Text>;
-      default: return <Text accessibilityLabel='anatom P. Título' style={styles.title}>Anatome-AT</Text>;
+      case 'Info': return <Text ref={r => this.refTitle = r} accessibilityLabel='Informações. Título' style={styles.title}>Informações</Text>;
+      case 'Ajuda': return <Text ref={r => this.refTitle = r} accessibilityLabel='Ajuda. Título' style={styles.title}>Ajuda</Text>;
+      case 'Config': return <Text ref={r => this.refTitle = r} accessibilityLabel='Configurações. Título' style={styles.title}>Configurações</Text>;
+      case 'Roteiro': return <Text ref={r => this.refTitle = r} accessibilityLabel='Interações. Título' style={styles.title}>Interações</Text>;
+      default: return <Text ref={r => this.refTitle = r} accessibilityLabel='anatom A.T. Título' style={styles.title}>Anatome-AT</Text>;
     }
   }
 
