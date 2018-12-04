@@ -119,7 +119,7 @@ class App extends Component {
                   align="center"
                   arrow="horizontal"
                 >
-                  <Text style={{fontWeight: 'bold', fontSize: 15, color}} accessibilityLabel={'Roteiro. ' + anatomp.nome}>{anatomp.nome}</Text>
+                  <Text style={{fontWeight: 'bold', fontSize: 15, color}} accessibilityLabel={anatomp.nome + " .Roteiro"}>{anatomp.nome}</Text>
                   <Brief style={{color}}>{anatomp.roteiro.curso} | {anatomp.roteiro.disciplina} | {anatomp.instituicao}</Brief>
                   <Text accessibilityLabel='Toque duas vezes para selecionar.'></Text>
                   <Midias color={color} value={anatomp.roteiro.resumoMidias} />

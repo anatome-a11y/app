@@ -88,8 +88,10 @@ class FormContainer extends React.Component {
 
         return (
             <View>
-                <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={'Treinamento-Teórico-Nomear'} />
-                <Instrucoes info={[
+                <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={'Treinamento - Teórico - Localização-Conteúdo'} />
+                <Instrucoes 
+                voz={screenProps.config.indexOf('voz') != -1}
+                info={[
                     'Para cada parte de cada peça física selecione o conteúdo teórico correspondente e em seguida pressione o botão "Próximo" no fim da lista.',
                     'Caso necessário, utilize o filtro para buscar um conteúdo',
                     `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`

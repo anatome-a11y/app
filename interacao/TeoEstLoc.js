@@ -89,8 +89,9 @@ class TeoEstLoc extends Component {
      
         return (
             <Container navigation={navigation}>
-            <BC _ref={r => this.initialFocus = r} body={['Roteiros', screenProps.anatomp.nome]} head={'Estudo-Teórico-Localizar'} />
+            <BC _ref={r => this.initialFocus = r} body={['Roteiros', screenProps.anatomp.nome]} head={'Estudo - Teórico - Conteúdo-Localização'} />
                 <Instrucoes
+                    voz={screenProps.config.indexOf('voz') != -1}
                     info={[
                         'Escolha um conteúdo teórico na lista de conteúdos para obter o nome da parte e sua localização nas peças físicas',
                         'Caso deseje, utilize o filtro a seguir para encontrar um conteúdo específico.'

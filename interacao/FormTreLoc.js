@@ -157,7 +157,7 @@ class FormTreLoc extends React.Component {
         return (
             <View>
                 <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={interaction} />
-                <Instrucoes info={info} />
+                <Instrucoes voz={screenProps.config.indexOf('voz') != -1} info={info} />
                 <Card style={{ marginBottom: 10 }}>
                     <Card.Header accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a dica d${dica}.`} ref={r => this.nomeDaPeca = r} title={title} />
                     <Card.Body>

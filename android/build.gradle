@@ -1,3 +1,4 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
     repositories {
@@ -32,17 +33,16 @@ allprojects {
 
 
 subprojects {
-  project.configurations.all {
-      afterEvaluate {project ->
+    afterEvaluate {project ->
         if (project.hasProperty("android")) {
             android {
-                compileSdkVersion 26
-                buildToolsVersion '26.0.2'
+                compileSdkVersion 27
+                buildToolsVersion "27.0.2"
             }
         }
     }
-  }
 }
+
 
 ext {
     buildToolsVersion = "26.0.3"

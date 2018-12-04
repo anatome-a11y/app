@@ -101,7 +101,7 @@ class PraTreloc extends Component {
                         onChangeValor={this.onChangeValor}
                         onErrorClick={this.onErrorClick}
                         onSubmit={this.onSubmit}
-                        interaction='Treinamento-Prático-Localizar'
+                        interaction='Treinamento - Prático - Conteúdo-Localização'
                         info={[
                             'Informe as partes de cada peça física do roteiro e pressione o botão "Próximo" para submeter.',
                             `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`

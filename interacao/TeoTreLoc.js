@@ -117,7 +117,7 @@ class TeoTreLoc extends Component {
                         onChangeValor={this.onChangeValor}
                         onErrorClick={this.onErrorClick}
                         onSubmit={this.onSubmit}
-                        interaction='Treinamento-Teórico-Localizar'
+                        interaction='Treinamento - Teórico - Conteúdo-Localização'
                         isTeoria={true}
                         info={[
                             'Para cada conteúdo teórico informe a parte correspondente e em seguida pressione o botão "Próximo" para submeter.',

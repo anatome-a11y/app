@@ -89,8 +89,10 @@ class FormContainer extends React.Component {
          }
         return (
             <View>
-                <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={'Treinamento-Prático-Nomear'} />
-                <Instrucoes info={[
+                <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={'Treinamento - Prático - Localização-Conteúdo'} />
+                <Instrucoes 
+                voz={screenProps.config.indexOf('voz') != -1}
+                info={[
                     'Dada a localização de cada parte, informe o seu nome e seus respectivos conteúdos teóricos',
                     'Após informar estes dados, verifique quais você acertou',
                     `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
@@ -276,7 +278,7 @@ class TeoTreNom extends Component {
                     onSubmit={this.onSubmit}
                     maxTentativa={this.props.screenProps.inputConfig.chances}
                 />
-            ) : <Resultados bc={['Roteiros', screenProps.anatomp.nome, 'Treinamento-Teórico-Nomear']} data={data} onRepeat={this.onRepeat} formatter={e => `Numero ${e.localizacao.numero}, peça ${e.localizacao.pecaFisica.nome}`} />
+            ) : <Resultados bc={['Roteiros', screenProps.anatomp.nome, 'Treinamento - Teórico - Localização-Conteúdo']} data={data} onRepeat={this.onRepeat} formatter={e => `Numero ${e.localizacao.numero}, peça ${e.localizacao.pecaFisica.nome}`} />
         )
 
         return (

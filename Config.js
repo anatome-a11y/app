@@ -95,6 +95,13 @@ class Config extends Component {
                         </View>
                         <Slider min={1} max={5} step={1} value={inputConfig.chances} onChange={this.onChangeInputConfig('chances', 'Máximo de tentativas', '')} />
                     </List.Item>
+                    <List.Item>
+                        <Option
+                            checked={config.indexOf('textoAlternativo') != -1}
+                            onChange={this.onChange('textoAlternativo', 'Permitir sugestões alternativas para transcrição de voz', config.indexOf('textoAlternativo') != -1)}
+                            label='Permitir sugestões alternativas para transcrição de voz'
+                        />
+                    </List.Item>                    
                 </List>
             </Container>
         )

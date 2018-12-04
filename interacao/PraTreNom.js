@@ -82,8 +82,10 @@ class FormContainer extends React.Component {
 
         return (
             <View>
-                <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={'Treinamento-Prático-Nomear'} />
-                <Instrucoes info={[
+                <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={'Treinamento - Prático - Localização-Conteúdo'} />
+                <Instrucoes 
+                voz={screenProps.config.indexOf('voz') != -1}
+                info={[
                     'Para cada parte (isto é, sua localização) em cada peça física, selecione o nome da parte e em seguida pressione o botão "Próximo" para submeter',
                     'Utilize o campo "Nome da parte" para buscar a parte desejada.',
                     `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
@@ -246,7 +248,7 @@ class PraTreNom extends Component {
                     onSubmit={this.onSubmit}
                     maxTentativa={this.props.screenProps.inputConfig.chances}
                 />
-            ) : <Resultados bc={['Roteiros', screenProps.anatomp.nome, 'Treinamento-Prático-Nomear']} data={data} onRepeat={this.onRepeat} formatter={e => `Numero ${e.numero}, peça ${e.pecaFisica.nome}`} />
+            ) : <Resultados bc={['Roteiros', screenProps.anatomp.nome, 'Treinamento - Prático - Localização-Conteúdo']} data={data} onRepeat={this.onRepeat} formatter={e => `Numero ${e.numero}, peça ${e.pecaFisica.nome}`} />
         )
 
         return (

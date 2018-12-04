@@ -27,7 +27,6 @@ class PraEstLoc extends Component {
     initialFocus = null;
     modalBody = null;
     refListaPartes = null;
-    refNovaParte = null;
     inputRef = null;
 
     state = {
@@ -75,23 +74,18 @@ class PraEstLoc extends Component {
 
         const selected = parte == undefined ? '' : parte._id;
 
-        // const btnNovaParte = screenProps.config.indexOf('talkback') != -1 ? [{
-        //     text: 'Selecionar nova parte',
-        //     acc: `Selecionar nova parte. Botão. Toque duas vezes para selecionar uma nova parte`,
-        //     onPress: () => this.setState({open: false}, () => setTimeout(() => {focusOnView(this.refNovaParte)}, 1000)),
-        // }] : []
-
         return (
             <Container navigation={navigation}>
-                <BC _ref={r => this.initialFocus = r} body={['Roteiros', screenProps.anatomp.nome]} head={'Estudo-Prático-Localizar'} acc='Prossiga para ouvir as instruções' />
+                <BC _ref={r => this.initialFocus = r} body={['Roteiros', screenProps.anatomp.nome]} head={'Estudo - Prático - Conteúdo-Localização'} acc='Prossiga para ouvir as instruções' />
                 <Instrucoes
+                    voz={screenProps.config.indexOf('voz') != -1}
                     info={[
                         'Escolha uma parte na lista de partes para obter sua localização nas peças físicas.',
                         'Caso deseje, utilize o filtro a seguir para encontrar uma parte.'
                     ]}
                 />
                 <Card>
-                    <Card.Header ref={r => this.refNovaParte = r} title='Partes a selecionar' accessibilityLabel='Partes a selecionar. A seguir informe uma parte para filtrar a lista de partes' />
+                    <Card.Header title='Partes a selecionar' accessibilityLabel='Partes a selecionar. A seguir informe uma parte para filtrar a lista de partes' />
                     <Card.Body >
                         <Input
                             _ref={this.getRef}
@@ -102,12 +96,12 @@ class PraEstLoc extends Component {
                         />
                         <List renderHeader={() => `Lista de partes`} accessibilityLabel={`Lista de partes filtradas. Na lista ${filtered.length} partes. Prossiga para ouvir os nomes das partes.`} ref={r => this.refListaPartes = r}>
                             {filtered.length > 0 ? filtered.map(c => (
-                                <List.Item accessible accessibilityLabel={`${c.nome}. Botão. Toque duas vezes para abrir ou prossiga para retornar ao filtro.`} wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
+                                <List.Item accessible accessibilityLabel={`${c.nome}. Botão. Toque duas vezes para abrir.`} wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
                                     <Text>{c.nome}</Text>
                                 </List.Item>
                             )) : <List.Item accessibilityLabel='Nenhuma parte encontrada. Altere as palavras chave do campo de busca.' wrap multipleLine>Nenhuma parte encontrada</List.Item>}
                         </List>
-                        {screenProps.config.indexOf('talkback') != -1 && <Button type='primary' onPressOut={() => focusOnView(this.inputRef)}>Voltar para o filtro</Button>}
+                        {/* {screenProps.config.indexOf('talkback') != -1 && <Button type='primary' onPressOut={() => focusOnView(this.inputRef)}>Voltar para o filtro</Button>} */}
                     </Card.Body>
                 </Card>
                 <Modal
@@ -124,9 +118,9 @@ class PraEstLoc extends Component {
                             const pf = pecasFisicas[key];
                             const l = pf.localizacao.find(m => m.parte._id == parte._id);
                             const referenciaAsPartes = pf.localizacao.filter(m => m.referenciaRelativa.referencia == parte._id)
-                            const RefRel = referenciaAsPartes.map(r => <Text style={{ marginBottom: 8 }} key={r._id}>{r.referenciaRelativa.referenciadoParaReferencia} da <Text style={{ fontWeight: 'bold' }}>parte {r.numero}</Text> ({r.parte.nome})</Text>)
+                            const RefRel = referenciaAsPartes.map(r => <Text style={{ marginBottom: 8 }} key={r._id}>{`Referencia: ${r.parte.nome}. `+ r.referenciaRelativa.referenciadoParaReferencia}</Text>)
                             if (l) {
-                                const localizacao = l.referenciaRelativa.referencia == '' ? ('Parte ' + l.numero) : (l.referenciaRelativa.referenciaParaReferenciado + ' da parte ' + l.numero)
+                                const localizacao = l.referenciaRelativa.referencia == '' ? ('Parte ' + l.numero) : (`Referenciado por ${l.parte.nome} parte ${l.numero}.` + l.referenciaRelativa.referenciaParaReferenciado)
                                 return (
                                     <View key={l._id} style={{ marginBottom: 8 }}>
                                         <Text><Text style={{ fontWeight: 'bold' }}>{pf.nome}:</Text>  <Text>{localizacao}</Text></Text>
@@ -160,8 +154,18 @@ class PraEstLoc extends Component {
 
             const filtered = _filtered != undefined ? _filtered : null
 
-            // announceForAccessibility(`Na lista ${filtered.length} partes: ${filtered.map(f => f.nome).join(', ')}. Prossiga para selecionar.`)
-            this.setState({ filtered })
+            this.setState({ filtered }, () => {
+                if(filtered.length > 0){
+                    const naLista = `Na lista ${filtered.length} partes. Prossiga para selecionar.`;
+                    if(pesquisa){
+                        announceForAccessibility(`Texto detectado: ${pesquisa}. ${naLista}`)
+                    }else{
+                        announceForAccessibility(`Texto removido. ${naLista}`)
+                    }
+                }else{
+                    announceForAccessibility(`Nenhuma parte foi encontrada para o filtro ${pesquisa}`)
+                }
+            })
         })
     }
 

@@ -5,12 +5,15 @@ import Container from './Container';
 
 import Videos from './components/Videos'
 import Imagens from './components/Imagens'
+import BC from './components/Breadcrumbs'
 
 import List from 'antd-mobile-rn/lib/list';
+import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
+
 const ListItem = List.Item;
 
-const Sig = ({ value }) => (
-    <Text style={styles.listItem}>{value}</Text>
+const Sig = ({ value, acc = 'Descrição:'}) => (
+    <Text accessibilityLabel={`${acc} ${value}`} style={styles.listItem}>{value}</Text>
 )
 
 const Name = ({ children }) => (
@@ -18,6 +21,14 @@ const Name = ({ children }) => (
 )
 
 class Info extends Component {
+
+    initialFocus = null;
+
+    componentDidMount() {
+        setTimeout(() => {
+            focusOnView(this.initialFocus)
+        }, 500)
+    }
 
 
     render() {
@@ -37,24 +48,28 @@ class Info extends Component {
             ...anatomp.roteiro.generalidades
         ] : []
 
+
+        const sizePF = anatomp ? anatomp.pecasFisicas.length : 1;
+
         return (
             <Container navigation={navigation}>
-                <List style={{ marginBottom: 10 }} renderHeader={() => 'Peças físicas do roteiro'}>
+                <BC _ref={r => this.initialFocus = r} body={[]} head={'Informações'} acc='Prossiga para ouvir as informações do roteiro' />
+                <List style={{ marginBottom: 10 }} renderHeader={() => 'Peças físicas do roteiro'} accessibilityLabel={`Peças físicas do roteiro. Lista com ${sizePF} itens. Prossiga para ouvir`}>
                     {anatomp ? anatomp.pecasFisicas.map(p => (
                         <ListItem wrap multipleLine key={p._id}><Name>{p.nome}</Name><Sig value={p.descricao ? p.descricao : 'Nenhuma descrição'} /></ListItem>
-                    )) : <ListItem wrap multipleLine><Text>Selecione um roteiro para visualizar as informações das peças físicas</Text></ListItem>}
+                    )) : <ListItem wrap multipleLine><Text>Selecione um roteiro para obter as informações das peças físicas</Text></ListItem>}
                 </List>
-                <List style={{ marginBottom: 10 }} renderHeader={() => 'Informações sobre o roteiro'}>
-                    {anatomp ? dados.map(d => <ListItem key={d.label} wrap multipleLine><Name>{d.label}</Name><Sig value={d.value} /></ListItem>) : <ListItem wrap multipleLine><Text>Selecione um roteiro para visualizar suas informações</Text></ListItem>}
+                <List style={{ marginBottom: 10 }} renderHeader={() => 'Informações sobre o roteiro'} accessibilityLabel={`Informações sobre o roteiro. Lista com ${dados.length} itens. Prossiga para ouvir`}>
+                    {anatomp ? dados.map(d => <ListItem key={d.label} wrap multipleLine><Name>{d.label}</Name><Sig acc={''} value={d.value} /></ListItem>) : <ListItem wrap multipleLine><Text>Selecione um roteiro para obter suas informações</Text></ListItem>}
                 </List>
-                <List style={{ marginBottom: 10 }} renderHeader={() => 'Generalidades'}>
+                <List style={{ marginBottom: 10 }} renderHeader={() => 'Generalidades do roteiro'} accessibilityLabel={`Generalidades do roteiro. Lista com ${generalidades.length} itens. Prossiga para ouvir`}>
                     {generalidades.length > 0 ? generalidades.map(g => <ListItem key={g._id} wrap multipleLine>
                         <Text style={styles.listItem}>{g.texto}</Text>
                         <Imagens config={config} midias={g.midias} />
                         <Videos config={config} midias={g.midias} />
-                    </ListItem>) : <ListItem wrap multipleLine><Text>Selecione um roteiro para visualizar suas generalidades</Text></ListItem>}
+                    </ListItem>) : <ListItem wrap multipleLine><Text>Selecione um roteiro para obter suas generalidades</Text></ListItem>}
                 </List>
-                <List style={{ marginBottom: 10 }} renderHeader={() => 'Lista de siglas da Anatomia'}>
+                <List style={{ marginBottom: 10 }} renderHeader={() => 'Siglas da Anatomia'} accessibilityLabel={`Siglas da Anatomia. Lista com 33 itens. Prossiga para ouvir`}>
                     <ListItem><Name>A.  <Sig value="Artéria" /></Name></ListItem>
                     <ListItem><Name>Aa.  <Sig value="Artérias" /></Name></ListItem>
                     <ListItem><Name>Art.  <Sig value="Articulação" /></Name></ListItem>

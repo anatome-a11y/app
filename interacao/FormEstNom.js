@@ -79,8 +79,9 @@ class FormEstNom extends Component {
             <Container navigation={navigation}>
                 <BC _ref={r => this.initialFocus = r} body={['Roteiros', screenProps.anatomp.nome]} head={interaction} />
                 <Instrucoes
+                    voz={screenProps.config.indexOf('voz') != -1}
                     info={[
-                        'Selecione uma peça física e informe a localização de uma parte para obter seu ' + view,
+                        'Selecione uma peça física e indique a localização de uma parte para obter seu ' + view,
                     ]}
                 />
                 <Card style={{ marginBottom: 10 }}>
@@ -128,9 +129,9 @@ class FormEstNom extends Component {
                                 onErrorClick: this.onErrorClick,
                             }}
                         />
-                        {this.state.conteudos.length > 0 && <Button ref={r => this.refBtnDetalhes = r} accessibilityLabel='Informações da parte. Botão. Toque duas vezes para obter mais informações sobre a parte' style={{ margin: 5 }} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Informações da parte</Button>}
+                        {<Button ref={r => this.refBtnDetalhes = r} accessibilityLabel='Partes referenciadas. Botão. Toque duas vezes para ouvir as partes referenciadas ou volte para informar uma nova parte' style={{ margin: 5 }} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Informações da parte</Button>}
                         {/* {(this.props.isTeoria && screenProps.config.indexOf('talkback') == -1) && <Button ref={r => this.refBtnDetalhes = r} accessibilityLabel='Nome da parte. Botão. Toque duas vezes para obter o nome da parte' style={{margin: 5}} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Nome da parte</Button>} */}
-                        {screenProps.config.indexOf('talkback') != -1 && <Button type='primary' onPressOut={() => focusOnView(this.fieldRef)}>Voltar para o filtro</Button>}
+                        {/* {screenProps.config.indexOf('talkback') != -1 && <Button type='primary' onPressOut={() => focusOnView(this.fieldRef)}>Voltar para o filtro</Button>} */}
                     </Card.Body>
                 </Card>
 
@@ -138,20 +139,16 @@ class FormEstNom extends Component {
                     talkback={screenProps.config.indexOf('talkback') != -1}
                     open={open}
                     title={parte ? parte.parte.nome : null}
-                    acc={`Parte ${parte ? parte.parte.nome : ''}. Aberto. Prossiga para ouvir as informações da parte`}
+                    acc={`Parte ${parte ? parte.parte.nome : ''}. Aberto. Prossiga para ouvir as partes referenciadas`}
                     footer={[
                         { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar` },
                     ]}
                 >
                     {parte != undefined ? <ScrollView style={{ maxHeight: 280 }}>
                         {
-                            conteudos.length == 0 ? (
-                                <View key='emptyList'>
-                                    <Text>Nenhuma informação adicional</Text>
-                                </View>
-                            ) : (conteudos.map(c => (
+                            conteudos.length > 0 && (conteudos.map(c => (
                                 <View key={c.texto} style={{ marginBottom: 8 }}>
-                                    <Text>{c.texto}</Text>
+                                    <Text style={{textAlign: 'justify'}}>{c.texto}</Text>
                                     {isTeoria && (
                                         <View>
                                             <Imagens config={screenProps.config} midias={c.midias} />
@@ -186,10 +183,10 @@ class FormEstNom extends Component {
                 conteudos = this.props.screenProps.anatomp.roteiro.conteudos.filter(c => c.partes.find(p => p._id == parte.parte._id)).map(c => ({texto: c.singular, midias: c.midias}));
             } else {
                 const referenciaAsPartes = pecasFisicas[pecaFisica].partesNumeradas.filter(m => m.referenciaRelativa.referencia == parte.parte._id)
-                const localizacaoRelativa = referenciaAsPartes.map(r => ({texto: r.referenciaRelativa.referenciadoParaReferencia + ' da parte ' + r.numero + '(' + r.parte.nome + ')'}));
+                const localizacaoRelativa = referenciaAsPartes.map(r => ({texto: ' Referencia a parte ' + r.numero + ': ' + r.parte.nome + '. ' + r.referenciaRelativa.referenciadoParaReferencia}));
                 if (localizacaoRelativa.length > 0) {
                     conteudos = localizacaoRelativa;
-                    announceForAccessibility(parte.parte.nome + '. Prossiga para ouvir as informações de localização')
+                    announceForAccessibility(parte.parte.nome + '. Prossiga para ouvir as partes referenciadas')
                 } else {
                     announceForAccessibility(parte.parte.nome)
                 }

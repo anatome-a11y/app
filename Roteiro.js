@@ -111,7 +111,7 @@ class Roteiro extends Component {
                                     checked={modoAprendizagem == 'estudo'}
                                     onChange={this.onChange('modoAprendizagem', 'estudo', 'Estudo')}
                                 >
-                                    Identificação anatômica por informações teóricas associadas
+                                    Você seleciona a parte anatômica e o sistema te informa o nome ou a localização da parte.
                                 </Option>
                             </List.Item>
                             <List.Item wrap multipleLine>
@@ -149,7 +149,7 @@ class Roteiro extends Component {
                                     checked={tipoConteudo == 'teorico'}
                                     onChange={this.onChange('tipoConteudo', 'teorico', 'Teórico')}
                                 >
-                                    Identificação anatômica por informações teóricas associadas
+                                    Identificação anatômica por conhecimento teórico associado
                                 </Option>
                             </List.Item>
                         </List>
@@ -162,8 +162,8 @@ class Roteiro extends Component {
                             <List.Item wrap multipleLine>
                                 <Option
                                     _ref={r => this.initialFocusSI = r}
-                                    title='Do nome da parte para a localização'
-                                    label='Sentido de identificação. Do nome da parte para a localização'
+                                    title='Conteúdo - Localização'
+                                    label='Do conteúdo para a localização'
                                     checked={sentidoIdentificacao == 'localizar'}
                                     onChange={this.onChange('sentidoIdentificacao', 'localizar', 'Do nome da parte para a localização')}
                                 >
@@ -172,8 +172,8 @@ class Roteiro extends Component {
                             </List.Item>
                             <List.Item wrap multipleLine>
                                 <Option
-                                    title='Da localização para o nome da parte'
-                                    label='Sentido de identificação. Da localização para o nome da parte'
+                                    title='Localização - Conteúdo'
+                                    label=' Da localização para o conteúdo'
                                     checked={sentidoIdentificacao == 'nomear'}
                                     onChange={this.onChange('sentidoIdentificacao', 'nomear', 'Da localização para o nome da parte')}
                                 >
