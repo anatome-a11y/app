@@ -18,7 +18,7 @@ const Option = ({ checked, onChange = null, label, title, children, _ref, disabl
     <Checkbox checked={checked} onChange={onChange} ref={_ref} disabled={disabled}>
         <View style={{ marginLeft: 15 }} >
             {title && <Text accessibilityLabel={getAcc(label, checked)} style={{ fontWeight: 'bold' }}>{title}: </Text>}
-            <Text>{children}</Text>
+            <Text style={{ paddingRight: 25 }}>{children}</Text>
         </View>
     </Checkbox>
 )

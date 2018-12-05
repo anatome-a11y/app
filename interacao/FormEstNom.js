@@ -27,7 +27,6 @@ class FormEstNom extends Component {
     fieldRef = []
     initialFocus = null;
     refBtnDetalhes = null;
-    headerParte = null;
 
     state = {
         pecasFisicas: {},
@@ -107,7 +106,7 @@ class FormEstNom extends Component {
                 </Card>
 
                 <Card style={{ marginBottom: 10 }}>
-                    <Card.Header ref={r => this.headerParte = r} title='Parte anatômica' accessibilityLabel='Parte anatômica. A seguir informe a localização de uma parte para obter suas informações' />
+                    <Card.Header title='Parte anatômica' accessibilityLabel='Parte anatômica. A seguir informe a localização de uma parte para obter suas informações' />
                     <Card.Body>
                         <Input
                             isTag
@@ -129,7 +128,7 @@ class FormEstNom extends Component {
                                 onErrorClick: this.onErrorClick,
                             }}
                         />
-                        {<Button ref={r => this.refBtnDetalhes = r} accessibilityLabel='Partes referenciadas. Botão. Toque duas vezes para ouvir as partes referenciadas ou volte para informar uma nova parte' style={{ margin: 5 }} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Informações da parte</Button>}
+                        {<Button ref={r => this.refBtnDetalhes = r} accessibilityLabel='Partes referenciadas. Botão. Toque duas vezes para ouvir ou retorne para informar uma nova parte' style={{ margin: 5 }} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Partes referenciadas</Button>}
                         {/* {(this.props.isTeoria && screenProps.config.indexOf('talkback') == -1) && <Button ref={r => this.refBtnDetalhes = r} accessibilityLabel='Nome da parte. Botão. Toque duas vezes para obter o nome da parte' style={{margin: 5}} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Nome da parte</Button>} */}
                         {/* {screenProps.config.indexOf('talkback') != -1 && <Button type='primary' onPressOut={() => focusOnView(this.fieldRef)}>Voltar para o filtro</Button>} */}
                     </Card.Body>
@@ -139,7 +138,7 @@ class FormEstNom extends Component {
                     talkback={screenProps.config.indexOf('talkback') != -1}
                     open={open}
                     title={parte ? parte.parte.nome : null}
-                    acc={`Parte ${parte ? parte.parte.nome : ''}. Aberto. Prossiga para ouvir as partes referenciadas`}
+                    acc={`Parte ${parte ? parte.parte.nome : ''}. Aberto. Prossiga para ouvir`}
                     footer={[
                         { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar` },
                     ]}
@@ -174,7 +173,7 @@ class FormEstNom extends Component {
 
     onChange = value => {
         const { pecasFisicas, pecaFisica } = this.state;
-        const parte = pecasFisicas[pecaFisica].partesNumeradas.find(p => p.numero == value);
+        const parte = pecasFisicas[pecaFisica].partesNumeradas.find(p => p.numero == value && p.referenciaRelativa.referencia == "" );
         let conteudos = [];
         if (parte != undefined) {
 
@@ -200,10 +199,6 @@ class FormEstNom extends Component {
     onSelectPF = pecaFisica => e => {
         this.setState({ pecaFisica: pecaFisica._id, parte: undefined, value: '' })
         announceForAccessibility(`${pecaFisica.nome} selecionado.`)
-        setTimeout(() => {
-            focusOnView(this.headerParte)
-        }, 2000)
-
     }
 
     onGetRef = r => { this.fieldRef = r }

@@ -123,8 +123,8 @@ class TeoEstLoc extends Component {
                     talkback={screenProps.config.indexOf('talkback') != -1}
                     open={open}
                     // title={null}
-                    title={conteudo ? conteudo.texto : null}
-                    acc={`Informações do conteúdo. Aberto. Prossiga para ouvir o nome da parte e sua localização nas peças físicas.`}
+                    title={null}
+                    acc={`Aberto. Prossiga para ouvir o nome da parte e sua localização nas peças físicas.`}
                     footer={[
                         { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar os detalhes do conteúdo ${conteudo ? conteudo.texto : ''}` },
                     ]}
@@ -147,7 +147,7 @@ class TeoEstLoc extends Component {
                                             const referencia = pf.localizacao.find(m => m.parte._id == l.referenciaRelativa.referencia)
                                             return (
                                                 <View key={l._id} style={{marginBottom: 8}}>
-                                                    <Text><Text style={{fontWeight: 'bold'}}>{p.nome}</Text> - {l.referenciaRelativa.referenciaParaReferenciado} da parte {referencia.numero} ({referencia.parte.nome}) na peça {l.pecaFisica.nome}</Text>
+                                                    <Text><Text style={{fontWeight: 'bold'}}>{p.nome}</Text> na peça {l.pecaFisica.nome} referenciado pela parte {referencia.numero} - {referencia.parte.nome}. {l.referenciaRelativa.referenciaParaReferenciado}</Text>
                                                 </View>
                                             )                                            
                                         }

@@ -108,7 +108,7 @@ class PraEstLoc extends Component {
                     talkback={screenProps.config.indexOf('talkback') != -1}
                     open={open}
                     title={parte ? parte.nome : null}
-                    acc={`Detalhes da Parte ${parte ? parte.nome : ''}. Aberto. Prossiga para ouvir a localização nas peças físicas.`}
+                    acc={`Parte ${parte ? parte.nome : ''}. Aberto. Prossiga para ouvir a localização nas peças físicas.`}
                     footer={[
                         { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar os detalhes da Parte ${parte ? parte.nome : ''}` },
                     ]}
