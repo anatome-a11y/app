@@ -19,8 +19,26 @@ import Videos from '../components/Videos'
 import BC from '../components/Breadcrumbs'
 import Instrucoes from '../components/Instrucoes'
 import Modal from '../components/Modal'
+import ReferenciasRelativas from '../components/ReferenciasRelativas';
 
 const ListItem = List.Item;
+
+
+
+
+const ModalBody = ({conteudos, isTeoria, config}) => {
+    return conteudos.length > 0 && (conteudos.map(c => (
+            <View key={c.texto} style={{ marginBottom: 8 }}>
+                <Text style={{textAlign: 'justify'}}>{c.texto}</Text>
+                {isTeoria && (
+                    <View>
+                        <Imagens config={config} midias={c.midias} />
+                        <Videos config={config} midias={c.midias} />
+                    </View>
+                )}
+            </View>
+        )))
+}
 
 
 class FormEstNom extends Component {
@@ -143,21 +161,14 @@ class FormEstNom extends Component {
                         { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar` },
                     ]}
                 >
-                    {parte != undefined ? <ScrollView style={{ maxHeight: 280 }}>
-                        {
-                            conteudos.length > 0 && (conteudos.map(c => (
-                                <View key={c.texto} style={{ marginBottom: 8 }}>
-                                    <Text style={{textAlign: 'justify'}}>{c.texto}</Text>
-                                    {isTeoria && (
-                                        <View>
-                                            <Imagens config={screenProps.config} midias={c.midias} />
-                                            <Videos config={screenProps.config} midias={c.midias} />
-                                        </View>
-                                    )}
-                                </View>
-                            )))
-                        }
-                    </ScrollView> : <Text style={{ padding: 5, textAlign: 'center' }}>Parte não setada nesta peça física</Text>}
+                    {parte != undefined ? (
+                        <ScrollView style={{ maxHeight: 280 }}>
+                            <ModalBody conteudos={conteudos} isTeoria={isTeoria} config={screenProps.config} />
+                            <ReferenciasRelativas parte={parte.parte} pecasFisicas={[pecasFisicas[pecaFisica]]} attrName='partesNumeradas' />
+                        </ScrollView>
+                    ) :
+                        (<Text style={{ padding: 5, textAlign: 'center' }}>Parte não setada nesta peça física</Text>
+                        )}
                 </Modal>
             </Container>
         )
@@ -173,18 +184,16 @@ class FormEstNom extends Component {
 
     onChange = value => {
         const { pecasFisicas, pecaFisica } = this.state;
-        const parte = pecasFisicas[pecaFisica].partesNumeradas.find(p => p.numero == value && p.referenciaRelativa.referencia == "" );
+        const parte = pecasFisicas[pecaFisica].partesNumeradas.find(p => p.numero == value && p.referenciaRelativa.referencia == null);
         let conteudos = [];
         if (parte != undefined) {
 
             if (this.props.isTeoria) {
                 announceForAccessibility(parte.parte.nome + '. Prossiga para ouvir os conteúdos associados')
-                conteudos = this.props.screenProps.anatomp.roteiro.conteudos.filter(c => c.partes.find(p => p._id == parte.parte._id)).map(c => ({texto: c.singular, midias: c.midias}));
+                conteudos = this.props.screenProps.anatomp.roteiro.conteudos.filter(c => c.partes.find(p => p._id == parte.parte._id)).map(c => ({ texto: c.singular, midias: c.midias }));
             } else {
-                const referenciaAsPartes = pecasFisicas[pecaFisica].partesNumeradas.filter(m => m.referenciaRelativa.referencia == parte.parte._id)
-                const localizacaoRelativa = referenciaAsPartes.map(r => ({texto: ' Referencia a parte ' + r.numero + ': ' + r.parte.nome + '. ' + r.referenciaRelativa.referenciadoParaReferencia}));
-                if (localizacaoRelativa.length > 0) {
-                    conteudos = localizacaoRelativa;
+                const referenciaAsPartes = pecasFisicas[pecaFisica].partesNumeradas.filter(m => m.referenciaRelativa.referencia != null && m.referenciaRelativa.referencia._id == parte.parte._id)
+                if (referenciaAsPartes.length > 0) {
                     announceForAccessibility(parte.parte.nome + '. Prossiga para ouvir as partes referenciadas')
                 } else {
                     announceForAccessibility(parte.parte.nome)

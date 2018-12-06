@@ -17,10 +17,34 @@ import Instrucoes from '../components/Instrucoes'
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 import Input from '../components/Input'
 import Modal from '../components/Modal'
+import ReferenciasRelativas from '../components/ReferenciasRelativas'
 
 
 
 const ListItem = List.Item;
+
+
+const CorpoModal = ({ parte, pecasFisicas }) => {
+    if (parte == undefined) {
+        return null;
+    } else {
+        return Object.keys(pecasFisicas).map(key => {
+            const pf = pecasFisicas[key];
+            const localizacao = pf.locFlat.find(m => m.parte._id == parte._id && m.referenciaRelativa.referencia == null);
+            if (localizacao != undefined) {
+                return (
+                    <Text key={localizacao._id} style={{ marginBottom: 8 }}>
+                        <Text style={{ fontWeight: 'bold' }}>{pf.nome}: </Text>
+                        <Text>Parte {localizacao.numero}</Text>
+                    </Text>
+                )
+            } else {
+                return null;
+            }
+        })
+    }
+}
+
 
 
 class PraEstLoc extends Component {
@@ -47,13 +71,13 @@ class PraEstLoc extends Component {
         //Objeto de indexação
         let pecasFisicas = {};
         anatomp.pecasFisicas.forEach(pf => {
-            pecasFisicas[pf._id] = { ...pf, localizacao: [] };
+            pecasFisicas[pf._id] = { ...pf, locFlat: [] };
         })
 
         //Seta as partes e seus numeros para cada peça física
         anatomp.mapa.forEach(mapa => {
             mapa.localizacao.forEach(loc => {
-                pecasFisicas[loc.pecaFisica._id].localizacao.push({ parte: mapa.parte, ...loc })
+                pecasFisicas[loc.pecaFisica._id].locFlat.push({ parte: mapa.parte, ...loc })
             })
         })
 
@@ -113,30 +137,10 @@ class PraEstLoc extends Component {
                         { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar os detalhes da Parte ${parte ? parte.nome : ''}` },
                     ]}
                 >
-                    {parte != undefined ? <ScrollView style={{ maxHeight: 280 }}>
-                        {Object.keys(pecasFisicas).map(key => {
-                            const pf = pecasFisicas[key];
-                            const l = pf.localizacao.find(m => m.parte._id == parte._id);
-                            const referenciaAsPartes = pf.localizacao.filter(m => m.referenciaRelativa.referencia == parte._id)
-                            const RefRel = referenciaAsPartes.map(r => <Text style={{ marginBottom: 8 }} key={r._id}>{`Referencia: ${r.parte.nome}. `+ r.referenciaRelativa.referenciadoParaReferencia}</Text>)
-                            if (l) {
-                                const localizacao = l.referenciaRelativa.referencia == '' ? ('Parte ' + l.numero) : (`Referenciado por ${l.parte.nome} parte ${l.numero}.` + l.referenciaRelativa.referenciaParaReferenciado)
-                                return (
-                                    <View key={l._id} style={{ marginBottom: 8 }}>
-                                        <Text><Text style={{ fontWeight: 'bold' }}>{pf.nome}:</Text>  <Text>{localizacao}</Text></Text>
-                                        {RefRel.length > 0 && <View accessible={true}>
-                                            <Text style={{ fontWeight: 'bold' }}>Referências relativas: </Text>
-                                            {RefRel}
-                                        </View>}
-                                        
-
-                                    </View>
-                                )
-                            } else {
-                                return null;
-                            }
-                        })}
-                    </ScrollView> : null}
+                    <ScrollView style={{ maxHeight: 280 }}>
+                        <CorpoModal parte={parte} pecasFisicas={pecasFisicas} />
+                        <ReferenciasRelativas parte={parte} pecasFisicas={pecasFisicas} />
+                    </ScrollView>
                 </Modal>
             </Container>
         )
@@ -155,14 +159,14 @@ class PraEstLoc extends Component {
             const filtered = _filtered != undefined ? _filtered : null
 
             this.setState({ filtered }, () => {
-                if(filtered.length > 0){
+                if (filtered.length > 0) {
                     const naLista = `Na lista ${filtered.length} partes. Prossiga para selecionar.`;
-                    if(pesquisa){
+                    if (pesquisa) {
                         announceForAccessibility(`Texto detectado: ${pesquisa}. ${naLista}`)
-                    }else{
+                    } else {
                         announceForAccessibility(`Texto removido. ${naLista}`)
                     }
-                }else{
+                } else {
                     announceForAccessibility(`Nenhuma parte foi encontrada para o filtro ${pesquisa}`)
                 }
             })
