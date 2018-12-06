@@ -148,10 +148,10 @@ class FormTreLoc extends React.Component {
         const { count, total, data, timer, pecasFisicas, tentativas } = mainState;
         const title = data[count].pecaFisica.nome;
         const dica = data[count].valores.length > 1 ? 'as partes' : 'a parte';
-        const qtdRefRel = data[count].partes.filter(p => p.referenciaRelativa.referencia != '').length;
+        const qtdRefRel = data[count].partes.filter(p => p.referenciaRelativa.referencia != null).length;
         const dicaRefRel = qtdRefRel > 0 ? (qtdRefRel == 1 ? ` (1 referência relativa)` : ` (${qtdRefRel} referências relativas)`) : ''
 
-        const identificador = (!data[count].referenciaRelativa || data[count].referenciaRelativa.referencia == '') ? (data[count].texto + dicaRefRel) : (data[count].referenciaRelativa.referenciadoParaReferencia + ' da parte ' + data[count].texto)
+        const identificador = (!data[count].referenciaRelativa || data[count].referenciaRelativa.referencia == null) ? (data[count].texto + dicaRefRel) : (data[count].referenciaRelativa.referenciadoParaReferencia + ' da parte ' + data[count].texto)
 
 
         return (
