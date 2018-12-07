@@ -12,10 +12,11 @@ const LocalizacaoPF = ({ parte, pecasFisicas }) => {
             if (localizacao != undefined) {
                 return (
                     <Text key={localizacao._id} style={{ marginBottom: 8 }}>
-                        <Text style={{ fontWeight: 'bold' }}>{pf.nome}: </Text>
-                        <Text>Parte {localizacao.numero}</Text>
+                        <Text style={{ fontWeight: 'bold' }}>{localizacao.parte.nome}: </Text>
+                        <Text>Parte {localizacao.numero} na peça</Text>
+                        <Text style={{ fontWeight: 'bold' }}> {pf.nome}</Text>
                     </Text>
-                )
+                )                
             } else {
                 return null;
             }

@@ -165,7 +165,7 @@ class Roteiro extends Component {
                                     title='Conteúdo - Localização'
                                     label='Do conteúdo para a localização'
                                     checked={sentidoIdentificacao == 'localizar'}
-                                    onChange={this.onChange('sentidoIdentificacao', 'localizar', 'Do nome da parte para a localização')}
+                                    onChange={this.onChange('sentidoIdentificacao', 'localizar', 'Do conteúdo para a localização')}
                                 >
                                     Partindo-se do nome ou teoria, encontra-se a localização da parte
                                 </Option>
@@ -175,7 +175,7 @@ class Roteiro extends Component {
                                     title='Localização - Conteúdo'
                                     label=' Da localização para o conteúdo'
                                     checked={sentidoIdentificacao == 'nomear'}
-                                    onChange={this.onChange('sentidoIdentificacao', 'nomear', 'Da localização para o nome da parte')}
+                                    onChange={this.onChange('sentidoIdentificacao', 'nomear', 'Da localização para o conteúdo')}
                                 >
                                     Partindo-se da localização da parte define-se o nome ou a informação teórica correta
                                 </Option>

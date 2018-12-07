@@ -151,7 +151,7 @@ class FormTreLoc extends React.Component {
         const qtdRefRel = data[count].partes.filter(p => p.referenciaRelativa.referencia != null).length;
         const dicaRefRel = qtdRefRel > 0 ? (qtdRefRel == 1 ? ` (1 referência relativa)` : ` (${qtdRefRel} referências relativas)`) : ''
 
-        const identificador = (!data[count].referenciaRelativa || data[count].referenciaRelativa.referencia == null) ? (data[count].texto + dicaRefRel) : (data[count].referenciaRelativa.referenciadoParaReferencia + ' da parte ' + data[count].texto)
+        const identificador = (!data[count].referenciaRelativa || data[count].referenciaRelativa.referencia == null) ? (data[count].texto + dicaRefRel) : (data[count].texto + ': Selecione a parte localizada ' +data[count].referenciaRelativa.referenciadoParaReferencia)
 
 
         return (

@@ -20,8 +20,31 @@ import Imagens from '../components/Imagens'
 import Videos from '../components/Videos'
 import BC from '../components/Breadcrumbs'
 import Instrucoes from '../components/Instrucoes'
+import ReferenciasRelativas from '../components/ReferenciasRelativas';
 
 const ListItem = List.Item;
+
+
+
+const LocalizacaoPF = ({conteudo, pecasFisicas}) => {
+    if (conteudo != undefined) {
+        return Object.keys(pecasFisicas).map(key => conteudo.partes.map(p => {
+            const localizacao = pf = pecasFisicas[key].localizacao.find(m => m.parte._id == p._id)
+
+            if (localizacao && localizacao.referenciaRelativa.referencia == null) {
+                return (
+                    <View key={localizacao._id} style={{ marginBottom: 8 }}>
+                        <Text><Text style={{ fontWeight: 'bold' }}>{p.nome}</Text> - Parte {localizacao.numero} na peça {localizacao.pecaFisica.nome}</Text>
+                    </View>
+                )
+            } else {
+                return null
+            }
+        }))
+    } else {
+        return null
+    }
+}
 
 
 class TeoEstLoc extends Component {
@@ -79,17 +102,17 @@ class TeoEstLoc extends Component {
             }, 500)
         })
 
-    }  
+    }
 
     render() {
         const { navigation, screenProps, isTeoria } = this.props;
         const { open, conteudo, filtered, pecasFisicas } = this.state;
 
         const selected = conteudo == undefined ? '' : conteudo._id;
-     
+
         return (
             <Container navigation={navigation}>
-            <BC _ref={r => this.initialFocus = r} body={['Roteiros', screenProps.anatomp.nome]} head={'Estudo - Teórico - Conteúdo-Localização'} />
+                <BC _ref={r => this.initialFocus = r} body={['Roteiros', screenProps.anatomp.nome]} head={'Estudo - Teórico - Conteúdo-Localização'} />
                 <Instrucoes
                     voz={screenProps.config.indexOf('voz') != -1}
                     info={[
@@ -100,19 +123,19 @@ class TeoEstLoc extends Component {
                 <Card>
                     <Card.Header title='Conteúdos a selecionar' accessibilityLabel='Conteúdos a selecionar. A seguir informe uma parte para filtrar a lista de partes' />
                     <Card.Body>
-                    <Input
+                        <Input
                             _ref={r => this.inputRef = r}
                             value={this.state.pesquisa}
                             onChange={this.onFilter}
                             name={'Filtro de conteúdo teórico'}
                             onSkipAlternatives={() => focusOnView(this.refListaConteudo)}
-                        />                        
+                        />
                         <List ref={r => this.refListaConteudo = r} accessibilityLabel={`Conteúdos teóricos filtrados. Lista com ${filtered.length} itens. Prossiga para ouvir os conteúdos.`}>
                             {filtered.length > 0 ? filtered.map(c => (
                                 <List.Item accessible accessibilityLabel={`${c.texto}. Botão. Toque duas vezes para abrir ou prossiga para obter mais opções.`} wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
                                     <Text>{c.texto}</Text>
                                     <Imagens config={screenProps.config} midias={c.midias} />
-                                    <Videos config={screenProps.config} midias={c.midias} />                                    
+                                    <Videos config={screenProps.config} midias={c.midias} />
                                 </List.Item>
                             )) : <List.Item accessibilityLabel='Nenhuma parte encontrada. Altere as palavras chave do campo de busca.' wrap multipleLine>Nenhum conteúdo foi encontrado</List.Item>}
                         </List>
@@ -129,40 +152,10 @@ class TeoEstLoc extends Component {
                         { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar os detalhes do conteúdo ${conteudo ? conteudo.texto : ''}` },
                     ]}
                 >
-                    {conteudo != undefined && <ScrollView style={{maxHeight: 280}}>
-                            {Object.keys(pecasFisicas).map(key => {
-                                const pf = pecasFisicas[key];
-
-                                const _Itens = conteudo.partes.map(p => {
-                                    const l = pf.localizacao.find(m => m.parte._id == p._id)
-
-                                    if (l) {
-                                        if(l.referenciaRelativa.referencia == null){
-                                            return (
-                                                <View key={l._id} style={{marginBottom: 8}}>
-                                                    <Text><Text style={{fontWeight: 'bold'}}>{p.nome}</Text> - Parte {l.numero} na peça {l.pecaFisica.nome}</Text>
-                                                </View>
-                                            )
-                                        }else{
-                                            const referencia = pf.localizacao.find(m => m.parte._id == l.referenciaRelativa.referencia._id)
-                                            return (
-                                                <View key={l._id} style={{marginBottom: 8}}>
-                                                    <Text><Text style={{fontWeight: 'bold'}}>{p.nome}</Text> na peça {l.pecaFisica.nome} referenciado pela parte {referencia.numero} - {referencia.parte.nome}. {l.referenciaRelativa.referenciaParaReferenciado}</Text>
-                                                </View>
-                                            )                                            
-                                        }
-                                    } else {
-                                        return null
-                                    }
-                                });
-
-                                if (_Itens.find(i => i != null)) {
-                                    return _Itens
-                                } else {
-                                    return null;
-                                }
-                            })}
-                    </ScrollView>}
+                    <ScrollView style={{ maxHeight: 280 }}>
+                        <LocalizacaoPF conteudo={conteudo} pecasFisicas={pecasFisicas} />
+                        {conteudo && conteudo.partes.map(p => <ReferenciasRelativas attrName='localizacao' key={p._id} parte={p} pecasFisicas={pecasFisicas} />)}
+                    </ScrollView>
                 </Modal>
             </Container>
         )

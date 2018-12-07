@@ -54,7 +54,7 @@ class TeoTreLoc extends Component {
             Object.keys(pecasFisicas).forEach(key => {
                 const pfTemAParteDoConteudo = pecasFisicas[key].partesNumeradas.find(pn => conteudo.partes.find(p => p._id == pn.parte._id) != undefined)
 
-                if (pfTemAParteDoConteudo) {
+                if (pfTemAParteDoConteudo && pfTemAParteDoConteudo.referenciaRelativa.referencia == null) {
                     const { nome, _id } = pecasFisicas[key];
                     //Substitui as partes do conteudo por partes numeradas
                     const partes = pecasFisicas[key].partesNumeradas.filter(pn => conteudo.partes.find(p => p._id == pn.parte._id) != undefined);

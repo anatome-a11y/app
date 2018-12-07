@@ -156,7 +156,7 @@ class FormEstNom extends Component {
                     talkback={screenProps.config.indexOf('talkback') != -1}
                     open={open}
                     title={parte ? parte.parte.nome : null}
-                    acc={`Parte ${parte ? parte.parte.nome : ''}. Aberto. Prossiga para ouvir`}
+                    acc={`Aberto. Prossiga para ouvir`}
                     footer={[
                         { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar` },
                     ]}

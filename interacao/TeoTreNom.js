@@ -70,7 +70,7 @@ class FormContainer extends React.Component {
         const { anatomp, config } = screenProps;
         const { count, total, data, timer, tentativas } = mainState;
         const title = data[count].localizacao.pecaFisica.nome;
-        const identificador = 'Parte ' + data[count].localizacao.numero;
+        const identificador = data[count].localizacao.referenciaRelativa.referencia == null ? ('Parte ' + data[count].localizacao.numero) : ('Em relação à parte ' + data[count].localizacao.numero +', localiza-se ' + data[count].localizacao.referenciaRelativa.referenciaParaReferenciado);
         const { open } = this.state;
         const isTB = config.indexOf('talkback') != -1;
 
@@ -142,7 +142,7 @@ class FormContainer extends React.Component {
                     <List>
                         <List.Item>
                             <Option
-                                label={`Parte. ${data[count].parte.nome}`}
+                                label={`Parte ${data[count].parte.nome}`}
                                 checked={data[count].correcao[0]}
                                 onChange={this.onChangeCorrecao(0)}
                                 title={data[count].parte.nome}

@@ -78,7 +78,7 @@ class FormContainer extends React.Component {
 
         const value = data[count].valores[0];
 
-        const identificador = data[count].referenciaRelativa.referencia == null ? ('Parte ' + data[count].numero) : (data[count].referenciaRelativa.referenciaParaReferenciado + ' da parte '+ data[count].numero)
+        const identificador = data[count].referenciaRelativa.referencia == null ? ('Nome da parte ' + data[count].numero) : ('Em relação à parte '+data[count].numero+', informe o nome da parte localizada ' + data[count].referenciaRelativa.referenciaParaReferenciado)
 
         return (
             <View>
