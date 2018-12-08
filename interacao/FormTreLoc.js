@@ -86,6 +86,44 @@ class Form extends Component {
 
 
 
+const DicaTeoria = ({ config, atual, _ref }) => {
+    const refRel = atual.partes.filter(p => p.referenciaRelativa.referencia != null);
+    const qtdRefRel = refRel.length;
+    const titleRefRel = 'Atente-se para as referências relativas:';
+    const instrucao = "Selecione a parte localizada ";
+
+    console.log(atual.partes)
+
+    return (
+        <View accessible={true} ref={_ref}>
+            <View style={{ margin: 10 }}>
+                <Text style={{textAlign: 'justify'}}>{atual.texto}</Text>
+                {qtdRefRel > 0 && (
+                    atual.partes.length > 1 ? (
+                        <View>
+                            <Text style={{textAlign: 'justify'}}>{titleRefRel}</Text>
+                            {refRel.map((p, key) => <Text style={{textAlign: 'justify', paddingLeft: 10}} key={key}>{'- '+instrucao + p.referenciaRelativa.referenciadoParaReferencia}</Text>)}
+                        </View>
+                    ) : (
+                        <Text style={{textAlign: 'justify'}}>{instrucao + atual.partes[0].referenciaRelativa.referenciadoParaReferencia}</Text> 
+                    )
+                )}
+            </View>
+            <Imagens config={config} midias={atual.midias} />
+            <Videos config={config} midias={atual.midias} />
+        </View>
+    )
+}
+
+
+const DicaPratica = ({ atual, _ref, dica }) => {
+    const identificador = (!atual.referenciaRelativa || atual.referenciaRelativa.referencia == null) ? atual.texto : (atual.texto + ': Selecione a parte localizada ' + atual.referenciaRelativa.referenciadoParaReferencia)
+    return (
+        <View accessible={true} ref={_ref} accessibilityLabel={`Dica: ${identificador}. Prossiga para informar ${dica}`}>
+             <Text style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>               
+        </View>        
+    )
+}
 
 
 class FormTreLoc extends React.Component {
@@ -148,11 +186,6 @@ class FormTreLoc extends React.Component {
         const { count, total, data, timer, pecasFisicas, tentativas } = mainState;
         const title = data[count].pecaFisica.nome;
         const dica = data[count].valores.length > 1 ? 'as partes' : 'a parte';
-        const qtdRefRel = data[count].partes.filter(p => p.referenciaRelativa.referencia != null).length;
-        const dicaRefRel = qtdRefRel > 0 ? (qtdRefRel == 1 ? ` (1 referência relativa)` : ` (${qtdRefRel} referências relativas)`) : ''
-
-        const identificador = (!data[count].referenciaRelativa || data[count].referenciaRelativa.referencia == null) ? (data[count].texto + dicaRefRel) : (data[count].texto + ': Selecione a parte localizada ' +data[count].referenciaRelativa.referenciadoParaReferencia)
-
 
         return (
             <View>
@@ -161,15 +194,7 @@ class FormTreLoc extends React.Component {
                 <Card style={{ marginBottom: 10 }}>
                     <Card.Header accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a dica d${dica}.`} ref={r => this.nomeDaPeca = r} title={title} />
                     <Card.Body>
-                        <View accessible={true} ref={r => this.dicaDaParte = r} accessibilityLabel={`Dica: ${identificador}. Prossiga para informar ${dica}`}>
-                            <Text style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
-                            {isTeoria && (
-                                <View>
-                                    <Imagens config={config} midias={data[count].midias} />
-                                    <Videos config={config} midias={data[count].midias} />
-                                </View>
-                            )}
-                        </View>
+                        {isTeoria ? <DicaTeoria _ref={r => this.dicaDaParte = r} atual={data[count]} config={config} /> : <DicaPratica dica={dica} _ref={r => this.dicaDaParte = r} atual={data[count]} />}                        
                         {data[count].valores.map((value, idx) => (
                             <View key={count + '-' + idx}>
                                 <Form
