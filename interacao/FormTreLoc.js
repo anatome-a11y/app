@@ -92,10 +92,8 @@ const DicaTeoria = ({ config, atual, _ref }) => {
     const titleRefRel = 'Atente-se para as referências relativas:';
     const instrucao = "Selecione a parte localizada ";
 
-    console.log(atual.partes)
-
     return (
-        <View accessible={true} ref={_ref}>
+        <View ref={_ref}>
             <View style={{ margin: 10 }}>
                 <Text style={{textAlign: 'justify'}}>{atual.texto}</Text>
                 {qtdRefRel > 0 && (
@@ -158,12 +156,13 @@ class FormTreLoc extends React.Component {
             }
         }
 
-        if (sinalTexto != next.sinalTexto) {
-            onSetSinalScroll(+ new Date())
-            setTimeout(() => {
-                focusOnView(this.dicaDaParte)
-            }, 500)
-        }
+        // if (sinalTexto != next.sinalTexto) {
+        //     onSetSinalScroll(+ new Date(), () => {
+        //         setTimeout(() => {
+        //             focusOnView(this.dicaDaParte)
+        //         }, 500)            
+        //     })
+        // }
 
 
         if (this.props.mainState.timer != 0 && next.mainState.timer == 0) {

@@ -26,16 +26,14 @@ const ListItem = List.Item;
 
 
 
-const ModalBody = ({conteudos, isTeoria, config}) => {
+const ModalBody = ({conteudos, config}) => {
     return conteudos.length > 0 && (conteudos.map(c => (
             <View key={c.texto} style={{ marginBottom: 8 }}>
                 <Text style={{textAlign: 'justify'}}>{c.texto}</Text>
-                {isTeoria && (
                     <View>
                         <Imagens config={config} midias={c.midias} />
                         <Videos config={config} midias={c.midias} />
                     </View>
-                )}
             </View>
         )))
 }
@@ -90,7 +88,8 @@ class FormEstNom extends Component {
         //     onPress: () => focusOnView(this.initialFocus)
         // }] : []
 
-        const view = isTeoria ? 'nome e os conteúdos associados.' : 'nome.';
+        const view = isTeoria ? 'nome,  conteúdos associados e referências relativas.' : 'nome e referências relativas';
+        const accBtn = isTeoria ? 'Informações da parte. .' : 'Partes referenciadas. '
 
         return (
             <Container navigation={navigation}>
@@ -146,7 +145,7 @@ class FormEstNom extends Component {
                                 onErrorClick: this.onErrorClick,
                             }}
                         />
-                        {<Button ref={r => this.refBtnDetalhes = r} accessibilityLabel='Partes referenciadas. Botão. Toque duas vezes para ouvir ou retorne para informar uma nova parte' style={{ margin: 5 }} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Partes referenciadas</Button>}
+                        {<Button ref={r => this.refBtnDetalhes = r} accessibilityLabel={accBtn+'Botão. Toque duas vezes para ouvir ou retorne para informar uma nova parte'} style={{ margin: 5 }} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>{isTeoria ? 'Informações da parte' : 'Partes referenciadas'}</Button>}
                         {/* {(this.props.isTeoria && screenProps.config.indexOf('talkback') == -1) && <Button ref={r => this.refBtnDetalhes = r} accessibilityLabel='Nome da parte. Botão. Toque duas vezes para obter o nome da parte' style={{margin: 5}} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Nome da parte</Button>} */}
                         {/* {screenProps.config.indexOf('talkback') != -1 && <Button type='primary' onPressOut={() => focusOnView(this.fieldRef)}>Voltar para o filtro</Button>} */}
                     </Card.Body>
@@ -163,7 +162,9 @@ class FormEstNom extends Component {
                 >
                     {parte != undefined ? (
                         <ScrollView style={{ maxHeight: 280 }}>
-                            <ModalBody conteudos={conteudos} isTeoria={isTeoria} config={screenProps.config} />
+                            {isTeoria && <Text accessibilityLabel='Conhecimentos teóricos. Prossiga para ouvir.' style={{fontWeight: 'bold', marginBottom: 5}}>Conhecimentos teóricos:</Text>}                        
+                            {isTeoria && <ModalBody conteudos={conteudos} config={screenProps.config} />}
+                            {isTeoria && <Text accessibilityLabel='Referências relativas. Prossiga para ouvir.' style={{fontWeight: 'bold', marginTop: 15, marginBottom: 5}}>Referências relativas:</Text>}
                             <ReferenciasRelativas parte={parte.parte} pecasFisicas={[pecasFisicas[pecaFisica]]} attrName='partesNumeradas' />
                         </ScrollView>
                     ) :
@@ -189,7 +190,7 @@ class FormEstNom extends Component {
         if (parte != undefined) {
 
             if (this.props.isTeoria) {
-                announceForAccessibility(parte.parte.nome + '. Prossiga para ouvir os conteúdos associados')
+                announceForAccessibility(parte.parte.nome + '. Prossiga para ouvir as informações da parte')
                 conteudos = this.props.screenProps.anatomp.roteiro.conteudos.filter(c => c.partes.find(p => p._id == parte.parte._id)).map(c => ({ texto: c.singular, midias: c.midias }));
             } else {
                 const referenciaAsPartes = pecasFisicas[pecaFisica].partesNumeradas.filter(m => m.referenciaRelativa.referencia != null && m.referenciaRelativa.referencia._id == parte.parte._id)

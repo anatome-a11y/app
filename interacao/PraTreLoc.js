@@ -211,6 +211,12 @@ class PraTreloc extends Component {
 
     onChangeValor = idx => valor => {
         const { data, count, timer } = this.state;
+        
+        if(valor){
+            announceForAccessibility(`Texto detectado: ${valor}. Prossiga para submeter.`)
+        }else{
+            announceForAccessibility(`Texto removido`)
+        }
 
         this.setState({
             data: [

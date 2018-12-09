@@ -130,7 +130,7 @@ class TeoEstLoc extends Component {
                             name={'Filtro de conteúdo teórico'}
                             onSkipAlternatives={() => focusOnView(this.refListaConteudo)}
                         />
-                        <List ref={r => this.refListaConteudo = r} accessibilityLabel={`Conteúdos teóricos filtrados. Lista com ${filtered.length} itens. Prossiga para ouvir os conteúdos.`}>
+                        <List renderHeader={() => `Lista de conteúdos teóricos`} ref={r => this.refListaConteudo = r} accessibilityLabel={`Conteúdos teóricos filtrados. Lista com ${filtered.length} itens. Prossiga para ouvir os conteúdos.`}>
                             {filtered.length > 0 ? filtered.map(c => (
                                 <List.Item accessible accessibilityLabel={`${c.texto}. Botão. Toque duas vezes para abrir ou prossiga para obter mais opções.`} wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
                                     <Text>{c.texto}</Text>
@@ -180,7 +180,16 @@ class TeoEstLoc extends Component {
             const filtered = _filtered != undefined ? _filtered : null
 
             this.setState({ filtered }, () => {
-                announceForAccessibility(filtered.length > 0 ? `Na lista ${filtered.length} conteúdos. Prossiga para selecionar um destes conteúdos: ${filtered.map(f => f.texto).join(', ')}` : 'Nenhum conteúdo encontrado. Altere as palavras chave e tente novamente.')
+                if (filtered.length > 0) {
+                    const naLista = `Na lista ${filtered.length} conteúdos. Prossiga para selecionar.`;
+                    if (pesquisa) {
+                        announceForAccessibility(`Texto detectado: ${pesquisa}. ${naLista}`)
+                    } else {
+                        announceForAccessibility(`Texto removido. ${naLista}`)
+                    }
+                } else {
+                    announceForAccessibility(`Nenhum conteúdo foi encontrado para o filtro ${pesquisa}`)
+                }
             })
         })
     }

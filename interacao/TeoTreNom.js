@@ -121,8 +121,8 @@ class FormContainer extends React.Component {
                                 }}
                             />
                         </View>
-                        <Button disabled={disabled || disabledVerificacao} accessibilityLabel={(disabled || disabledVerificacao) ? 'Verificar Respostas. Botão. Desabilitado' :`Verificar respostas. Botão. Toque duas vezes para abrir a verficação de respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={this.toggleDialog(true)} type='primary'>Verificar respostas</Button>
-                        {isTB && <Button disabled={disabled} accessibilityLabel={disabled ? 'Próximo. Botão. Desabilitado' :`Próximo. Botão. Toque duas vezes para confirmar suas respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={this.onSubmit} type='primary'>Próximo</Button>}
+                        <Button disabled={disabled || disabledVerificacao} accessibilityLabel={(disabled || disabledVerificacao) ? 'Verificar Respostas. Botão. Desabilitado. Informe a parte e os conteúdos para habilitar' :`Verificar respostas. Botão. Toque duas vezes para abrir a verficação de respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={this.toggleDialog(true)} type='primary'>Verificar respostas</Button>
+                        {isTB && <Button accessibilityLabel={`Próximo. Botão. Toque duas vezes para confirmar suas respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={this.onSubmit} type='primary'>Próximo</Button>}
                     </Card.Body>
                 </Card>
                 <Modal

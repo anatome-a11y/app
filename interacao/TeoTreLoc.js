@@ -110,7 +110,7 @@ class TeoTreLoc extends Component {
                     <FormTreLoc
                         screenProps={screenProps}
                         sinalTexto={sinalTexto}
-                        onSetSinalScroll={s => this.setState({sinalScroll: s})}
+                        onSetSinalScroll={this.onSetSinalScroll}
                         mainState={this.state}
                         onGetRef={this.onGetRef}
                         onSetFocus={this.onSetFocus}
@@ -128,6 +128,8 @@ class TeoTreLoc extends Component {
             </Container>
         )
     }
+
+    onSetSinalScroll = (s, cb) => this.setState({sinalScroll: s}, cb)
 
     onRepeat = () => {
         const { data } = this.state;
@@ -233,6 +235,12 @@ class TeoTreLoc extends Component {
 
     onChangeValor = idx => valor => {
         const { data, count, timer } = this.state;
+
+        if(valor){
+            announceForAccessibility(`Texto detectado: ${valor}. Prossiga para submeter.`)
+        }else{
+            announceForAccessibility(`Texto removido`)
+        }        
 
         this.setState({
             data: [
