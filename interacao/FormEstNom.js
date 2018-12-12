@@ -164,8 +164,12 @@ class FormEstNom extends Component {
                         <ScrollView style={{ maxHeight: 280 }}>
                             {isTeoria && <Text accessibilityLabel='Conhecimentos teóricos. Prossiga para ouvir.' style={{fontWeight: 'bold', marginBottom: 5}}>Conhecimentos teóricos:</Text>}                        
                             {isTeoria && <ModalBody conteudos={conteudos} config={screenProps.config} />}
-                            {isTeoria && <Text accessibilityLabel='Referências relativas. Prossiga para ouvir.' style={{fontWeight: 'bold', marginTop: 15, marginBottom: 5}}>Referências relativas:</Text>}
-                            <ReferenciasRelativas parte={parte.parte} pecasFisicas={[pecasFisicas[pecaFisica]]} attrName='partesNumeradas' />
+                            <ReferenciasRelativas 
+                                title={isTeoria ? <Text key='title' accessibilityLabel='Referências relativas. Prossiga para ouvir.' style={{fontWeight: 'bold', marginTop: 15, marginBottom: 5}}>Referências relativas:</Text> : null}
+                                parte={parte.parte} 
+                                pecasFisicas={[pecasFisicas[pecaFisica]]} 
+                                attrName='partesNumeradas' 
+                            />
                         </ScrollView>
                     ) :
                         (<Text style={{ padding: 5, textAlign: 'center' }}>Parte não setada nesta peça física</Text>

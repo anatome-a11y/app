@@ -13,7 +13,7 @@ import { announceForAccessibility, focusOnView } from 'react-native-accessibilit
 
 const ListItem = List.Item;
 
-const siglas =                     [
+const siglas = [
     ['A.', 'A', 'Artéria'],
     ['Aa.', 'AA', 'Artérias'],
     ['Art.', 'ART', 'Articulação'],
@@ -53,7 +53,7 @@ const siglas =                     [
     ['Vagg.', 'VAGG', 'Vaginas (“bainhas”)'],
 ]
 
-const Sig = ({ value, acc = 'Descrição:'}) => (
+const Sig = ({ value, acc = 'Descrição:' }) => (
     <Text accessibilityLabel={`${acc} ${value}`} style={styles.listItem}>{value}</Text>
 )
 
@@ -81,12 +81,6 @@ class Info extends Component {
             { label: 'Curso', value: anatomp.roteiro.curso },
             { label: 'Disciplina', value: anatomp.roteiro.disciplina },
             { label: 'Intituição', value: anatomp.instituicao },
-            { label: 'Propósito', value: anatomp.roteiro.proposito ? anatomp.roteiro.proposito : 'Não informado' },
-        ] : []
-
-        const generalidades = anatomp ? [
-            ...anatomp.generalidades,
-            ...anatomp.roteiro.generalidades
         ] : []
 
 
@@ -95,22 +89,40 @@ class Info extends Component {
         return (
             <Container navigation={navigation}>
                 <BC _ref={r => this.initialFocus = r} body={[]} head={'Informações'} acc='Prossiga para ouvir as informações do roteiro' />
-                <List style={{ marginBottom: 10 }} renderHeader={() => 'Peças físicas do roteiro'} accessibilityLabel={`Peças físicas do roteiro. Lista com ${sizePF} itens. Prossiga para ouvir`}>
+                {anatomp && <List style={{ marginBottom: 10 }} renderHeader={() => 'Peças físicas do roteiro'} accessibilityLabel={`Peças físicas do roteiro. Lista com ${sizePF} itens. Prossiga para ouvir`}>
                     {anatomp ? anatomp.pecasFisicas.map(p => (
                         <ListItem wrap multipleLine key={p._id}><Name>{p.nome}</Name><Sig value={p.descricao ? p.descricao : 'Nenhuma descrição'} /></ListItem>
-                    )) : <ListItem wrap multipleLine><Text>Selecione um roteiro para obter as informações das peças físicas</Text></ListItem>}
-                </List>
-                <List style={{ marginBottom: 10 }} renderHeader={() => 'Informações sobre o roteiro'} accessibilityLabel={`Informações sobre o roteiro. Lista com ${dados.length} itens. Prossiga para ouvir`}>
-                    {anatomp ? dados.map(d => <ListItem key={d.label} wrap multipleLine><Name>{d.label}</Name><Sig acc={''} value={d.value} /></ListItem>) : <ListItem wrap multipleLine><Text>Selecione um roteiro para obter suas informações</Text></ListItem>}
-                </List>
-                <List style={{ marginBottom: 10 }} renderHeader={() => 'Generalidades do roteiro'} accessibilityLabel={`Generalidades do roteiro. Lista com ${generalidades.length} itens. Prossiga para ouvir`}>
-                    {generalidades.length > 0 ? generalidades.map(g => <ListItem key={g._id} wrap multipleLine>
+                    )) : <ListItem wrap multipleLine><Text>Este roteiro não possui peça física</Text></ListItem>}
+                </List>}
+                {anatomp && <List style={{ marginBottom: 10 }} renderHeader={() => 'Orientações de estudo'} accessibilityLabel={`Orientações de estudo. Lista com ${anatomp.generalidades.length} itens. Prossiga para ouvir`}>
+                    {anatomp.generalidades.length > 0 ? anatomp.generalidades.map(g => <ListItem key={g._id} wrap multipleLine>
                         <Text style={styles.listItem}>{g.texto}</Text>
                         <Imagens config={config} midias={g.midias} />
                         <Videos config={config} midias={g.midias} />
-                    </ListItem>) : <ListItem wrap multipleLine><Text>Selecione um roteiro para obter suas generalidades</Text></ListItem>}
-                </List>
-                <List style={{ marginBottom: 10 }} renderHeader={() => 'Siglas da Anatomia'} accessibilityLabel={`Siglas da Anatomia. Lista com 33 itens. Prossiga para ouvir`}>                    
+                    </ListItem>) : <ListItem wrap multipleLine><Text>Este roteiro não possui orientações de estudo</Text></ListItem>}
+                </List>}
+                {anatomp && anatomp.roteiro.pecasGenericas.map(pecaGenerica => {
+                    return (
+                        <List key={pecaGenerica._id} style={{ marginBottom: 10 }} renderHeader={() => `Generalidades da peça ${pecaGenerica.nome}`} accessibilityLabel={`Generalidades da peça ${pecaGenerica.nome}. Lista com ${pecaGenerica.generalidades.length} itens. Prossiga para ouvir`}>
+                            {pecaGenerica.generalidades.length > 0 ? pecaGenerica.generalidades.map(g => <ListItem key={g._id} wrap multipleLine>
+                                <Text style={styles.listItem}>{g.texto}</Text>
+                                <Imagens config={config} midias={g.midias} />
+                                <Videos config={config} midias={g.midias} />
+                            </ListItem>) : <ListItem wrap multipleLine><Text>Este roteiro não possui orientações de estudo</Text></ListItem>}
+                        </List>
+                    )
+                })}
+                {anatomp && <List style={{ marginBottom: 10 }} renderHeader={() => 'Generalidades do roteiro'} accessibilityLabel={`Orientações de estudo. Lista com ${anatomp.roteiro.generalidades.length} itens. Prossiga para ouvir`}>
+                    {anatomp.roteiro.generalidades.length > 0 ? anatomp.roteiro.generalidades.map(g => <ListItem key={g._id} wrap multipleLine>
+                        <Text style={styles.listItem}>{g.texto}</Text>
+                        <Imagens config={config} midias={g.midias} />
+                        <Videos config={config} midias={g.midias} />
+                    </ListItem>) : <ListItem wrap multipleLine><Text>Este roteiro não possui generalidades</Text></ListItem>}
+                </List>}
+                {anatomp && <List style={{ marginBottom: 10 }} renderHeader={() => 'Informações sobre o roteiro'} accessibilityLabel={`Informações sobre o roteiro. Lista com ${dados.length} itens. Prossiga para ouvir`}>
+                    {anatomp ? dados.map(d => <ListItem key={d.label} wrap multipleLine><Name>{d.label}</Name><Sig acc={''} value={d.value} /></ListItem>) : <ListItem wrap multipleLine><Text>Selecione um roteiro para obter suas informações</Text></ListItem>}
+                </List>}
+                <List style={{ marginBottom: 10 }} renderHeader={() => 'Siglas da Anatomia'} accessibilityLabel={`Siglas da Anatomia. Lista com 33 itens. Prossiga para ouvir`}>
                     {siglas.map(([a, b, c]) => <ListItem key={a} accessibilityLabel={`${b} ${c}`} accessible><Name>{a}  <Sig value={c} /></Name></ListItem>)}
                 </List>
             </Container>
@@ -122,6 +134,7 @@ const styles = StyleSheet.create({
     listItemTitle: {
         fontWeight: 'bold',
         fontSize: 15,
+        textAlign: 'justify'
     },
     listItem: {
         fontWeight: "200",

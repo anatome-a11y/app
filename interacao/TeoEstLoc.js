@@ -110,6 +110,9 @@ class TeoEstLoc extends Component {
 
         const selected = conteudo == undefined ? '' : conteudo._id;
 
+        const modalTitle = (conteudo && conteudo.partes) ? (conteudo.partes.length == 1 ? conteudo.partes[0].nome : `Partes: ${conteudo.partes.map(item => item.nome).join(', ')}`) : null
+
+
         return (
             <Container navigation={navigation}>
                 <BC _ref={r => this.initialFocus = r} body={['Roteiros', screenProps.anatomp.nome]} head={'Estudo - Teórico - Conteúdo-Localização'} />
@@ -146,7 +149,7 @@ class TeoEstLoc extends Component {
                     talkback={screenProps.config.indexOf('talkback') != -1}
                     open={open}
                     // title={null}
-                    title={null}
+                    title={modalTitle}
                     acc={`Aberto. Prossiga para ouvir o nome da parte e sua localização nas peças físicas.`}
                     footer={[
                         { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar os detalhes do conteúdo ${conteudo ? conteudo.texto : ''}` },

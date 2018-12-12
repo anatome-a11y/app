@@ -44,6 +44,10 @@ class Roteiro extends Component {
         setTimeout(() => {
             focusOnView(this.initialFocus)
         }, 500)
+
+        if(this.props.screenProps.anatomp.roteiro.conteudos.length == 0){
+            this.props.screenProps.onChangeModoInteracao('tipoConteudo', 'pratico')
+        }
     }
 
 
@@ -142,7 +146,7 @@ class Roteiro extends Component {
                                     Identificação anatômica por nome
                                 </Option>
                             </List.Item>
-                            <List.Item wrap multipleLine>
+                            {this.props.screenProps.anatomp.roteiro.conteudos.length > 0 && <List.Item wrap multipleLine>
                                 <Option
                                     title='Teórico'
                                     label='Tipo de conteúdo. Teórico'
@@ -151,7 +155,7 @@ class Roteiro extends Component {
                                 >
                                     Identificação anatômica por conhecimento teórico associado
                                 </Option>
-                            </List.Item>
+                            </List.Item>}
                         </List>
                     </Panel>
                     <Panel

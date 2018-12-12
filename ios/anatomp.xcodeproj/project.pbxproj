@@ -41,6 +41,7 @@
 		9D16C2B6014B496EB9F8D509 /* libRNReactNativeAccessibility.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 929FA8C5BE404762BB5FBB48 /* libRNReactNativeAccessibility.a */; };
 		C082AC1EC95D486590FCD4E2 /* libVoice.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8B3220049EB64DFA80192755 /* libVoice.a */; };
 		43216496E61B4233B9DB6F3E /* libRCTVideo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D44D60403F6D472DB884A202 /* libRCTVideo.a */; };
+		B8DCD2F6F7434CC8AA2B19EE /* libRNAudio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EB52EC983B54E25B0AF685C /* libRNAudio.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -354,6 +355,8 @@
 		8B3220049EB64DFA80192755 /* libVoice.a */ = {isa = PBXFileReference; name = "libVoice.a"; path = "libVoice.a"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = archive.ar; explicitFileType = undefined; includeInIndex = 0; };
 		63213050CE824DD59E0DCF14 /* RCTVideo.xcodeproj */ = {isa = PBXFileReference; name = "RCTVideo.xcodeproj"; path = "../node_modules/react-native-video/ios/RCTVideo.xcodeproj"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = wrapper.pb-project; explicitFileType = undefined; includeInIndex = 0; };
 		D44D60403F6D472DB884A202 /* libRCTVideo.a */ = {isa = PBXFileReference; name = "libRCTVideo.a"; path = "libRCTVideo.a"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = archive.ar; explicitFileType = undefined; includeInIndex = 0; };
+		B18D5D4BBBA04E58A4F5FDEE /* RNAudio.xcodeproj */ = {isa = PBXFileReference; name = "RNAudio.xcodeproj"; path = "../node_modules/react-native-audio/ios/RNAudio.xcodeproj"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = wrapper.pb-project; explicitFileType = undefined; includeInIndex = 0; };
+		9EB52EC983B54E25B0AF685C /* libRNAudio.a */ = {isa = PBXFileReference; name = "libRNAudio.a"; path = "libRNAudio.a"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = archive.ar; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -386,6 +389,7 @@
 				9D16C2B6014B496EB9F8D509 /* libRNReactNativeAccessibility.a in Frameworks */,
 				C082AC1EC95D486590FCD4E2 /* libVoice.a in Frameworks */,
 				43216496E61B4233B9DB6F3E /* libRCTVideo.a in Frameworks */,
+				B8DCD2F6F7434CC8AA2B19EE /* libRNAudio.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -576,6 +580,7 @@
 				4652AC63C00D43F0AF2B35AD /* RNReactNativeAccessibility.xcodeproj */,
 				BE1930ABE0064AAC8AA75A63 /* Voice.xcodeproj */,
 				63213050CE824DD59E0DCF14 /* RCTVideo.xcodeproj */,
+				B18D5D4BBBA04E58A4F5FDEE /* RNAudio.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -1203,6 +1208,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1210,6 +1216,7 @@
 					"$(SRCROOT)/../node_modules/react-native-accessibility/ios",
 					"$(SRCROOT)/../node_modules/react-native-voice/ios/Voice",
 					"$(SRCROOT)/../node_modules/react-native-video/ios",
+					"$(SRCROOT)/../node_modules/react-native-audio/ios",
 				);
 			};
 			name = Debug;
@@ -1231,6 +1238,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1238,6 +1246,7 @@
 					"$(SRCROOT)/../node_modules/react-native-accessibility/ios",
 					"$(SRCROOT)/../node_modules/react-native-voice/ios/Voice",
 					"$(SRCROOT)/../node_modules/react-native-video/ios",
+					"$(SRCROOT)/../node_modules/react-native-audio/ios",
 				);
 			};
 			name = Release;
@@ -1263,6 +1272,7 @@
 					"$(SRCROOT)/../node_modules/react-native-accessibility/ios",
 					"$(SRCROOT)/../node_modules/react-native-voice/ios/Voice",
 					"$(SRCROOT)/../node_modules/react-native-video/ios",
+					"$(SRCROOT)/../node_modules/react-native-audio/ios",
 				);
 			};
 			name = Debug;
@@ -1287,6 +1297,7 @@
 					"$(SRCROOT)/../node_modules/react-native-accessibility/ios",
 					"$(SRCROOT)/../node_modules/react-native-voice/ios/Voice",
 					"$(SRCROOT)/../node_modules/react-native-video/ios",
+					"$(SRCROOT)/../node_modules/react-native-audio/ios",
 				);
 			};
 			name = Release;
@@ -1317,6 +1328,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1324,6 +1336,7 @@
 					"$(SRCROOT)/../node_modules/react-native-accessibility/ios",
 					"$(SRCROOT)/../node_modules/react-native-voice/ios/Voice",
 					"$(SRCROOT)/../node_modules/react-native-video/ios",
+					"$(SRCROOT)/../node_modules/react-native-audio/ios",
 				);
 			};
 			name = Debug;
@@ -1354,6 +1367,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1361,6 +1375,7 @@
 					"$(SRCROOT)/../node_modules/react-native-accessibility/ios",
 					"$(SRCROOT)/../node_modules/react-native-voice/ios/Voice",
 					"$(SRCROOT)/../node_modules/react-native-video/ios",
+					"$(SRCROOT)/../node_modules/react-native-audio/ios",
 				);
 			};
 			name = Release;
@@ -1390,6 +1405,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1397,6 +1413,7 @@
 					"$(SRCROOT)/../node_modules/react-native-accessibility/ios",
 					"$(SRCROOT)/../node_modules/react-native-voice/ios/Voice",
 					"$(SRCROOT)/../node_modules/react-native-video/ios",
+					"$(SRCROOT)/../node_modules/react-native-audio/ios",
 				);
 			};
 			name = Debug;
@@ -1426,6 +1443,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1433,6 +1451,7 @@
 					"$(SRCROOT)/../node_modules/react-native-accessibility/ios",
 					"$(SRCROOT)/../node_modules/react-native-voice/ios/Voice",
 					"$(SRCROOT)/../node_modules/react-native-video/ios",
+					"$(SRCROOT)/../node_modules/react-native-audio/ios",
 				);
 			};
 			name = Release;

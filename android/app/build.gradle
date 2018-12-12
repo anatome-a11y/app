@@ -148,6 +148,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-audio')
     compile project(':react-native-video')
     compile project(':react-native-voice')
     compile project(':react-native-accessibility')
