@@ -3,9 +3,11 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import Icon from 'antd-mobile-rn/lib/icon';
 import List from 'antd-mobile-rn/lib/list';
-import Flex from 'antd-mobile-rn/lib/flex';
 import Toast from 'antd-mobile-rn/lib/toast';
-import Tag from 'antd-mobile-rn/lib/tag';
+import 'intl'
+import 'intl/locale-data/jsonp/pt-BR.js'
+import { IntlProvider } from 'react-intl'
+import { flattenMessages, messages } from './messages'
 
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 
@@ -74,12 +76,14 @@ const Midias = ({ value, color }) => {
   // })
   return <View>
     <View style={{ flexWrap: 'wrap', alignItems: 'flex-start', flexDirection: 'row' }}>
-      <Brief style={{color}} >Formatos de saída: </Brief>
+      <Brief style={{ color }} >Formatos de saída: </Brief>
       <View accessibilityLabel={'Leitor de tela'}><Icon style={{ padding: 5, color }} type={'\uE698'} /></View>
       {value.map((v, idx) => <View key={idx} accessibilityLabel={getMediaLabel(v)}>{getMediaIcon(v)}</View>)}
     </View>
   </View>
 }
+
+const intlMessages = flattenMessages(messages['pt-BR'])
 
 class App extends Component {
 
@@ -103,32 +107,34 @@ class App extends Component {
     const selected = screenProps.anatomp != null ? screenProps.anatomp._id : false
 
     return (
-      <Container navigation={navigation} refreshing={loading} onRefresh={this.onGetData} >
-        <BC _ref={r => this.initialFocus = r} head='Roteiros' acc='Prossiga para acessar a lista de roteiros' />
-        <List accessibilityLabel={`Roteiros de Aprendizagem. Lista com ${anatomps.length} itens. Prossiga para escolher um roteiro`} renderHeader={() => 'Roteiros de aprendizagem'}>
-          {
-            anatomps.map(anatomp => {
-              const color = selected == anatomp._id ? '#108ee9' : '#00000070'
-              return (
-                <ListItem
-                  onClick={this.onSelectRoteiro(anatomp)}
-                  style={{backgroundColor: selected == anatomp._id ? '#108ee930' : '#fff'}}
-                  key={anatomp.roteiro._id}
-                  wrap
-                  multipleLine
-                  align="center"
-                  arrow="horizontal"
-                >
-                  <Text style={{fontWeight: 'bold', fontSize: 15, color}} accessibilityLabel={anatomp.nome + " .Roteiro"}>{anatomp.nome}</Text>
-                  <Brief style={{color}}>{anatomp.roteiro.curso} | {anatomp.roteiro.disciplina} | {anatomp.instituicao}</Brief>
-                  <Text accessibilityLabel='Toque duas vezes para selecionar.'></Text>
-                  <Midias color={color} value={anatomp.roteiro.resumoMidias} />
-                </ListItem>
-              )
-            })
-          }
-        </List>
-      </Container>
+      <IntlProvider locale="pt-BR" defaultLocale="pt-BR" messages={intlMessages}>
+        <Container navigation={navigation} refreshing={loading} onRefresh={this.onGetData} >
+          <BC _ref={r => this.initialFocus = r} head='Roteiros' acc='Prossiga para acessar a lista de roteiros' />
+          <List accessibilityLabel={`Roteiros de Aprendizagem. Lista com ${anatomps.length} itens. Prossiga para escolher um roteiro`} renderHeader={() => 'Roteiros de aprendizagem'}>
+            {
+              anatomps.map(anatomp => {
+                const color = selected == anatomp._id ? '#108ee9' : '#00000070'
+                return (
+                  <ListItem
+                    onClick={this.onSelectRoteiro(anatomp)}
+                    style={{ backgroundColor: selected == anatomp._id ? '#108ee930' : '#fff' }}
+                    key={anatomp.roteiro._id}
+                    wrap
+                    multipleLine
+                    align="center"
+                    arrow="horizontal"
+                  >
+                    <Text style={{ fontWeight: 'bold', fontSize: 15, color }} accessibilityLabel={anatomp.nome + " .Roteiro"}>{anatomp.nome}</Text>
+                    <Brief style={{ color }}>{anatomp.roteiro.curso} | {anatomp.roteiro.disciplina} | {anatomp.instituicao}</Brief>
+                    <Text accessibilityLabel='Toque duas vezes para selecionar.'></Text>
+                    <Midias color={color} value={anatomp.roteiro.resumoMidias} />
+                  </ListItem>
+                )
+              })
+            }
+          </List>
+        </Container>
+      </IntlProvider>
     );
   }
 
@@ -160,7 +166,7 @@ class App extends Component {
         Toast.fail(msg)
         announceForAccessibility(msg)
       })
-      .finally(() => this.setState({ loading: false }))    
+      .finally(() => this.setState({ loading: false }))
   }
 
 

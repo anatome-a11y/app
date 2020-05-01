@@ -8,7 +8,9 @@
   },
   "dependencies": {
     "antd-mobile-rn": "^2.2.1",
+    "intl": "^1.2.5",
     "react": "16.4.1",
+    "react-intl": "^4.5.1",
     "react-native": "0.56.0",
     "react-native-accessibility": "^1.0.7",
     "react-native-audio": "^4.3.0",
