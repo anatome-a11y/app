@@ -4,16 +4,11 @@ import { StyleSheet, Text, View } from 'react-native';
 import Icon from 'antd-mobile-rn/lib/icon';
 import List from 'antd-mobile-rn/lib/list';
 import Toast from 'antd-mobile-rn/lib/toast';
-import 'intl'
-import 'intl/locale-data/jsonp/pt-BR.js'
-import { IntlProvider } from 'react-intl'
-import { flattenMessages, messages } from './messages'
-
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 
 import Container from './Container'
 import BC from './components/Breadcrumbs'
-
+import { withI18n } from './messages/withI18n';
 
 const ListItem = List.Item;
 const Brief = ListItem.Brief;
@@ -83,8 +78,6 @@ const Midias = ({ value, color }) => {
   </View>
 }
 
-const intlMessages = flattenMessages(messages['pt-BR'])
-
 class App extends Component {
 
   initialFocus = null;
@@ -102,15 +95,14 @@ class App extends Component {
 
   render() {
     const { anatomps, msg, loading } = this.state;
-    const { navigation, screenProps } = this.props;
+    const { navigation, screenProps, i18n } = this.props;
 
     const selected = screenProps.anatomp != null ? screenProps.anatomp._id : false
 
     return (
-      <IntlProvider locale="pt-BR" defaultLocale="pt-BR" messages={intlMessages}>
         <Container navigation={navigation} refreshing={loading} onRefresh={this.onGetData} >
           <BC _ref={r => this.initialFocus = r} head='Roteiros' acc='Prossiga para acessar a lista de roteiros' />
-          <List accessibilityLabel={`Roteiros de Aprendizagem. Lista com ${anatomps.length} itens. Prossiga para escolher um roteiro`} renderHeader={() => 'Roteiros de aprendizagem'}>
+          <List accessibilityLabel={`Roteiros de Aprendizagem. Lista com ${anatomps.length} itens. Prossiga para escolher um roteiro`} renderHeader={() => i18n('teste')}>
             {
               anatomps.map(anatomp => {
                 const color = selected == anatomp._id ? '#108ee9' : '#00000070'
@@ -134,7 +126,6 @@ class App extends Component {
             }
           </List>
         </Container>
-      </IntlProvider>
     );
   }
 
@@ -185,4 +176,4 @@ const styles = StyleSheet.create({
 });
 
 
-export default App;
+export default withI18n(App);
