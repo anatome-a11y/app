@@ -1,4 +1,5 @@
 import ptBR from './pt_br'
+import en from './en'
 
 export function flattenMessages(nestedMessages, prefix = '') {
   return Object.keys(nestedMessages).reduce((messages, key) => {
@@ -14,5 +15,6 @@ export function flattenMessages(nestedMessages, prefix = '') {
 }
 
 export const messages =  {
-    'pt-BR': ptBR
+    'pt-BR': ptBR,
+    'en': en
   }

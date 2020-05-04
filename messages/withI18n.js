@@ -5,8 +5,8 @@ import {injectIntl} from 'react-intl'
 export const withI18n = (Wrapped) => {
     class I18n extends Component{
 
-        i18n = (id, params) => {
-            return this.props.intl.formatMessage({id, params})
+        i18n = (id, values) => {
+            return this.props.intl.formatMessage({id, defaultMessage: id}, values)
         }
 
         render(){

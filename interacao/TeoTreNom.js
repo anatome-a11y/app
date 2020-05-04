@@ -24,9 +24,9 @@ import { norm } from '../utils'
 
 import BC from '../components/Breadcrumbs'
 import Instrucoes from '../components/Instrucoes'
+import {withI18n} from '../messages/withI18n'
 
-
-class FormContainer extends React.Component {
+class _FormContainer extends React.Component {
     initialFocus = null;
     nomeDaPeca = null;
     dicaDaParte = null;
@@ -65,7 +65,7 @@ class FormContainer extends React.Component {
 
 
     render() {
-        const { screenProps, mainState, onGetRef, maxTentativa, onChange } = this.props;
+        const { screenProps, mainState, onGetRef, maxTentativa, onChange, i18n } = this.props;
         const { anatomp, config } = screenProps;
         const { count, total, data, timer, tentativas, open } = mainState;
         const title = data[count].localizacao.pecaFisica.nome;
@@ -78,13 +78,13 @@ class FormContainer extends React.Component {
 
         return (
             <View>
-                <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={'Treinamento - Teórico - Localização-Conteúdo'} />
+                <BC _ref={r => this.initialFocus = r} body={[i18n('common.scripts'), anatomp.nome]} head={`${i18n('common.training')} - ${i18n('common.theoretical')} - ${i18n('common.locToContent')}`} />
                 <Instrucoes 
                 voz={screenProps.config.indexOf('voz') != -1}
                 info={[
-                    'Dada a localização de cada parte, informe o seu nome e seus respectivos conteúdos teóricos',
-                    'Após informar estes dados, verifique quais você acertou',
-                    `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${3*screenProps.inputConfig.tempo} segundos para cada tentativa.`
+                    i18n('teoTreNom.sections.instructions.hints.inform'),
+                    i18n('teoTreNom.sections.instructions.hints.verify'),
+                    i18n('teoTreNom.sections.instructions.hints.chances', {chances: screenProps.inputConfig.chances, tempo: 3*screenProps.inputConfig.tempo}),
                 ]} />
                 <Card style={{ marginBottom: 10 }}>
                     <Card.Header ref={r => this.nomeDaPeca = r} accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a parte anatômica`} title={title} />
@@ -196,6 +196,8 @@ const getValue = (field, value, item) => {
         return ""
     }
 }
+
+const FormContainer = withI18n(_FormContainer)
 
 class TeoTreNom extends Component {
     timer = null;

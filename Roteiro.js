@@ -12,6 +12,7 @@ import { announceForAccessibility, focusOnView } from 'react-native-accessibilit
 import Option from './components/Option'
 
 import BC from './components/Breadcrumbs'
+import { withI18n } from './messages/withI18n';
 
 
 const ListItem = List.Item;
@@ -82,7 +83,7 @@ class Roteiro extends Component {
 
     render() {
         const { active } = this.state;
-        const { navigation, screenProps } = this.props;
+        const { navigation, screenProps, i18n } = this.props;
         const { tipoConteudo, modoAprendizagem, sentidoIdentificacao } = screenProps.modoInteracao;
 
         const { anatomp, config } = screenProps;
@@ -94,9 +95,9 @@ class Roteiro extends Component {
 
         return (
             <Container navigation={navigation}> 
-                <BC _ref={r => this.initialFocus = r} body={['Roteiros']} head={anatomp.nome} acc='Prossiga para configurar a interação.' />
+                <BC _ref={r => this.initialFocus = r} body={[i18n('common.scripts')]} head={anatomp.nome} acc='Prossiga para configurar a interação.' />
                 {exibeSelecionados && <Text style={{ padding: 10, paddingTop: 0, textAlign: 'justify', lineHeight: 22 }}>
-                    <Text style={{ fontWeight: 'bold'}}>Selecionados: </Text>                    
+        <Text style={{ fontWeight: 'bold'}}>{i18n('common.selected')}</Text>                    
                     <Text style={{ color: '#108ee9' }}>{modoAprendizagem == 'estudo' ? 'Estudo' : 'Treinamento'}</Text><Text> | </Text>
                     <Text style={{ color: '#108ee9' }}>{tipoConteudo == 'pratico' ? 'Prático' : 'Teórico'}</Text><Text> | </Text>
                     <Text style={{ color: '#108ee9' }}>{sentidoIdentificacao == 'nomear' ? 'Nomear' : 'Localizar'}</Text>
@@ -210,4 +211,4 @@ class Roteiro extends Component {
 
 }
 
-export default Roteiro;
+export default withI18n(Roteiro);

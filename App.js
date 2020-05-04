@@ -64,19 +64,21 @@ const getMediaLabel = (media, idx) => {
 }
 
 
-const Midias = ({ value, color }) => {
+const _Midias = ({ value, color, i18n }) => {
   //   const unicos = value.filter(function(item, pos) {
 
   //     return value.findIndex(v => v.media == item.media) == pos;
   // })
   return <View>
     <View style={{ flexWrap: 'wrap', alignItems: 'flex-start', flexDirection: 'row' }}>
-      <Brief style={{ color }} >Formatos de saída: </Brief>
+      <Brief style={{ color }} >{i18n('home.sections.learningScripts.outputFormats')} </Brief>
       <View accessibilityLabel={'Leitor de tela'}><Icon style={{ padding: 5, color }} type={'\uE698'} /></View>
       {value.map((v, idx) => <View key={idx} accessibilityLabel={getMediaLabel(v)}>{getMediaIcon(v)}</View>)}
     </View>
   </View>
 }
+
+const Midias = withI18n(_Midias)
 
 class App extends Component {
 
@@ -101,8 +103,8 @@ class App extends Component {
 
     return (
         <Container navigation={navigation} refreshing={loading} onRefresh={this.onGetData} >
-          <BC _ref={r => this.initialFocus = r} head='Roteiros' acc='Prossiga para acessar a lista de roteiros' />
-          <List accessibilityLabel={`Roteiros de Aprendizagem. Lista com ${anatomps.length} itens. Prossiga para escolher um roteiro`} renderHeader={() => i18n('teste')}>
+          <BC _ref={r => this.initialFocus = r} head={i18n('common.scripts')} acc='Prossiga para acessar a lista de roteiros' />
+          <List accessibilityLabel={`Roteiros de Aprendizagem. Lista com ${anatomps.length} itens. Prossiga para escolher um roteiro`} renderHeader={() => i18n('home.sections.learningScripts.title')}>
             {
               anatomps.map(anatomp => {
                 const color = selected == anatomp._id ? '#108ee9' : '#00000070'

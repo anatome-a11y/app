@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { AppRegistry, Platform, AccessibilityInfo, Vibration } from 'react-native';
+import { AppRegistry, Platform, AccessibilityInfo, Vibration, Text } from 'react-native';
 import App from './App';
 import Ajuda from './Ajuda';
 import Config from './Config';
@@ -18,13 +18,13 @@ import { name as appName } from './app.json';
 import Toast from 'antd-mobile-rn/lib/toast';
 import 'intl'
 import 'intl/locale-data/jsonp/pt-BR.js'
+import 'intl/locale-data/jsonp/en.js'
 import { IntlProvider } from 'react-intl'
 import { flattenMessages, messages } from './messages'
 import NfcManager, { NdefParser } from 'react-native-nfc-manager';
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 import AppContext from './components/AppContext'
 import { createStackNavigator } from 'react-navigation';
-const intlMessages = flattenMessages(messages['pt-BR'])
 
 const Nav = createStackNavigator({
     App: { screen: App },
@@ -49,7 +49,7 @@ const Nav = createStackNavigator({
     }
 );
 
-
+const intlMessages = flattenMessages(messages['en'])
 
 class Root extends Component {
 
@@ -113,7 +113,7 @@ class Root extends Component {
 
         const { config, modoInteracao, anatomp, inputConfig } = this.state;
 
-        return <IntlProvider locale="pt-BR" defaultLocale="pt-BR" messages={intlMessages}>
+        return <IntlProvider textComponent={Text} locale="en" defaultLocale="en" messages={intlMessages}>
             <AppContext.Provider value={{
                 config,
                 inputConfig,
