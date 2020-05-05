@@ -69,7 +69,7 @@ class _FormContainer extends React.Component {
         const { anatomp, config } = screenProps;
         const { count, total, data, timer, tentativas, open } = mainState;
         const title = data[count].localizacao.pecaFisica.nome;
-        const identificador = data[count].localizacao.referenciaRelativa.referencia == null ? ('Parte ' + data[count].localizacao.numero) : ('Em relação à parte ' + data[count].localizacao.numero +', localiza-se ' + data[count].localizacao.referenciaRelativa.referenciaParaReferenciado);
+        const identificador = data[count].localizacao.referenciaRelativa.referencia == null ? (i18n('common.part') + ' ' + data[count].localizacao.numero) : (i18n('teoTreNom.common.inRelationToThePart') + data[count].localizacao.numero +', ' + i18n('teoTreNom.common.isLocatedAt') + ' ' + data[count].localizacao.referenciaRelativa.referenciaParaReferenciado);
         const isTB = config.indexOf('talkback') != -1;
 
         const disabled = data[count].respostaParte.length == 0 || data[count].respostaConteudos.length == 0;
@@ -82,9 +82,9 @@ class _FormContainer extends React.Component {
                 <Instrucoes 
                 voz={screenProps.config.indexOf('voz') != -1}
                 info={[
-                    i18n('teoTreNom.sections.instructions.hints.inform'),
-                    i18n('teoTreNom.sections.instructions.hints.verify'),
-                    i18n('teoTreNom.sections.instructions.hints.chances', {chances: screenProps.inputConfig.chances, tempo: 3*screenProps.inputConfig.tempo}),
+                    i18n('teoTreNom.hints.inform'),
+                    i18n('teoTreNom.hints.verify'),
+                    i18n('teoTreNom.hints.chances', {chances: screenProps.inputConfig.chances, tempo: 3*screenProps.inputConfig.tempo}),
                 ]} />
                 <Card style={{ marginBottom: 10 }}>
                     <Card.Header ref={r => this.nomeDaPeca = r} accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a parte anatômica`} title={title} />
@@ -110,8 +110,8 @@ class _FormContainer extends React.Component {
                                 }}
                             />
                         </View>
-                        <Button disabled={disabled || disabledVerificacao} accessibilityLabel={(disabled || disabledVerificacao) ? 'Verificar Respostas. Botão. Desabilitado. Informe a parte e os conteúdos para habilitar' :`Verificar respostas. Botão. Toque duas vezes para abrir a verficação de respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={this.props.onToggleDialog(true)} type='primary'>Verificar respostas</Button>
-                        <Button accessibilityLabel={`Próximo. Botão. Toque duas vezes para confirmar suas respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={this.props.onSubmit} type='primary'>Próximo</Button>
+                            <Button disabled={disabled || disabledVerificacao} accessibilityLabel={(disabled || disabledVerificacao) ? 'Verificar Respostas. Botão. Desabilitado. Informe a parte e os conteúdos para habilitar' :`Verificar respostas. Botão. Toque duas vezes para abrir a verficação de respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={this.props.onToggleDialog(true)} type='primary'>{i18n('teoTreNom.actions.check')}</Button>
+                            <Button accessibilityLabel={`Próximo. Botão. Toque duas vezes para confirmar suas respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={this.props.onSubmit} type='primary'>{i18n('actions.next')}</Button>
                     </Card.Body>
                 </Card>
                 <Modal
@@ -119,19 +119,19 @@ class _FormContainer extends React.Component {
                     open={open}
                     title={identificador}
                     acc={`${identificador}. Aberto. Prossiga para ouvir as informações da parte`}
-                    footer={[{ text: 'Fechar', onPress: this.props.onToggleDialog(false), acc: `Fechar. Botão. Toque duas vezes para fechar a verificação de respostas.`}]}
+                    footer={[{ text: i18n('actions.close'), onPress: this.props.onToggleDialog(false), acc: `Fechar. Botão. Toque duas vezes para fechar a verificação de respostas.`}]}
                 >
                     <View accessible={true}>
-                        <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 3 }}>Sua resposta:</Text>
+                        <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 3 }}>{i18n('teoTreNom.common.yourAnswer')}:</Text>
                         <Text>{data[count].respostaParte}</Text>
                         <Text>{data[count].respostaConteudos}</Text>
                         <Text accessibilityLabel='Prossiga para ouvir a lista de respostas esperadas'></Text>
                     </View>
-                    <Text accessibilityLabel={`Respostas esperadas. ${data[count].conteudos.length+1} itens na lista. Prossiga para marcar as opções que você acertou.`} accessible style={{ color: '#000', marginBottom: 3, marginTop: 6 }}><Text style={{ fontWeight: 'bold' }}>Respostas esperadas </Text>(Marque o que você acertou):</Text>
+                    <Text accessibilityLabel={`Respostas esperadas. ${data[count].conteudos.length+1} itens na lista. Prossiga para marcar as opções que você acertou.`} accessible style={{ color: '#000', marginBottom: 3, marginTop: 6 }}><Text style={{ fontWeight: 'bold' }}>{i18n('teoTreNom.common.expectedAnswers')} </Text>({i18n('teoTreNom.common.checkTheRights')}):</Text>
                     <List>
                         <List.Item>
                             <Option
-                                label={`Parte ${data[count].parte.nome}`}
+                                label={`${i18n('common.part')} ${data[count].parte.nome}`}
                                 checked={data[count].correcao[0]}
                                 onChange={this.onChangeCorrecao(0)}
                                 title={data[count].parte.nome}
@@ -150,7 +150,7 @@ class _FormContainer extends React.Component {
                     </List>
                 </Modal>
                 <Card>
-                    <Card.Header title='Resumo' />
+                    <Card.Header title={i18n('common.summary')} />
                     <Card.Body>
                         <Placar
                             count={count}
@@ -266,7 +266,7 @@ class TeoTreNom extends Component {
     }
 
     render() {
-        const { navigation, screenProps } = this.props;
+        const { navigation, screenProps, i18n } = this.props;
         const { data, count, loading, open, sinalScroll } = this.state;
 
         const _View = loading ? null : (
@@ -318,21 +318,22 @@ class TeoTreNom extends Component {
 
     onSubmit = () => {
         const { data, count, tentativas, timer } = this.state;
+        const {i18n} = this.props
 
         let acertou = this.checkAcertos(data[count]);
 
         if (timer > 0) {
             if (acertou) {
-                Toast.success('Acertou!', 3, this.onNext(acertou));
+                Toast.success(i18n('common.correct'), 3, this.onNext(acertou));
                 announceForAccessibility('Acertou!')
             } else {
                 this.setState({ tentativas: tentativas + 1 })
                 if (tentativas == this.props.screenProps.inputConfig.chances - 1) {
-                    Toast.fail('Você errou.', 3, this.onNext(acertou))
+                    Toast.fail(i18n('common.missed'), 3, this.onNext(acertou))
                     announceForAccessibility('Você errou.')
                 } else {
                     const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
-                    const msg = `Corrija ou complemente sua resposta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
+                    const msg = i18n('teoTreNom.alerts.correctTheAnswer', {num, sufixo: num == 1 ? '' : 's'})
                     Toast.fail(msg, 3, () => this.onSetFocus(count))
                     this.setState({timer: 3*this.props.screenProps.inputConfig.tempo,})
                     announceForAccessibility(msg)
@@ -413,4 +414,4 @@ class TeoTreNom extends Component {
     }
 }
 
-export default TeoTreNom;
+export default withI18n(TeoTreNom);

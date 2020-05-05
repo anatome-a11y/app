@@ -20,6 +20,7 @@ import BC from '../components/Breadcrumbs'
 import Instrucoes from '../components/Instrucoes'
 import Modal from '../components/Modal'
 import ReferenciasRelativas from '../components/ReferenciasRelativas';
+import { withI18n } from '../messages/withI18n';
 
 const ListItem = List.Item;
 
@@ -80,7 +81,7 @@ class FormEstNom extends Component {
     }
 
     render() {
-        const { navigation, screenProps, isTeoria, interaction } = this.props;
+        const { navigation, screenProps, isTeoria, interaction, i18n } = this.props;
         const { value, pecasFisicas, pecaFisica, parte, conteudos, open } = this.state;
 
         // const btnNovoFluxo = this.props.screenProps.config.indexOf('talkback') != -1 ? [{
@@ -89,7 +90,7 @@ class FormEstNom extends Component {
         // }] : []
 
         const view = isTeoria ? 'nome,  conteúdos associados e referências relativas.' : 'nome e referências relativas';
-        const accBtn = isTeoria ? 'Informações da parte. .' : 'Partes referenciadas. '
+        const accBtn = isTeoria ? 'Informações da parte. ' : 'Partes referenciadas. '
 
         return (
             <Container navigation={navigation}>
@@ -97,11 +98,11 @@ class FormEstNom extends Component {
                 <Instrucoes
                     voz={screenProps.config.indexOf('voz') != -1}
                     info={[
-                        'Selecione uma peça física e indique a localização de uma parte para obter seu ' + view,
+                        i18n('estNom.hints.select') + view,
                     ]}
                 />
                 <Card style={{ marginBottom: 10 }}>
-                    <Card.Header title='Peças físicas' accessibilityLabel='Peças físicas. Prossiga para selecionar uma peça física.' />
+                    <Card.Header title={i18n('common.physicalPieces')} accessibilityLabel='Peças físicas. Prossiga para selecionar uma peça física.' />
                     <Card.Body>
                         <List>
                             {
@@ -123,7 +124,7 @@ class FormEstNom extends Component {
                 </Card>
 
                 <Card style={{ marginBottom: 10 }}>
-                    <Card.Header title='Parte anatômica' accessibilityLabel='Parte anatômica. A seguir informe a localização de uma parte para obter suas informações' />
+                    <Card.Header title={i18n('common.anatomicalPart')} accessibilityLabel='Parte anatômica. A seguir informe a localização de uma parte para obter suas informações' />
                     <Card.Body>
                         <Input
                             isTag
@@ -137,7 +138,7 @@ class FormEstNom extends Component {
                                 }
                             }}
                             onChange={this.onChange}
-                            name='Localização da parte'
+                            name={i18n('common.partLocation')}
                             onDone={this.onOpen}
                             InputProps={{
                                 type: 'number',
@@ -145,7 +146,7 @@ class FormEstNom extends Component {
                                 onErrorClick: this.onErrorClick,
                             }}
                         />
-                        {<Button ref={r => this.refBtnDetalhes = r} accessibilityLabel={accBtn+'Botão. Toque duas vezes para ouvir ou retorne para informar uma nova parte'} style={{ margin: 5 }} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>{isTeoria ? 'Informações da parte' : 'Partes referenciadas'}</Button>}
+                        {<Button ref={r => this.refBtnDetalhes = r} accessibilityLabel={accBtn+'Botão. Toque duas vezes para ouvir ou retorne para informar uma nova parte'} style={{ margin: 5 }} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>{isTeoria ? i18n('common.partInformation') : i18n('common.referencedParts')}</Button>}
                         {/* {(this.props.isTeoria && screenProps.config.indexOf('talkback') == -1) && <Button ref={r => this.refBtnDetalhes = r} accessibilityLabel='Nome da parte. Botão. Toque duas vezes para obter o nome da parte' style={{margin: 5}} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Nome da parte</Button>} */}
                         {/* {screenProps.config.indexOf('talkback') != -1 && <Button type='primary' onPressOut={() => focusOnView(this.fieldRef)}>Voltar para o filtro</Button>} */}
                     </Card.Body>
@@ -157,12 +158,12 @@ class FormEstNom extends Component {
                     title={parte ? parte.parte.nome : null}
                     acc={`Aberto. Prossiga para ouvir`}
                     footer={[
-                        { text: 'Fechar', onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar` },
+                        { text: i18n('actions.close'), onPress: this.onClose, acc: `Fechar. Botão. Toque duas vezes para fechar` },
                     ]}
                 >
                     {parte != undefined ? (
                         <ScrollView style={{ maxHeight: 280 }}>
-                            {isTeoria && <Text accessibilityLabel='Conhecimentos teóricos. Prossiga para ouvir.' style={{fontWeight: 'bold', marginBottom: 5}}>Conhecimentos teóricos:</Text>}                        
+                            {isTeoria && <Text accessibilityLabel='Conhecimentos teóricos. Prossiga para ouvir.' style={{fontWeight: 'bold', marginBottom: 5}}>{i18n('common.theoreticalKnowledge')}:</Text>}                        
                             {isTeoria && <ModalBody conteudos={conteudos} config={screenProps.config} />}
                             <ReferenciasRelativas 
                                 title={isTeoria ? <Text key='title' accessibilityLabel='Referências relativas. Prossiga para ouvir.' style={{fontWeight: 'bold', marginTop: 15, marginBottom: 5}}>Referências relativas:</Text> : null}
@@ -218,4 +219,4 @@ class FormEstNom extends Component {
     onGetRef = r => { this.fieldRef = r }
 }
 
-export default FormEstNom;
+export default withI18n(FormEstNom);
