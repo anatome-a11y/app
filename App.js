@@ -138,7 +138,7 @@ class App extends Component {
     announceForAccessibility('Carregando...');
     Toast.loading('Carregando...', 0)
 
-    fetch('https://frozen-thicket-97625.herokuapp.com/anatomp', {
+    fetch('http://162.214.174.114:8080', {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
