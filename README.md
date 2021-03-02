@@ -1,3 +1,12 @@
+# Anatome App
+
+## Executar app
+
+`npm run start:android`
+
+## Informações gerais
+
+
 O link para instalar as libs necessárias para rodar o APP está abaixo. Não precisa instalar o Android Studio e nem nada depois disso, mas precisa instalar o Sdk do Android (aquela pasta Android/Sdk)
 https://react-native.rocketseat.dev/android/linux 
 
