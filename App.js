@@ -138,7 +138,7 @@ class App extends Component {
     announceForAccessibility('Carregando...');
     Toast.loading('Carregando...', 0)
 
-    fetch('http://162.214.174.114:8080/roteiro', {
+    fetch('http://162.214.174.114:8080/anatomp', {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
