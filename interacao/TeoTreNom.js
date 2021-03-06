@@ -25,6 +25,36 @@ import { norm } from '../utils'
 import BC from '../components/Breadcrumbs'
 import Instrucoes from '../components/Instrucoes'
 
+/**
+ * Esse arquivo é utilizado na função:
+ *  > Treinamento
+ *  > Teórico
+ *  > Localização - Conteúdo
+ * 
+ * 
+ * Verificar se é voz:
+ * 
+ * config.indexOf('voz')
+ * 
+ * 
+ * 
+ * 
+ * Obter configurações definidas:
+ * 
+ * Tempo de base por questão:
+ * this.getConfigs().tempoBase
+ * 
+ * Tempo de leitura por caractere:
+ * this.getConfigs().tempoLeituraPorCaractere
+ * 
+ * Tempo de digitação por caractere:
+ * this.getConfigs().tempoDigitacaoPorCaractere
+ * 
+ * Tempo de fala por caractere:
+ * this.getConfigs().tempoFalaPorCaractere
+ * 
+ * 
+ */
 
 class FormContainer extends React.Component {
     initialFocus = null;
@@ -58,6 +88,10 @@ class FormContainer extends React.Component {
             }
         }
 
+    }
+
+    getConfigs() {
+        return this.props.screenProps.inputConfig;
     }
 
     componentWillUnmount() {

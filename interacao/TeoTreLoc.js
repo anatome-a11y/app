@@ -11,6 +11,36 @@ import FormTreLoc from './FormTreLoc'
 
 import BC from '../components/Breadcrumbs'
 
+/**
+ * Esse arquivo é utilizado na função:
+ *  > Treinamento
+ *  > Teórico
+ *  > Conteúdo - Localização
+ * 
+ * 
+ * Verificar se é voz:
+ * 
+ * config.indexOf('voz')
+ * 
+ * 
+ * 
+ * 
+ * Obter configurações definidas:
+ * 
+ * Tempo de base por questão:
+ * this.getConfigs().tempoBase
+ * 
+ * Tempo de leitura por caractere:
+ * this.getConfigs().tempoLeituraPorCaractere
+ * 
+ * Tempo de digitação por caractere:
+ * this.getConfigs().tempoDigitacaoPorCaractere
+ * 
+ * Tempo de fala por caractere:
+ * this.getConfigs().tempoFalaPorCaractere
+ * 
+ * 
+ */
 
 class TeoTreLoc extends Component {
     timer = null;
@@ -79,6 +109,11 @@ class TeoTreLoc extends Component {
             Toast.hide();
         })
 
+    }
+
+
+    getConfigs() {
+        return this.props.screenProps.inputConfig;
     }
 
 

@@ -16,13 +16,15 @@ class PraTreloc extends Component {
         data: [],
         count: 0,
         total: 0,
-        timer: this.props.screenProps.inputConfig.tempo,
+        timer: 60,
+        maxTime: 60,
         pecasFisicas: [],
         tentativas: 0,
         sinalScroll: 0,
         sinalTexto: 0        
     }
 
+    // Componente iniciliazado
     componentDidMount() {
         const { anatomp } = this.props.screenProps;
 
@@ -57,25 +59,40 @@ class PraTreloc extends Component {
 
         this.fieldRef = dados.map(fd => Array(1).fill(null))
 
-        this.setState({ data: dados, total: dados.length, pecasFisicas: { ...pecasFisicas } }, () => {
+        // Obter o tempo máximo para requestão inicial
+        const timer = this.getMaxQuestionTime(dados[this.state.count]);
+
+        // O tempo máximo é definido em `timer` e `maxTime`
+        // `timer`: Tempo restante atualmente (reduz a cada um segundo)
+        // `maxTime`: Tempo máximo para a questão atual
+        this.setState({ data: dados, timer: timer, maxTime: timer, total: dados.length, pecasFisicas: { ...pecasFisicas } }, () => {
             this.onCount();
             Toast.hide();
         })
 
     }
 
+    // Calcula o tempo da questão
+    getMaxQuestionTime(obj) {
+        // Obtem o nome da peça
+        const nome = obj.partes[0].parte.nome;
+        const readTime = nome.length * this.getConfigs().tempoLeituraPorCaractere;
+
+        const totalTime = this.getConfigs().tempoBase + readTime;
+        return Math.ceil(totalTime);
+    }
+
+    getConfigs() {
+        return this.props.screenProps.inputConfig;
+    }
 
     componentWillUpdate(nextProps, nextState) {
-        if (this.state.timer != 0 && nextState.timer == 0) {
+        if (this.state.timer != 0 && nextState.timer <= 0) {
             clearInterval(this.timer)
             if (nextState.count !== nextState.data.length) {
                 Toast.info('Tempo limite excedido!')
                 announceForAccessibility('Tempo limite excedido!')
             }
-        }
-
-        if (this.state.count != nextState.count) {
-            this.setState({ timer: this.props.screenProps.inputConfig.tempo });
         }
     }
 
@@ -104,7 +121,7 @@ class PraTreloc extends Component {
                         interaction='Treinamento - Prático - Conteúdo-Localização'
                         info={[
                             'Informe as partes de cada peça física do roteiro e pressione o botão "Próximo" para submeter.',
-                            `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
+                            `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${this.state.maxTime} segundos.`
                         ]}
                     />
                 ) : <Resultados data={data} onRepeat={this.onRepeat} formatter={e => e.texto} />}
@@ -118,10 +135,11 @@ class PraTreloc extends Component {
 
         clearInterval(this.timer)
 
+        // Reseta o tempo máximo ao repetir a tentativa para a questão
         this.setState({
             data: dados,
             count: 0,
-            timer: this.props.screenProps.inputConfig.tempo,
+            timer: this.state.maxTime,
             tentativas: 0
         }, () => this.onCount())
     }
@@ -157,11 +175,19 @@ class PraTreloc extends Component {
 
 
     onNext = acertou => () => {
-        const { data, count, tentativas } = this.state;
+        const { data, count, tentativas, timer } = this.state;
+
+        // Ao ir para a próxima questão, calcular o novo tempo
+        let newTimer = timer;
+
+        if(count < data.length - 1) {
+            newTimer = this.getMaxQuestionTime(data[count + 1])
+        }
 
         this.setState({
             count: count + 1,
-            timer: this.props.screenProps.inputConfig.tempo,
+            timer: newTimer,
+            maxTime: newTimer,
             tentativas: 0,
             data: [
                 ...data.slice(0, count),
