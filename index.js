@@ -59,7 +59,11 @@ class Root extends Component {
             config: ['video_imagem'],
             inputConfig: {
                 chances: 3,
-                tempo: 60
+                tempo: 60,
+                tempoBase: 60,
+                tempoLeituraPorCaractere: 0.5,
+                tempoDigitacaoPorCaractere: 0.8,
+                tempoFalaPorCaractere: 0.5
             },
             anatomp: null,
             modoInteracao: {
