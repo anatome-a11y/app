@@ -90,10 +90,6 @@ class FormContainer extends React.Component {
 
     }
 
-    getConfigs() {
-        return this.props.screenProps.inputConfig;
-    }
-
     componentWillUnmount() {
         clearInterval(this.time2Focus)
     }
@@ -129,7 +125,7 @@ class FormContainer extends React.Component {
                 info={[
                     'Dada a localização de cada parte, informe o seu nome e seus respectivos conteúdos teóricos',
                     'Após informar estes dados, verifique quais você acertou',
-                    `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
+                    `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${mainState.maxTime} segundos.`
                 ]} />
                 <Card style={{ marginBottom: 10 }}>
                     <Card.Header ref={r => this.nomeDaPeca = r} accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a parte anatômica`} title={title} />
@@ -242,7 +238,8 @@ class TeoTreNom extends Component {
         data: [],
         count: 0,
         total: 0,
-        timer: this.props.screenProps.inputConfig.tempo,
+        timer: 60,
+        maxTime: 60,
         tentativas: 0,
         loading: true
     }
@@ -270,27 +267,47 @@ class TeoTreNom extends Component {
 
         const array = Object.keys(partesUnificadas).map(key => partesUnificadas[key]);
 
+        const timer = this.getMaxQuestionTime(array[this.state.count]);
+
         this.fieldRef = array.map(fd => [null])
 
-        this.setState({ loading: false, data: array, total: array.length }, () => {
+        this.setState({ loading: false, data: array, timer: timer, maxTime: timer, total: array.length }, () => {
             this.onCount();
             Toast.hide();
         })
 
     }
 
+    getMaxQuestionTime(obj) {
+        const texto = obj.parte.nome;
+        let tamanho = texto.length;
+
+        if(!!obj.conteudos) {
+            tamanho += obj.conteudos
+                .map(text => text.length)
+                .reduce((prev, cur) => prev + cur);
+        }
+
+        const writeTime = tamanho * this.getConfigs().tempoDigitacaoPorCaractere;
+        const speakTime = tamanho * this.getConfigs().tempoFalaPorCaractere;
+
+        const responseTime = this.props.screenProps.config.includes('voz') ? speakTime : writeTime;
+
+        const totalTime = this.getConfigs().tempoBase + responseTime;
+        return Math.ceil(totalTime);
+    }
+
+    getConfigs() {
+        return this.props.screenProps.inputConfig;
+    }
 
     componentWillUpdate(nextProps, nextState) {
-        if (this.state.timer != 0 && nextState.timer == 0) {
+        if (this.state.timer != 0 && nextState.timer <= 0) {
             clearInterval(this.timer)
             if (nextState.count !== nextState.data.length) {
                 Toast.info('Tempo limite excedido!')
                 announceForAccessibility('Tempo limite excedido!')
             }
-        }
-
-        if (this.state.count != nextState.count) {
-            this.setState({ timer: this.props.screenProps.inputConfig.tempo });
         }
     }
 
@@ -331,7 +348,7 @@ class TeoTreNom extends Component {
         this.setState({
             data: dados,
             count: 0,
-            timer: this.props.screenProps.inputConfig.tempo,
+            timer: this.state.maxTime,
             tentativas: 0
         }, () => this.onCount())
     }
@@ -366,11 +383,17 @@ class TeoTreNom extends Component {
 
 
     onNext = acertou => () => {
-        const { data, count, tentativas } = this.state;
+        const { data, count, tentativas, timer } = this.state;
+        let newTimer = timer;
+
+        if(count < data.length - 1) {
+            newTimer = this.getMaxQuestionTime(data[count + 1])
+        }
 
         this.setState({
             count: count + 1,
-            timer: this.props.screenProps.inputConfig.tempo,
+            timer: newTimer,
+            maxTime: newTimer,
             tentativas: 0,
             data: [
                 ...data.slice(0, count),
