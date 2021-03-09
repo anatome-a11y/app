@@ -24,37 +24,6 @@ import BC from '../components/Breadcrumbs'
 import Instrucoes from '../components/Instrucoes'
 
 
-/**
- * Esse arquivo é utilizado na função:
- *  > Treinamento
- *  > Teórico
- *  > Localização - Conteúdo
- * 
- * 
- * Verificar se é voz:
- * 
- * config.indexOf('voz')
- * 
- * 
- * 
- * 
- * Obter configurações definidas:
- * 
- * Tempo de base por questão:
- * this.getConfigs().tempoBase
- * 
- * Tempo de leitura por caractere:
- * this.getConfigs().tempoLeituraPorCaractere
- * 
- * Tempo de digitação por caractere:
- * this.getConfigs().tempoDigitacaoPorCaractere
- * 
- * Tempo de fala por caractere:
- * this.getConfigs().tempoFalaPorCaractere
- * 
- * 
- */
-
 class FormContainer extends React.Component {
     initialFocus= null;
     nomeDaPeca = null;
@@ -95,10 +64,6 @@ class FormContainer extends React.Component {
 
     }
 
-    getConfigs() {
-        return this.props.screenProps.inputConfig;
-    }
-
     componentWillUnmount() {
         clearInterval(this.time2Focus)
     }
@@ -123,7 +88,7 @@ class FormContainer extends React.Component {
                 info={[
                     'Para cada parte (isto é, sua localização) em cada peça física, selecione o nome da parte e em seguida pressione o botão "Próximo" para submeter',
                     'Utilize o campo "Nome da parte" para buscar a parte desejada.',
-                    `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
+                    `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${mainState.maxTime} segundos.`
                 ]} />
                 <Card style={{ marginBottom: 10 }}>
                     <Card.Header ref={r => this.nomeDaPeca = r} accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a parte anatômica`} title={title} />
@@ -139,7 +104,7 @@ class FormContainer extends React.Component {
                             />
                             {!found || pesquisa == '' && <Text style={{ padding: 5 }}>Nenhuma parte foi identificada</Text>}
                         </View>
-                        <Button disabled={!found && timer > 0} accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
+                        <Button  accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
                     </Card.Body>
                 </Card>
 
@@ -205,7 +170,8 @@ class PraTreNom extends Component {
         data: [],
         count: 0,
         total: 0,
-        timer: this.props.screenProps.inputConfig.tempo,
+        timer: 60,
+        maxTime: 60,
         partes: [],
         tentativas: 0,
         loading: true
@@ -241,27 +207,40 @@ class PraTreNom extends Component {
 
         const dados = flatData.map(fd => ({ ...fd, acertou: false, valores: [''] }));
 
+        const timer = this.getMaxQuestionTime(dados[this.state.count]);
+
         this.fieldRef = flatData.map(fd => [null])
 
-        this.setState({ loading: false, data: dados, total: dados.length, partes: anatomp.roteiro.partes }, () => {
+        this.setState({ loading: false, data: dados, timer: timer, maxTime: timer, total: dados.length, partes: anatomp.roteiro.partes }, () => {
             this.onCount();
             Toast.hide();
         })
 
     }
 
+    getMaxQuestionTime(obj) {
+        const texto = obj.parte.nome;
+
+        const writeTime = texto.length * this.getConfigs().tempoDigitacaoPorCaractere;
+        const speakTime = texto.length * this.getConfigs().tempoFalaPorCaractere;
+
+        const responseTime = this.props.screenProps.config.includes('voz') ? speakTime : writeTime;
+
+        const totalTime = this.getConfigs().tempoBase + responseTime;
+        return Math.ceil(totalTime);
+    }
+
+    getConfigs() {
+        return this.props.screenProps.inputConfig;
+    }
 
     componentWillUpdate(nextProps, nextState) {
-        if (this.state.timer != 0 && nextState.timer == 0) {
+        if (this.state.timer != 0 && nextState.timer <= 0) {
             clearInterval(this.timer)
             if (nextState.count !== nextState.data.length) {
                 Toast.info('Tempo limite excedido!')
                 announceForAccessibility('Tempo limite excedido!')
             }
-        }
-
-        if (this.state.count != nextState.count) {
-            this.setState({ timer: this.props.screenProps.inputConfig.tempo });
         }
     }
 
@@ -302,7 +281,7 @@ class PraTreNom extends Component {
         this.setState({
             data: dados,
             count: 0,
-            timer: this.props.screenProps.inputConfig.tempo,
+            timer: this.state.maxTime,
             tentativas: 0
         }, () => this.onCount())
     }
@@ -337,11 +316,17 @@ class PraTreNom extends Component {
 
 
     onNext = acertou => () => {
-        const { data, count, tentativas } = this.state;
+        const { data, count, tentativas, timer } = this.state;
+        let newTimer = timer;
+
+        if(count < data.length - 1) {
+            newTimer = this.getMaxQuestionTime(data[count + 1])
+        }
 
         this.setState({
             count: count + 1,
-            timer: this.props.screenProps.inputConfig.tempo,
+            timer: newTimer,
+            maxTime: newTimer,
             tentativas: 0,
             data: [
                 ...data.slice(0, count),
