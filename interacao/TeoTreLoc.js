@@ -50,7 +50,8 @@ class TeoTreLoc extends Component {
         data: [],
         count: 0,
         total: 0,
-        timer: this.props.screenProps.inputConfig.tempo,
+        timer: 60,
+        maxTime: 60,
         pecasFisicas: [],
         tentativas: 0,
         sinalScroll: 0,
@@ -104,13 +105,21 @@ class TeoTreLoc extends Component {
 
         this.fieldRef = flatData.map(fd => fd.modo == 'singular' ? Array(1).fill(null) : Array(fd.partes.length).fill(null))
 
-        this.setState({ data: dados, total: dados.length, pecasFisicas: { ...pecasFisicas } }, () => {
+        const timer = this.getMaxQuestionTime(dados[this.state.count]);
+
+        this.setState({ data: dados, timer: timer, maxTime: timer, total: dados.length, pecasFisicas: { ...pecasFisicas } }, () => {
             this.onCount();
             Toast.hide();
         })
 
     }
 
+    getMaxQuestionTime(obj) {
+        const readTime = obj.texto.length * this.getConfigs().tempoLeituraPorCaractere;
+
+        const totalTime = this.getConfigs().tempoBase + readTime;
+        return Math.ceil(totalTime);
+    }
 
     getConfigs() {
         return this.props.screenProps.inputConfig;
@@ -118,16 +127,12 @@ class TeoTreLoc extends Component {
 
 
     componentWillUpdate(nextProps, nextState) {
-        if (this.state.timer != 0 && nextState.timer == 0) {
+        if (this.state.timer != 0 && nextState.timer <= 0) {
             clearInterval(this.timer)
             if (nextState.count !== nextState.data.length) {
                 Toast.info('Tempo limite excedido!')
                 announceForAccessibility('Tempo limite excedido!')
             }
-        }
-
-        if (this.state.count != nextState.count) {
-            this.setState({ timer: this.props.screenProps.inputConfig.tempo });
         }
     }
 
@@ -156,7 +161,7 @@ class TeoTreLoc extends Component {
                         isTeoria={true}
                         info={[
                             'Para cada conteúdo teórico informe a parte correspondente e em seguida pressione o botão "Próximo" para submeter.',
-                            `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
+                            `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${this.state.maxTime} segundos.`
                         ]}
                     />
                 ) : <Resultados data={data} onRepeat={this.onRepeat} formatter={e => e.texto} />}
@@ -175,7 +180,7 @@ class TeoTreLoc extends Component {
         this.setState({
             data: dados,
             count: 0,
-            timer: this.props.screenProps.inputConfig.tempo,
+            timer: this.state.maxTime,
             tentativas: 0
         }, () => this.onCount())
     }
@@ -211,12 +216,19 @@ class TeoTreLoc extends Component {
 
 
     onNext = acertou => () => {
-        const { data, count, tentativas } = this.state;
+        const { data, count, tentativas, timer } = this.state;
         const {config} = this.props.screenProps;
+
+        let newTimer = timer;
+
+        if(count < data.length - 1) {
+            newTimer = this.getMaxQuestionTime(data[count + 1])
+        }
 
         this.setState({
             count: count + 1,
-            timer: this.props.screenProps.inputConfig.tempo,
+            timer: newTimer,
+            maxTime: newTimer,
             tentativas: 0,
             data: [
                 ...data.slice(0, count),
