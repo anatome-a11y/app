@@ -138,7 +138,8 @@ class App extends Component {
     announceForAccessibility('Carregando...');
     Toast.loading('Carregando...', 0)
 
-    fetch('http://162.214.174.114:8080/anatomp', {
+    const apiUrl = 'https://anatome.herokuapp.com';
+    fetch(`${apiUrl}/anatomp`, {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
