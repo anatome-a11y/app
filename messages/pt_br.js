@@ -60,7 +60,8 @@ export default {
     },
     estNom: {
         hints: {
-            select: 'Selecione uma peça física e indique a localização de uma parte para obter seu '
+            select: 'Selecione uma peça física e indique a localização de uma parte para obter seu ',
+            selectDigital: 'Selecione uma peça física e clique na localização de uma parte para obter seu '
         }
     }
 }

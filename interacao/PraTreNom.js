@@ -1,31 +1,22 @@
-import React, { Component } from 'react';
-
-import { View, Text, TouchableHighlight, TextInput } from 'react-native';
-import Container from '../Container';
-import List from 'antd-mobile-rn/lib/list';
-import Card from 'antd-mobile-rn/lib/card';
-import Toast from 'antd-mobile-rn/lib/toast';
 import Button from 'antd-mobile-rn/lib/button';
-import Flex from 'antd-mobile-rn/lib/flex';
-import Tag from 'antd-mobile-rn/lib/tag';
-import InputItem from 'antd-mobile-rn/lib/input-item';
-import Checkbox from 'antd-mobile-rn/lib/checkbox';
-
+import Card from 'antd-mobile-rn/lib/card';
+import List from 'antd-mobile-rn/lib/list';
+import Toast from 'antd-mobile-rn/lib/toast';
+import React, { Component } from 'react';
+import { Text, View } from 'react-native';
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
-
-import Resultados from './Resultados'
-import Placar from './Placar'
-
-import Input from '../components/Input'
-
-import { norm } from '../utils'
-
-import BC from '../components/Breadcrumbs'
-import Instrucoes from '../components/Instrucoes'
+import BC from '../components/Breadcrumbs';
+import Input from '../components/Input';
+import Instrucoes from '../components/Instrucoes';
+import LocalizacaoPD from '../components/LocalizacaoPD';
+import Container from '../Container';
+import { norm } from '../utils';
+import Placar from './Placar';
+import Resultados from './Resultados';
 
 
 class FormContainer extends React.Component {
-    initialFocus= null;
+    initialFocus = null;
     nomeDaPeca = null;
     dicaDaParte = null;
     listRef = null;
@@ -57,7 +48,7 @@ class FormContainer extends React.Component {
                 this.setState({ found: null, pesquisa: '' }, () => {
                     setTimeout(() => {
                         focusOnView(this.dicaDaParte)
-                    }, 500);                    
+                    }, 500);
                 })
             }
         }
@@ -76,25 +67,36 @@ class FormContainer extends React.Component {
         const title = data[count].pecaFisica.nome;
         const { found, pesquisa } = this.state;
 
+        const pecasFisicas = anatomp.pecasFisicas;
         const value = data[count].valores[0];
+        const parte = data[count].parte;
+        const identificador = data[count].referenciaRelativa.referencia == null ? ('Nome da parte ' + data[count].numero) : ('Em relação à parte ' + data[count].numero + ', informe o nome da parte localizada ' + data[count].referenciaRelativa.referenciaParaReferenciado)
 
-        const identificador = data[count].referenciaRelativa.referencia == null ? ('Nome da parte ' + data[count].numero) : ('Em relação à parte '+data[count].numero+', informe o nome da parte localizada ' + data[count].referenciaRelativa.referenciaParaReferenciado)
+        const info = (screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' ? 'Para cada parte (isto é, sua localização) em cada peça física, selecione o nome da parte e em seguida pressione o botão "Próximo" para submeter' : 'Para cada parte (isto é, sua localização) em cada peça digital, informe o nome da parte e em seguida pressione o botão "Próximo" para submeter.');
 
         return (
             <View>
                 <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={'Treinamento - Prático - Localização-Conteúdo'} />
-                <Instrucoes 
-                voz={screenProps.config.indexOf('voz') != -1}
-                info={[
-                    'Para cada parte (isto é, sua localização) em cada peça física, selecione o nome da parte e em seguida pressione o botão "Próximo" para submeter',
-                    'Utilize o campo "Nome da parte" para buscar a parte desejada.',
-                    `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
-                ]} />
+                <Instrucoes
+                    voz={screenProps.config.indexOf('voz') != -1}
+                    info={[
+                        info,
+                        'Utilize o campo "Nome da parte" para informar o nome da parte.',
+                        `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
+                    ]} />
                 <Card style={{ marginBottom: 10 }}>
                     <Card.Header ref={r => this.nomeDaPeca = r} accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a parte anatômica`} title={title} />
                     <Card.Body>
                         <View>
-                            <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`${identificador}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
+
+                            {screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' &&
+                                <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`${identificador}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
+                            }
+
+                            {screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital' &&
+                                <LocalizacaoPD parte={parte} pecasFisicas={pecasFisicas} exibirLabel={false} />
+                            }
+
                             <Input
                                 _ref={onGetRef(count)}
                                 value={this.state.pesquisa}
@@ -141,7 +143,7 @@ class FormContainer extends React.Component {
 
             if (found) {
                 this.onChange(found);
-            }else{
+            } else {
                 announceForAccessibility(`Parte não encontrada`)
             }
 
@@ -279,7 +281,7 @@ class PraTreNom extends Component {
 
         let acertou = this.checkAcertos(data[count]);
 
-        if(timer > 0){
+        if (timer > 0) {
             if (acertou) {
                 Toast.success('Acertou!', 3, this.onNext(acertou));
                 announceForAccessibility('Acertou!')
@@ -295,7 +297,7 @@ class PraTreNom extends Component {
                     announceForAccessibility(msg)
                 }
             }
-        }else{
+        } else {
             this.onNext(false)()
         }
     }
@@ -328,13 +330,13 @@ class PraTreNom extends Component {
     onSetFocus = (count) => {
         const { config } = this.props.screenProps;
         if (config.indexOf('talkback') != -1) {
-           setTimeout(() =>  focusOnView(this.fieldRef[count]), 500)
-        }else{
+            setTimeout(() => focusOnView(this.fieldRef[count]), 500)
+        } else {
             if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
                 this.fieldRef[count].focus()
-            }            
-        }        
-         
+            }
+        }
+
     }
 
     checkAcertos = item => {

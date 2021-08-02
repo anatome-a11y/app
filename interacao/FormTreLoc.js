@@ -1,22 +1,17 @@
-import React, { Component } from 'react';
-
-import { View, Text } from 'react-native';
-import List from 'antd-mobile-rn/lib/list';
-import Card from 'antd-mobile-rn/lib/card';
 import Button from 'antd-mobile-rn/lib/button';
-import Flex from 'antd-mobile-rn/lib/flex';
+import Card from 'antd-mobile-rn/lib/card';
+import List from 'antd-mobile-rn/lib/list';
+import React, { Component } from 'react';
+import { Text, View } from 'react-native';
+import { focusOnView } from 'react-native-accessibility';
+import BC from '../components/Breadcrumbs';
+import Imagens from '../components/Imagens';
+import Input from '../components/Input';
+import Instrucoes from '../components/Instrucoes';
+import LocalizacaoPDPartes from '../components/LocalizacaoPDPartes';
+import Videos from '../components/Videos';
+import Placar from './Placar';
 
-import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
-
-import Placar from './Placar'
-
-import Input from '../components/Input'
-
-import BC from '../components/Breadcrumbs'
-import Instrucoes from '../components/Instrucoes'
-
-import Imagens from '../components/Imagens'
-import Videos from '../components/Videos'
 
 
 const ListItem = List.Item;
@@ -79,12 +74,10 @@ class Form extends Component {
                 }}
             />
         ) : (
-                value == '' ? <ListItem key={idx} >{_ni}</ListItem> : <ListItem key={idx} >{value + ' - ' + label}</ListItem>
-            )
+            value == '' ? <ListItem key={idx} >{_ni}</ListItem> : <ListItem key={idx} >{value + ' - ' + label}</ListItem>
+        )
     }
 }
-
-
 
 const DicaTeoria = ({ config, atual, _ref }) => {
     const refRel = atual.partes.filter(p => p.referenciaRelativa.referencia != null);
@@ -93,17 +86,17 @@ const DicaTeoria = ({ config, atual, _ref }) => {
     const instrucao = "Selecione a parte localizada ";
 
     return (
-        <View ref={_ref}>
-            <View style={{ margin: 10 }}>
-                <Text style={{textAlign: 'justify'}}>{atual.texto}</Text>
+        <View ref={_ref} accessible={true} >
+            <View style={{ margin: 10 }} accessible={true} >
+                <Text style={{ textAlign: 'justify' }}>{atual.texto}</Text>
                 {qtdRefRel > 0 && (
                     atual.partes.length > 1 ? (
-                        <View>
-                            <Text style={{textAlign: 'justify'}}>{titleRefRel}</Text>
-                            {refRel.map((p, key) => <Text style={{textAlign: 'justify', paddingLeft: 10}} key={key}>{'- '+instrucao + p.referenciaRelativa.referenciadoParaReferencia}</Text>)}
+                        <View accessible={true} >
+                            <Text style={{ textAlign: 'justify' }}>{titleRefRel}</Text>
+                            {refRel.map((p, key) => <Text style={{ textAlign: 'justify', paddingLeft: 10 }} key={key}>{'- ' + instrucao + p.referenciaRelativa.referenciadoParaReferencia}</Text>)}
                         </View>
                     ) : (
-                        <Text style={{textAlign: 'justify'}}>{instrucao + atual.partes[0].referenciaRelativa.referenciadoParaReferencia}</Text> 
+                        <Text style={{ textAlign: 'justify' }}>{instrucao + atual.partes[0].referenciaRelativa.referenciadoParaReferencia}</Text>
                     )
                 )}
             </View>
@@ -117,9 +110,9 @@ const DicaTeoria = ({ config, atual, _ref }) => {
 const DicaPratica = ({ atual, _ref, dica }) => {
     const identificador = (!atual.referenciaRelativa || atual.referenciaRelativa.referencia == null) ? atual.texto : (atual.texto + ': Selecione a parte localizada ' + atual.referenciaRelativa.referenciadoParaReferencia)
     return (
-        <View accessible={true} ref={_ref} accessibilityLabel={`Dica: ${identificador}. Prossiga para informar ${dica}`}>
-             <Text style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>               
-        </View>        
+        <View  accessible={true} ref={_ref} accessibilityLabel={`Dica: ${identificador}. Prossiga para informar ${dica}`}>
+            <Text style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
+        </View>
     )
 }
 
@@ -179,23 +172,35 @@ class FormTreLoc extends React.Component {
     }
 
 
+    onClickParte = label => e => {
+        this.props.onChangeValorDigital(0, label);
+    }
+
+
     render() {
-        const { screenProps, mainState, onGetRef, onSetFocus, onChangeValor, onErrorClick, onSubmit, interaction, info, isTeoria } = this.props;
+        const { screenProps, mainState, onGetRef, onSetFocus, onChangeValor, onChangeValorDigital, onErrorClick, onSubmit, interaction, info, isTeoria } = this.props;
         const { anatomp, onReadNFC, onStopNFC, config } = screenProps;
         const { count, total, data, timer, pecasFisicas, tentativas } = mainState;
         const title = data[count].pecaFisica.nome;
         const dica = data[count].valores.length > 1 ? 'as partes' : 'a parte';
+        const parte = data[count].partes[0].parte;
 
+        
         return (
-            <View>
+            <View accessible={true} >
                 <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={interaction} />
                 <Instrucoes voz={screenProps.config.indexOf('voz') != -1} info={info} />
                 <Card style={{ marginBottom: 10 }}>
                     <Card.Header accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a dica d${dica}.`} ref={r => this.nomeDaPeca = r} title={title} />
                     <Card.Body>
-                        {isTeoria ? <DicaTeoria _ref={r => this.dicaDaParte = r} atual={data[count]} config={config} /> : <DicaPratica dica={dica} _ref={r => this.dicaDaParte = r} atual={data[count]} />}                        
-                        {data[count].valores.map((value, idx) => (
-                            <View key={count + '-' + idx}>
+                        {isTeoria ? <DicaTeoria _ref={r => this.dicaDaParte = r} atual={data[count]} config={config} /> : <DicaPratica dica={dica} _ref={r => this.dicaDaParte = r} atual={data[count]} />}
+
+                        {screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital' &&
+                            <LocalizacaoPDPartes parte={parte} pecasFisicas={pecasFisicas} exibirLabel={true} onClickParte={this.onClickParte} />
+                        }
+
+                        {screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' && data[count].valores.map((value, idx) => (
+                            <View key={count + '-' + idx} accessible={true} >
                                 <Form
                                     data={data[count]}
                                     timer={timer}
@@ -215,8 +220,9 @@ class FormTreLoc extends React.Component {
                                     idx={idx}
                                 />
                             </View>
-                        ))}
-                        <Button ref={r => this.btnProximo = r} accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
+                        )) &&
+                            <Button ref={r => this.btnProximo = r} accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
+                        }
                     </Card.Body>
                 </Card>
 

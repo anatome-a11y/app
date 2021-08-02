@@ -1,30 +1,32 @@
+import Toast from 'antd-mobile-rn/lib/toast';
+import 'intl';
+import 'intl/locale-data/jsonp/en.js';
+import 'intl/locale-data/jsonp/pt-BR.js';
 import React, { Component } from 'react';
-
-import { AppRegistry, Platform, AccessibilityInfo, Vibration, Text } from 'react-native';
-import App from './App';
+import { IntlProvider } from 'react-intl';
+import { AccessibilityInfo, AppRegistry, Platform, Text, Vibration } from 'react-native';
+import { announceForAccessibility } from 'react-native-accessibility';
+import NfcManager, { NdefParser } from 'react-native-nfc-manager';
+import { createStackNavigator } from 'react-navigation';
 import Ajuda from './Ajuda';
+import App from './App';
+import { name as appName } from './app.json';
+import AppContext from './components/AppContext';
 import Config from './Config';
-import Roteiro from './Roteiro';
 import Info from './Info';
+import PraEstLoc from './interacao/PraEstLoc';
+import PraEstNom from './interacao/PraEstNom';
+import PraTreLoc from './interacao/PraTreLoc';
+import PraTreNom from './interacao/PraTreNom';
+import TeoEstLoc from './interacao/TeoEstLoc';
+import TeoEstNom from './interacao/TeoEstNom';
 import TeoTreLoc from './interacao/TeoTreLoc';
 import TeoTreNom from './interacao/TeoTreNom';
-import PraTreNom from './interacao/PraTreNom';
-import PraTreLoc from './interacao/PraTreLoc';
-import TeoEstNom from './interacao/TeoEstNom';
-import PraEstNom from './interacao/PraEstNom';
-import TeoEstLoc from './interacao/TeoEstLoc';
-import PraEstLoc from './interacao/PraEstLoc';
-import { name as appName } from './app.json';
-import Toast from 'antd-mobile-rn/lib/toast';
-import 'intl'
-import 'intl/locale-data/jsonp/pt-BR.js'
-import 'intl/locale-data/jsonp/en.js'
-import { IntlProvider } from 'react-intl'
-import { flattenMessages, messages } from './messages'
-import NfcManager, { NdefParser } from 'react-native-nfc-manager';
-import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
-import AppContext from './components/AppContext'
-import { createStackNavigator } from 'react-navigation';
+import { flattenMessages, messages } from './messages';
+import Roteiro from './Roteiro';
+
+// Para não exibir Warnings
+console.disableYellowBox = true;
 
 const Nav = createStackNavigator({
     App: { screen: App },
@@ -49,7 +51,7 @@ const Nav = createStackNavigator({
     }
 );
 
-const intlMessages = flattenMessages(messages['en'])
+const intlMessages = flattenMessages(messages['pt-BR'])
 
 class Root extends Component {
 
@@ -113,7 +115,7 @@ class Root extends Component {
 
         const { config, modoInteracao, anatomp, inputConfig } = this.state;
 
-        return <IntlProvider textComponent={Text} locale="en" defaultLocale="en" messages={intlMessages}>
+        return <IntlProvider textComponent={Text} locale="pt-BR" defaultLocale="pt-BR" messages={intlMessages}>
             <AppContext.Provider value={{
                 config,
                 inputConfig,

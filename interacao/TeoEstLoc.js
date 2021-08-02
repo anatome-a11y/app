@@ -1,32 +1,32 @@
-import React, { Component } from 'react';
-
-import { ScrollView, View, Text, TouchableHighlight, TextInput } from 'react-native';
-import Container from '../Container';
+import Badge from 'antd-mobile-rn/lib/badge';
+import Button from 'antd-mobile-rn/lib/button';
+import Card from 'antd-mobile-rn/lib/card';
 import List from 'antd-mobile-rn/lib/list';
 import Toast from 'antd-mobile-rn/lib/toast';
-import Button from 'antd-mobile-rn/lib/button';
-import Checkbox from 'antd-mobile-rn/lib/checkbox';
-import Card from 'antd-mobile-rn/lib/card';
-
-import { norm } from '../utils'
-
-
+import React, { Component } from 'react';
+import { Image, ScrollView, Text, View } from 'react-native';
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
-import Input from '../components/Input'
-import Option from '../components/Option'
-import Modal from '../components/Modal'
-
-import Imagens from '../components/Imagens'
-import Videos from '../components/Videos'
-import BC from '../components/Breadcrumbs'
-import Instrucoes from '../components/Instrucoes'
+import BC from '../components/Breadcrumbs';
+import Imagens from '../components/Imagens';
+import Input from '../components/Input';
+import Instrucoes from '../components/Instrucoes';
+import Modal from '../components/Modal';
 import ReferenciasRelativas from '../components/ReferenciasRelativas';
+import Videos from '../components/Videos';
+import Container from '../Container';
+import { norm } from '../utils';
+
+
+
+
+
 
 const ListItem = List.Item;
 
 
 
-const LocalizacaoPF = ({conteudo, pecasFisicas}) => {
+const LocalizacaoPF = ({ conteudo, pecasFisicas }) => {
+
     if (conteudo != undefined) {
         return Object.keys(pecasFisicas).map(key => conteudo.partes.map(p => {
             const localizacao = pf = pecasFisicas[key].localizacao.find(m => m.parte._id == p._id)
@@ -47,6 +47,64 @@ const LocalizacaoPF = ({conteudo, pecasFisicas}) => {
 }
 
 
+const LocalizacaoPD = ({ conteudo, pecasFisicas = [], exibirLabel = true }) => {
+
+    let pecasFisicasFiltradas = [];
+    Object.keys(pecasFisicas).map(key => {
+
+        let peca = JSON.parse(JSON.stringify(pecasFisicas[key]));
+
+        let pecaFiltrada = JSON.parse(JSON.stringify(pecasFisicas[key]));
+        pecaFiltrada.midias = [];
+        pecaFiltrada.localizacao = [];
+
+        let pontos = [];
+        for (let image of peca.midias) {
+            let imageFiltrada = JSON.parse(JSON.stringify(image));
+            imageFiltrada.pontos = [];
+
+            conteudo.partes.map(cParte => {
+                imageFiltrada.pontos = image.pontos.filter(ponto => ponto.parte._id == cParte._id);
+                if (imageFiltrada && imageFiltrada.pontos && imageFiltrada.pontos.length > 0) {
+                    pontos = pontos.concat(imageFiltrada.pontos);
+                }
+            })
+            imageFiltrada.pontos = pontos;
+            if (imageFiltrada && imageFiltrada.pontos && imageFiltrada.pontos.length > 0) {
+                pecaFiltrada.midias.push(imageFiltrada);
+            }
+            pontos = [];
+        }
+        if (pecaFiltrada.midias && pecaFiltrada.midias.length > 0) {
+            pecasFisicasFiltradas.push(pecaFiltrada);
+        }
+
+    });
+
+    pecasFisicasFiltradas = pecasFisicasFiltradas.filter(p => p.midias.length > 0);
+
+    return pecasFisicasFiltradas.map(peca => peca.midias.map((image, idx) =>
+        <View>
+            <Image
+                style={{
+                    width: 400,
+                    height: 400,
+                    resizeMode: 'stretch',
+                    position: 'relative',
+                }}
+                source={{ uri: image.url }}
+            />
+            {image.pontos.map((point, idxPonto) =>
+                <Badge
+                    text={exibirLabel ? point.label : "  "}
+                    style={{ top: point.y + "%", left: point.x + "%", position: 'absolute' }}>
+                </Badge>
+            )}
+        </View>
+    ))
+}
+
+
 class TeoEstLoc extends Component {
     timer = null;
     fieldRef = [];
@@ -58,6 +116,7 @@ class TeoEstLoc extends Component {
     state = {
         loading: true,
         open: false,
+        openDigital: false,
         conteudo: undefined,
         conteudos: [],
         filtered: [],
@@ -106,12 +165,13 @@ class TeoEstLoc extends Component {
 
     render() {
         const { navigation, screenProps, isTeoria } = this.props;
-        const { open, conteudo, filtered, pecasFisicas } = this.state;
+        const { open, openDigital, conteudo, filtered, pecasFisicas } = this.state;
 
         const selected = conteudo == undefined ? '' : conteudo._id;
 
         const modalTitle = (conteudo && conteudo.partes) ? (conteudo.partes.length == 1 ? conteudo.partes[0].nome : `Partes: ${conteudo.partes.map(item => item.nome).join(', ')}`) : null
 
+        const info = (screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' ? 'Escolha um conteúdo teórico na lista de conteúdos para obter o nome da parte e sua localização nas peças físicas.' : 'Escolha um conteúdo teórico na lista de conteúdos para obter o nome da parte e sua localização nas peças digitais.');
 
         return (
             <Container navigation={navigation}>
@@ -119,7 +179,7 @@ class TeoEstLoc extends Component {
                 <Instrucoes
                     voz={screenProps.config.indexOf('voz') != -1}
                     info={[
-                        'Escolha um conteúdo teórico na lista de conteúdos para obter o nome da parte e sua localização nas peças físicas',
+                        info,
                         'Caso deseje, utilize o filtro a seguir para encontrar um conteúdo específico.'
                     ]}
                 />
@@ -133,6 +193,7 @@ class TeoEstLoc extends Component {
                             name={'Filtro de conteúdo teórico'}
                             onSkipAlternatives={() => focusOnView(this.refListaConteudo)}
                         />
+
                         <List renderHeader={() => `Lista de conteúdos teóricos`} ref={r => this.refListaConteudo = r} accessibilityLabel={`Conteúdos teóricos filtrados. Lista com ${filtered.length} itens. Prossiga para ouvir os conteúdos.`}>
                             {filtered.length > 0 ? filtered.map(c => (
                                 <List.Item accessible accessibilityLabel={`${c.texto}. Botão. Toque duas vezes para abrir ou prossiga para obter mais opções.`} wrap multipleLine key={c._id} onClick={this.onSelectParte(c)}>
@@ -142,9 +203,14 @@ class TeoEstLoc extends Component {
                                 </List.Item>
                             )) : <List.Item accessibilityLabel='Nenhuma parte encontrada. Altere as palavras chave do campo de busca.' wrap multipleLine>Nenhum conteúdo foi encontrado</List.Item>}
                         </List>
+
                         {screenProps.config.indexOf('talkback') != -1 && <Button type='primary' onPressOut={() => focusOnView(this.inputRef)}>Voltar para o filtro</Button>}
+
                     </Card.Body>
                 </Card>
+
+
+                {/* Modal Peças Físicas */}
                 <Modal
                     talkback={screenProps.config.indexOf('talkback') != -1}
                     open={open}
@@ -160,17 +226,40 @@ class TeoEstLoc extends Component {
                         {conteudo && conteudo.partes.map(p => <ReferenciasRelativas attrName='localizacao' key={p._id} parte={p} pecasFisicas={pecasFisicas} />)}
                     </ScrollView>
                 </Modal>
+
+                {/* Modal Peças Digitais */}
+                <Modal
+                    talkback={true}
+                    open={openDigital}
+                    title={modalTitle}
+                    acc={`Aberto. Prossiga para ouvir o nome da parte e sua localização nas peças digitais.`}
+                    footer={[
+                        { text: 'Fechar', onPress: this.onCloseDigital, acc: `Fechar. Botão. Toque duas vezes para fechar os detalhes do conteúdo ${conteudo ? conteudo.texto : ''}` },
+                    ]}
+                >
+                    <ScrollView style={{ maxHeight: '87%' }}>
+                        <LocalizacaoPD conteudo={conteudo} pecasFisicas={pecasFisicas} exibirLabel={false} />
+                    </ScrollView>
+                </Modal>
             </Container>
         )
     }
 
     onSelectParte = conteudo => e => {
-        this.setState({ conteudo, open: true })
+        if (this.props.screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica') {
+            this.setState({ conteudo, open: true })
+        } else if (this.props.screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital') {
+            this.setState({ conteudo, openDigital: true })
+        }
     }
 
     onOpen = () => this.setState({ open: true })
 
     onClose = () => this.setState({ open: false })
+
+    onOpenDigital = () => this.setState({ openDigital: true })
+
+    onCloseDigital = () => this.setState({ openDigital: false })
 
     onFilter = pesquisa => {
         this.setState({

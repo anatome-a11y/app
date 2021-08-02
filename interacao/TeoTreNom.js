@@ -1,30 +1,21 @@
-import React, { Component } from 'react';
-
-import { View, Text, TouchableHighlight, TextInput } from 'react-native';
-import Container from '../Container';
-import List from 'antd-mobile-rn/lib/list';
-import Card from 'antd-mobile-rn/lib/card';
-import Toast from 'antd-mobile-rn/lib/toast';
 import Button from 'antd-mobile-rn/lib/button';
-import Flex from 'antd-mobile-rn/lib/flex';
-import Tag from 'antd-mobile-rn/lib/tag';
-import InputItem from 'antd-mobile-rn/lib/input-item';
-import Checkbox from 'antd-mobile-rn/lib/checkbox';
-
+import Card from 'antd-mobile-rn/lib/card';
+import List from 'antd-mobile-rn/lib/list';
+import Toast from 'antd-mobile-rn/lib/toast';
+import React, { Component } from 'react';
+import { Text, View } from 'react-native';
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
+import BC from '../components/Breadcrumbs';
+import Input from '../components/Input';
+import Instrucoes from '../components/Instrucoes';
+import LocalizacaoPD from '../components/LocalizacaoPD';
+import Modal from '../components/Modal';
+import { Simple as Option } from '../components/Option';
+import Container from '../Container';
+import { withI18n } from '../messages/withI18n';
+import Placar from './Placar';
+import Resultados from './Resultados';
 
-import Resultados from './Resultados'
-import Placar from './Placar'
-
-import Input from '../components/Input'
-import Modal from '../components/Modal'
-import {Simple as Option} from '../components/Option'
-
-import { norm } from '../utils'
-
-import BC from '../components/Breadcrumbs'
-import Instrucoes from '../components/Instrucoes'
-import {withI18n} from '../messages/withI18n'
 
 class _FormContainer extends React.Component {
     initialFocus = null;
@@ -65,32 +56,42 @@ class _FormContainer extends React.Component {
 
 
     render() {
-        const { screenProps, mainState, onGetRef, maxTentativa, onChange, i18n } = this.props;
+        const { screenProps, mainState, onGetRef, maxTentativa, onChange, i18n, } = this.props;
         const { anatomp, config } = screenProps;
         const { count, total, data, timer, tentativas, open } = mainState;
+
+        const pecasFisicas = anatomp.pecasFisicas;
         const title = data[count].localizacao.pecaFisica.nome;
-        const identificador = data[count].localizacao.referenciaRelativa.referencia == null ? (i18n('common.part') + ' ' + data[count].localizacao.numero) : (i18n('teoTreNom.common.inRelationToThePart') + data[count].localizacao.numero +', ' + i18n('teoTreNom.common.isLocatedAt') + ' ' + data[count].localizacao.referenciaRelativa.referenciaParaReferenciado);
+        const parte = data[count].parte;
+        const identificador = data[count].localizacao.referenciaRelativa.referencia == null ? (i18n('common.part') + ' ' + data[count].localizacao.numero) : (i18n('teoTreNom.common.inRelationToThePart') + data[count].localizacao.numero + ', ' + i18n('teoTreNom.common.isLocatedAt') + ' ' + data[count].localizacao.referenciaRelativa.referenciaParaReferenciado);
         const isTB = config.indexOf('talkback') != -1;
 
         const disabled = data[count].respostaParte.length == 0 || data[count].respostaConteudos.length == 0;
         const disabledVerificacao = timer == 0 || tentativas == maxTentativa;
 
-
         return (
             <View>
                 <BC _ref={r => this.initialFocus = r} body={[i18n('common.scripts'), anatomp.nome]} head={`${i18n('common.training')} - ${i18n('common.theoretical')} - ${i18n('common.locToContent')}`} />
-                <Instrucoes 
-                voz={screenProps.config.indexOf('voz') != -1}
-                info={[
-                    i18n('teoTreNom.hints.inform'),
-                    i18n('teoTreNom.hints.verify'),
-                    i18n('teoTreNom.hints.chances', {chances: screenProps.inputConfig.chances, tempo: 3*screenProps.inputConfig.tempo}),
-                ]} />
+                <Instrucoes
+                    voz={screenProps.config.indexOf('voz') != -1}
+                    info={[
+                        i18n('teoTreNom.sections.instructions.hints.inform'),
+                        i18n('teoTreNom.sections.instructions.hints.verify'),
+                        i18n('teoTreNom.sections.instructions.hints.chances', { chances: screenProps.inputConfig.chances, tempo: 3 * screenProps.inputConfig.tempo }),
+                    ]} />
                 <Card style={{ marginBottom: 10 }}>
                     <Card.Header ref={r => this.nomeDaPeca = r} accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a parte anatômica`} title={title} />
                     <Card.Body>
                         <View>
-                            <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`${identificador}. Prossiga para informar o nome da parte e os conteúdo associados.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
+
+                            {screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' &&
+                                <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`${identificador}. Prossiga para informar o nome da parte e os conteúdo associados.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
+                            }
+
+                            {screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital' &&
+                                <LocalizacaoPD parte={parte} pecasFisicas={pecasFisicas} exibirLabel={false} />
+                            }
+
                             <Input
                                 _ref={onGetRef(count)}
                                 value={data[count].respostaParte}
@@ -110,8 +111,8 @@ class _FormContainer extends React.Component {
                                 }}
                             />
                         </View>
-                            <Button disabled={disabled || disabledVerificacao} accessibilityLabel={(disabled || disabledVerificacao) ? 'Verificar Respostas. Botão. Desabilitado. Informe a parte e os conteúdos para habilitar' :`Verificar respostas. Botão. Toque duas vezes para abrir a verficação de respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={this.props.onToggleDialog(true)} type='primary'>{i18n('teoTreNom.actions.check')}</Button>
-                            <Button accessibilityLabel={`Próximo. Botão. Toque duas vezes para confirmar suas respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={this.props.onSubmit} type='primary'>{i18n('actions.next')}</Button>
+                        <Button disabled={disabled || disabledVerificacao} accessibilityLabel={(disabled || disabledVerificacao) ? 'Verificar Respostas. Botão. Desabilitado. Informe a parte e os conteúdos para habilitar' : `Verificar respostas. Botão. Toque duas vezes para abrir a verficação de respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={this.props.onToggleDialog(true)} type='primary'>{i18n('teoTreNom.actions.check')}</Button>
+                        <Button accessibilityLabel={`Próximo. Botão. Toque duas vezes para confirmar suas respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={this.props.onSubmit} type='primary'>{i18n('actions.next')}</Button>
                     </Card.Body>
                 </Card>
                 <Modal
@@ -119,7 +120,7 @@ class _FormContainer extends React.Component {
                     open={open}
                     title={identificador}
                     acc={`${identificador}. Aberto. Prossiga para ouvir as informações da parte`}
-                    footer={[{ text: i18n('actions.close'), onPress: this.props.onToggleDialog(false), acc: `Fechar. Botão. Toque duas vezes para fechar a verificação de respostas.`}]}
+                    footer={[{ text: i18n('actions.close'), onPress: this.props.onToggleDialog(false), acc: `Fechar. Botão. Toque duas vezes para fechar a verificação de respostas.` }]}
                 >
                     <View accessible={true}>
                         <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 3 }}>{i18n('teoTreNom.common.yourAnswer')}:</Text>
@@ -127,7 +128,7 @@ class _FormContainer extends React.Component {
                         <Text>{data[count].respostaConteudos}</Text>
                         <Text accessibilityLabel='Prossiga para ouvir a lista de respostas esperadas'></Text>
                     </View>
-                    <Text accessibilityLabel={`Respostas esperadas. ${data[count].conteudos.length+1} itens na lista. Prossiga para marcar as opções que você acertou.`} accessible style={{ color: '#000', marginBottom: 3, marginTop: 6 }}><Text style={{ fontWeight: 'bold' }}>{i18n('teoTreNom.common.expectedAnswers')} </Text>({i18n('teoTreNom.common.checkTheRights')}):</Text>
+                    <Text accessibilityLabel={`Respostas esperadas. ${data[count].conteudos.length + 1} itens na lista. Prossiga para marcar as opções que você acertou.`} accessible style={{ color: '#000', marginBottom: 3, marginTop: 6 }}><Text style={{ fontWeight: 'bold' }}>{i18n('teoTreNom.common.expectedAnswers')} </Text>({i18n('teoTreNom.common.checkTheRights')}):</Text>
                     <List>
                         <List.Item>
                             <Option
@@ -186,13 +187,13 @@ const _ni = 'Não identificado'
 
 
 const getValue = (field, value, item) => {
-    if(value){
-        if(field == 'respostaConteudos'){
-            return item.respostaConteudos +". "+ value;
-        }else{
+    if (value) {
+        if (field == 'respostaConteudos') {
+            return item.respostaConteudos + ". " + value;
+        } else {
             return value;
         }
-    }else{
+    } else {
         return ""
     }
 }
@@ -208,13 +209,14 @@ class TeoTreNom extends Component {
         count: 0,
         total: 0,
         open: false,
-        timer: 3*this.props.screenProps.inputConfig.tempo,
+        timer: 3 * this.props.screenProps.inputConfig.tempo,
         tentativas: 0,
         loading: true,
-        sinalScroll: 0
+        sinalScroll: 0,
     }
 
     componentDidMount() {
+
         const { anatomp } = this.props.screenProps;
 
         Toast.loading('Aguarde...', 0)
@@ -243,7 +245,6 @@ class TeoTreNom extends Component {
             this.onCount();
             Toast.hide();
         })
-
     }
 
 
@@ -257,7 +258,7 @@ class TeoTreNom extends Component {
         }
 
         if (this.state.count != nextState.count) {
-            this.setState({ timer: 3*this.props.screenProps.inputConfig.tempo });
+            this.setState({ timer: 3 * this.props.screenProps.inputConfig.tempo });
         }
     }
 
@@ -293,11 +294,11 @@ class TeoTreNom extends Component {
     }
 
 
-    onSetSinalScroll = () => this.setState({sinalScroll: + new Date()})
+    onSetSinalScroll = () => this.setState({ sinalScroll: + new Date() })
 
 
-    onToggleDialog = (open, cb = () => {}) => () => {
-        this.setState({open}, cb)
+    onToggleDialog = (open, cb = () => { }) => () => {
+        this.setState({ open }, cb)
     }
 
     onRepeat = () => {
@@ -309,7 +310,7 @@ class TeoTreNom extends Component {
         this.setState({
             data: dados,
             count: 0,
-            timer: 3*this.props.screenProps.inputConfig.tempo,
+            timer: 3 * this.props.screenProps.inputConfig.tempo,
             tentativas: 0
         }, () => this.onCount())
     }
@@ -318,7 +319,7 @@ class TeoTreNom extends Component {
 
     onSubmit = () => {
         const { data, count, tentativas, timer } = this.state;
-        const {i18n} = this.props
+        const { i18n } = this.props
 
         let acertou = this.checkAcertos(data[count]);
 
@@ -333,9 +334,9 @@ class TeoTreNom extends Component {
                     announceForAccessibility('Você errou.')
                 } else {
                     const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
-                    const msg = i18n('teoTreNom.alerts.correctTheAnswer', {num, sufixo: num == 1 ? '' : 's'})
+                    const msg = i18n('teoTreNom.alerts.correctTheAnswer', { num, sufixo: num == 1 ? '' : 's' })
                     Toast.fail(msg, 3, () => this.onSetFocus(count))
-                    this.setState({timer: 3*this.props.screenProps.inputConfig.tempo,})
+                    this.setState({ timer: 3 * this.props.screenProps.inputConfig.tempo, })
                     announceForAccessibility(msg)
                 }
             }
@@ -350,7 +351,7 @@ class TeoTreNom extends Component {
 
         this.setState({
             count: count + 1,
-            timer: 3*this.props.screenProps.inputConfig.tempo,
+            timer: 3 * this.props.screenProps.inputConfig.tempo,
             tentativas: 0,
             data: [
                 ...data.slice(0, count),
@@ -364,7 +365,6 @@ class TeoTreNom extends Component {
             clearInterval(this.timer)
             this.onCount()
         })
-
     }
 
     onGetRef = (count) => r => { this.fieldRef[count] = r }
@@ -386,18 +386,18 @@ class TeoTreNom extends Component {
 
     onCount = () => {
         this.timer = setInterval(() => {
-            if(!this.state.open){
+            if (!this.state.open) {
                 this.setState({ timer: this.state.timer - 1 })
-            }            
+            }
         }, 1000);
     }
 
     onChange = field => value => {
         const { data, count, timer } = this.state;
 
-        if(value){
+        if (value) {
             announceForAccessibility(`Texto detectado: ${value}`)
-        }else{
+        } else {
             announceForAccessibility('Texto removido')
         }
 
@@ -411,6 +411,7 @@ class TeoTreNom extends Component {
                 ...data.slice(count + 1),
             ]
         })
+
     }
 }
 

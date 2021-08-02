@@ -8,10 +8,11 @@
   },
   "dependencies": {
     "antd-mobile-rn": "^2.2.1",
+    "babel-preset-react-native": "^2.1.0",
     "intl": "^1.2.5",
     "react": "16.4.1",
     "react-intl": "^4.5.1",
-    "react-native": "0.56.0",
+    "react-native": "0.55.4",
     "react-native-accessibility": "^1.0.7",
     "react-native-audio": "^4.3.0",
     "react-native-autocomplete-input": "^3.5.0",
@@ -24,7 +25,6 @@
   },
   "devDependencies": {
     "babel-jest": "23.4.2",
-    "babel-preset-react-native": "5.0.2",
     "jest": "23.5.0",
     "react-test-renderer": "16.4.1"
   },
