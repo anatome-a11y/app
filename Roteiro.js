@@ -200,6 +200,7 @@ class Roteiro extends Component {
         const { navigation, screenProps } = this.props;
         const { tipoConteudo, modoAprendizagem, sentidoIdentificacao } = screenProps.modoInteracao;
         const view = getCode(tipoConteudo) + getCode(modoAprendizagem) + getCode(sentidoIdentificacao)
+
         navigation.navigate(view)
     }
 

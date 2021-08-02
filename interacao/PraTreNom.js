@@ -106,7 +106,7 @@ class FormContainer extends React.Component {
                             />
                             {!found || pesquisa == '' && <Text style={{ padding: 5 }}>Nenhuma parte foi identificada</Text>}
                         </View>
-                        <Button disabled={!found && timer > 0} accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
+                        <Button  accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
                     </Card.Body>
                 </Card>
 
@@ -172,7 +172,8 @@ class PraTreNom extends Component {
         data: [],
         count: 0,
         total: 0,
-        timer: this.props.screenProps.inputConfig.tempo,
+        timer: 60,
+        maxTime: 60,
         partes: [],
         tentativas: 0,
         loading: true
@@ -208,27 +209,40 @@ class PraTreNom extends Component {
 
         const dados = flatData.map(fd => ({ ...fd, acertou: false, valores: [''] }));
 
+        const timer = this.getMaxQuestionTime(dados[this.state.count]);
+
         this.fieldRef = flatData.map(fd => [null])
 
-        this.setState({ loading: false, data: dados, total: dados.length, partes: anatomp.roteiro.partes }, () => {
+        this.setState({ loading: false, data: dados, timer: timer, maxTime: timer, total: dados.length, partes: anatomp.roteiro.partes }, () => {
             this.onCount();
             Toast.hide();
         })
 
     }
 
+    getMaxQuestionTime(obj) {
+        const texto = obj.parte.nome;
+
+        const writeTime = texto.length * this.getConfigs().tempoDigitacaoPorCaractere;
+        const speakTime = texto.length * this.getConfigs().tempoFalaPorCaractere;
+
+        const responseTime = this.props.screenProps.config.includes('voz') ? speakTime : writeTime;
+
+        const totalTime = this.getConfigs().tempoBase + responseTime;
+        return Math.ceil(totalTime);
+    }
+
+    getConfigs() {
+        return this.props.screenProps.inputConfig;
+    }
 
     componentWillUpdate(nextProps, nextState) {
-        if (this.state.timer != 0 && nextState.timer == 0) {
+        if (this.state.timer != 0 && nextState.timer <= 0) {
             clearInterval(this.timer)
             if (nextState.count !== nextState.data.length) {
                 Toast.info('Tempo limite excedido!')
                 announceForAccessibility('Tempo limite excedido!')
             }
-        }
-
-        if (this.state.count != nextState.count) {
-            this.setState({ timer: this.props.screenProps.inputConfig.tempo });
         }
     }
 
@@ -269,7 +283,7 @@ class PraTreNom extends Component {
         this.setState({
             data: dados,
             count: 0,
-            timer: this.props.screenProps.inputConfig.tempo,
+            timer: this.state.maxTime,
             tentativas: 0
         }, () => this.onCount())
     }
@@ -304,11 +318,17 @@ class PraTreNom extends Component {
 
 
     onNext = acertou => () => {
-        const { data, count, tentativas } = this.state;
+        const { data, count, tentativas, timer } = this.state;
+        let newTimer = timer;
+
+        if(count < data.length - 1) {
+            newTimer = this.getMaxQuestionTime(data[count + 1])
+        }
 
         this.setState({
             count: count + 1,
-            timer: this.props.screenProps.inputConfig.tempo,
+            timer: newTimer,
+            maxTime: newTimer,
             tentativas: 0,
             data: [
                 ...data.slice(0, count),

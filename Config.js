@@ -73,22 +73,67 @@ class Config extends Component {
                 </List>
                 {!isAcc && <Text style={{ marginTop: 5, fontSize: 12 }}><Text style={{ color: '#108ee9' }}>*</Text> Talkback (Android) ou VoiceOver (iOS) desativado no sistema do dispositivo</Text>}
                 <List accessibilityLabel='Configurações de interação. Prossiga para alterá-las' style={{ marginTop: 15 }} renderHeader={() => 'Interação'}>
+
                     <List.Item>
-                        <View accessible accessibilityLabel={`Tempo máximo. ${inputConfig.tempo} segundos. Prossiga para alterar o valor.`}>
-                            {isAcc ? <Text>Tempo máximo: {inputConfig.tempo} segundos</Text>  : (
-                                <Flex>
-                                <Text style={{ flex: 3 }}>Tempo máximo</Text>
-                                <View style={{ flex: 1 }}><Tag size='small'>{inputConfig.tempo}</Tag></View>
+                        <View accessible accessibilityLabel={`Tempo base. ${inputConfig.tempoBase} segundos. Prossiga para alterar o valor.`}>
+                            {isAcc ? <Text>Tempo base: {inputConfig.tempoBase} segundos</Text>  : (
+                            <Flex>
+                                <Text style={{ flex: 3 }}>Tempo base</Text>
+                                <View style={{ flex: 1 }}><Tag size='small'>{inputConfig.tempoBase}</Tag></View>
                             </Flex>
                             )}
                         </View>
-                        <Slider min={30} max={150} step={15} value={inputConfig.tempo} onChange={this.onChangeInputConfig('tempo', 'Tempo máximo', 'segundos')} />
+                        <Slider min={30} max={150} step={15} value={inputConfig.tempoBase} onChange={this.onChangeInputConfig('tempoBase', 'Tempo base', 'segundos')} />
                     </List.Item>
+
+                    <List.Item>
+                        <View accessible accessibilityLabel={`Tempo de leitura por caractere . ${inputConfig.tempoLeituraPorCaractere} segundos. Prossiga para alterar o valor.`}>
+                            {isAcc ? <Text>Tempo de leitura por caractere: {inputConfig.tempoLeituraPorCaractere} segundos</Text>  : (
+                            <Flex>
+                                <Text style={{ flex: 3 }}>Tempo de leitura por caractere</Text>
+                                <View style={{ flex: 1 }}><Tag size='small'>{inputConfig.tempoLeituraPorCaractere}</Tag></View>
+                            </Flex>
+                            )}
+
+
+                        </View>
+                        <Slider min={0.1} max={1} step={0.1} value={inputConfig.tempoLeituraPorCaractere} onChange={this.onChangeInputConfig('tempoLeituraPorCaractere', 'Tempo de leitura por caractere', 'segundos')} />
+                    </List.Item>
+
+                    <List.Item>
+                        <View accessible accessibilityLabel={`Tempo de digitação por caractere . ${inputConfig.tempoDigitacaoPorCaractere} segundos. Prossiga para alterar o valor.`}>
+                            {isAcc ? <Text>Tempo de digitação por caractere: {inputConfig.tempoDigitacaoPorCaractere} segundos</Text>  : (
+                            <Flex>
+                                <Text style={{ flex: 3 }}>Tempo de digitação por caractere</Text>
+                                <View style={{ flex: 1 }}><Tag size='small'>{inputConfig.tempoDigitacaoPorCaractere}</Tag></View>
+                            </Flex>
+                            )}
+
+
+                        </View>
+                        <Slider min={0.5} max={5} step={0.1} value={inputConfig.tempoDigitacaoPorCaractere} onChange={this.onChangeInputConfig('tempoDigitacaoPorCaractere', 'Tempo de digitção por caractere', 'segundos')} />
+                    </List.Item>
+
+                    <List.Item>
+                        <View accessible accessibilityLabel={`Tempo de fala por caractere . ${inputConfig.tempoFalaPorCaractere} segundos. Prossiga para alterar o valor.`}>
+                            {isAcc ? <Text>Tempo de fala por caractere: {inputConfig.tempoFalaPorCaractere} segundos</Text>  : (
+                            <Flex>
+                                <Text style={{ flex: 3 }}>Tempo de fala por caractere</Text>
+                                <View style={{ flex: 1 }}><Tag size='small'>{inputConfig.tempoFalaPorCaractere}</Tag></View>
+                            </Flex>
+                            )}
+
+
+                        </View>
+                        <Slider min={0.3} max={1} step={0.1} value={inputConfig.tempoFalaPorCaractere} onChange={this.onChangeInputConfig('tempoFalaPorCaractere', 'Tempo de digitção por caractere', 'segundos')} />
+                    </List.Item>
+
+
                     <List.Item>
                         <View accessible accessibilityLabel={`Máximo de tentativas. ${inputConfig.chances}. Prossiga para alterar o valor.`}>
                         {isAcc ? <Text>Máximo de entativas: {inputConfig.chances}</Text> : (
                         <Flex>
-                            <Text style={{ flex: 3 }}>Máximo de entativas</Text>
+                            <Text style={{ flex: 3 }}>Máximo de tentativas</Text>
                             <View style={{ flex: 1 }}><Tag size='small'>{inputConfig.chances}</Tag></View>
                         </Flex>                            
                         )}                        
@@ -109,6 +154,17 @@ class Config extends Component {
 
 
     onChangeInputConfig = (key, name, unidade) => v => {
+        const roundValues = [
+            'tempoLeituraPorCaractere',
+            'tempoDigitacaoPorCaractere',
+            'tempoFalaPorCaractere'
+        ];
+
+        if(roundValues.includes(key)) {
+            v = Math.round(v * 10) / 10
+        }
+
+
         this.props.screenProps.onChangeInputConfig(key)(v);
         announceForAccessibility(`${name} ajustado para ${v} ${unidade}`)
     }
