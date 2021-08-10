@@ -1,15 +1,9 @@
-import React, { Component } from 'react';
-
-import Container from '../Container';
 import Toast from 'antd-mobile-rn/lib/toast';
-
+import React, { Component } from 'react';
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
-
-import Resultados from './Resultados'
-import FormTreLoc from './FormTreLoc'
-
-
-import BC from '../components/Breadcrumbs'
+import Container from '../Container';
+import FormTreLoc from './FormTreLoc';
+import Resultados from './Resultados';
 
 class TeoTreLoc extends Component {
     timer = null;
@@ -61,7 +55,7 @@ class TeoTreLoc extends Component {
 
                     if (conteudo.plural != '') {
                         flatData.push({ pecaFisica: { nome, _id }, modo: 'plural', texto: conteudo.plural, partes, midias: conteudo.midias })
-                    }else{
+                    } else {
                         if (conteudo.singular != '') {
                             flatData.push({ pecaFisica: { nome, _id }, modo: 'singular', texto: conteudo.singular, partes, midias: conteudo.midias })
                         }
@@ -112,6 +106,7 @@ class TeoTreLoc extends Component {
     render() {
         const { navigation, screenProps } = this.props;
         const { data, count, sinalScroll, sinalTexto } = this.state;
+        const info = (screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' ? 'Para cada conteúdo teórico informe a parte correspondente e em seguida pressione o botão "Próximo" para submeter.' : 'Para cada conteúdo teórico clique na parte correspondente.');
 
         return (
             <Container sinalScroll={sinalScroll} navigation={navigation} >
@@ -124,13 +119,14 @@ class TeoTreLoc extends Component {
                         onGetRef={this.onGetRef}
                         onSetFocus={this.onSetFocus}
                         onChangeValor={this.onChangeValor}
+                        onChangeValorDigital={this.onChangeValorDigital}
                         onErrorClick={this.onErrorClick}
                         onSubmit={this.onSubmit}
                         interaction='Treinamento - Teórico - Conteúdo-Localização'
                         isTeoria={true}
                         info={[
-                            'Para cada conteúdo teórico informe a parte correspondente e em seguida pressione o botão "Próximo" para submeter.',
-                            `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${this.state.maxTime} segundos.`
+                            info,
+                            `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
                         ]}
                     />
                 ) : <Resultados data={data} onRepeat={this.onRepeat} formatter={e => e.texto} />}
@@ -138,7 +134,7 @@ class TeoTreLoc extends Component {
         )
     }
 
-    onSetSinalScroll = (s, cb) => this.setState({sinalScroll: s}, cb)
+    onSetSinalScroll = (s, cb) => this.setState({ sinalScroll: s }, cb)
 
     onRepeat = () => {
         const { data } = this.state;
@@ -161,7 +157,7 @@ class TeoTreLoc extends Component {
 
         let acertou = this.checkAcertos(data[count]);
 
-        if(timer > 0){
+        if (timer > 0) {
             if (acertou) {
                 Toast.success('Acertou!', 3, this.onNext(acertou));
                 announceForAccessibility('Acertou!')
@@ -173,11 +169,11 @@ class TeoTreLoc extends Component {
                 } else {
                     const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
                     const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
-                    Toast.fail(msg, 3, () => this.setState({sinalTexto: + new Date()}))
+                    Toast.fail(msg, 3, () => this.setState({ sinalTexto: + new Date() }))
                     announceForAccessibility(msg)
                 }
             }
-        }else{
+        } else {
             this.onNext(false)()
         }
 
@@ -210,15 +206,16 @@ class TeoTreLoc extends Component {
         }, () => {
             clearInterval(this.timer)
             this.onCount()
-            if (count + 1 < data.length) {
+            if (this.props.screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' && count + 1 < data.length) {
                 if (config.indexOf('talkback') == -1) {
                     if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
-                        this.fieldRef[count+1][0].focus()
+                        this.fieldRef[count + 1][0].focus()
                     }
-                } 
+                }
             }
 
         })
+
 
     }
 
@@ -227,19 +224,24 @@ class TeoTreLoc extends Component {
     onSetFocus = (count, idx = 0) => {
         const { config } = this.props.screenProps;
         if (config.indexOf('talkback') !== -1) {
-            focusOnView(this.fieldRef[count][idx]);            
+            focusOnView(this.fieldRef[count][idx]);
         } else {
             if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
                 this.fieldRef[count][idx].focus()
             }
-        }     
+        }
     }
 
     checkAcertos = item => {
+
         if (item.modo == 'singular') {
             return item.partes.find(p => p.numero == item.valores[0]) != undefined
         } else {
-            return item.partes.every(p => item.valores.indexOf(p.numero) != -1)
+            if (this.props.screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital') {
+                return item.partes.find(p => p.numero == item.valores[0]) != undefined
+            } else {
+                return item.partes.every(p => item.valores.indexOf(p.numero) != -1)
+            }
         }
     }
 
@@ -252,11 +254,11 @@ class TeoTreLoc extends Component {
     onChangeValor = idx => valor => {
         const { data, count, timer } = this.state;
 
-        if(valor){
+        if (valor) {
             announceForAccessibility(`Texto detectado: ${valor}. Prossiga para submeter.`)
-        }else{
+        } else {
             announceForAccessibility(`Texto removido`)
-        }        
+        }
 
         this.setState({
             data: [
@@ -272,6 +274,33 @@ class TeoTreLoc extends Component {
                 ...data.slice(count + 1),
             ]
         })
+    }
+
+    onChangeValorDigital = async (idx, valor) => {
+        const { data, count, timer } = this.state;
+
+        if (valor) {
+            announceForAccessibility(`Texto detectado: ${valor}. Prossiga para submeter.`)
+        } else {
+            announceForAccessibility(`Texto removido`)
+        }
+
+        await this.setState({
+            data: [
+                ...data.slice(0, count),
+                {
+                    ...data[count],
+                    valores: [
+                        ...data[count].valores.slice(0, idx),
+                        valor,
+                        ...data[count].valores.slice(idx + 1),
+                    ]
+                },
+                ...data.slice(count + 1),
+            ]
+        })
+
+        this.onSubmit();
     }
 }
 

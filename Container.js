@@ -6,6 +6,7 @@ import Button from 'antd-mobile-rn/lib/button';
 import Flex from 'antd-mobile-rn/lib/flex';
 import {version} from './package.json'
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
+import { withI18n } from './messages/withI18n';
 
 const FlexItem = Flex.Item;
 const _fechar = '\ue633';
@@ -23,7 +24,7 @@ class Container extends Component {
   }
 
   render() {
-    const { children, footer, onRefresh, refreshing } = this.props;
+    const { children, footer, onRefresh, refreshing, i18n } = this.props;
 
     return (
       <View style={styles.container}>
@@ -46,7 +47,7 @@ class Container extends Component {
         <Flex style={{ marginBottom: 5 }}>
           <FlexItem><Button onPressOut={this.goToTop} accessibilityLabel={this.getAcc('Contexto')} ><Icon type={'\ue616'} size='md' /></Button></FlexItem>
           <FlexItem style={styles.spacer}>
-            <Text style={{textAlign: 'center'}}>Versão {version}</Text>
+            <Text style={{textAlign: 'center'}}>{i18n('common.version')} {version}</Text>
           </FlexItem>
           <FlexItem><Button accessibilityLabel={this.getAcc('Info')} onPressOut={this.onNavigate('Info')}><Icon type={this.getIcone('Info', '\ue629')} size='md' /></Button></FlexItem>
         </Flex>
@@ -142,4 +143,4 @@ const styles = StyleSheet.create({
 });
 
 
-export default Container;
+export default withI18n(Container);

@@ -1,6 +1,6 @@
 {
   "name": "anatomp",
-  "version": "0.1.4",
+  "version": "0.1.7",
   "private": true,
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
@@ -9,9 +9,13 @@
   },
   "dependencies": {
     "antd-mobile-rn": "^2.2.1",
+    "babel-preset-react-native": "^2.1.0",
+    "intl": "^1.2.5",
     "react": "16.4.1",
-    "react-native": "0.56.0",
+    "react-intl": "^4.5.1",
+    "react-native": "0.55.4",
     "react-native-accessibility": "^1.0.7",
+    "react-native-audio": "^4.3.0",
     "react-native-autocomplete-input": "^3.5.0",
     "react-native-fit-image": "^1.5.4",
     "react-native-nfc-manager": "^0.5.5",
@@ -22,7 +26,6 @@
   },
   "devDependencies": {
     "babel-jest": "23.4.2",
-    "babel-preset-react-native": "5.0.2",
     "jest": "23.5.0",
     "react-test-renderer": "16.4.1"
   },

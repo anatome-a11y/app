@@ -1,30 +1,21 @@
-import React, { Component } from 'react';
-
-import { View, Text, TouchableHighlight, TextInput, ScrollView } from 'react-native';
-import Container from '../Container';
+import Card from 'antd-mobile-rn/lib/card';
 import List from 'antd-mobile-rn/lib/list';
 import Toast from 'antd-mobile-rn/lib/toast';
-import Button from 'antd-mobile-rn/lib/button';
-import Checkbox from 'antd-mobile-rn/lib/checkbox';
-
-import Card from 'antd-mobile-rn/lib/card';
-
-import { norm } from '../utils'
-
-import BC from '../components/Breadcrumbs'
-import Instrucoes from '../components/Instrucoes'
-
+import React, { Component } from 'react';
+import { ScrollView, Text } from 'react-native';
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
-import Input from '../components/Input'
-import Modal from '../components/Modal'
-import ReferenciasRelativas from '../components/ReferenciasRelativas'
-import LocalizacaoPF from '../components/LocalizacaoPF'
-
+import BC from '../components/Breadcrumbs';
+import Input from '../components/Input';
+import Instrucoes from '../components/Instrucoes';
+import LocalizacaoPD from '../components/LocalizacaoPD';
+import LocalizacaoPF from '../components/LocalizacaoPF';
+import Modal from '../components/Modal';
+import ReferenciasRelativas from '../components/ReferenciasRelativas';
+import Container from '../Container';
+import { norm } from '../utils';
 
 
 const ListItem = List.Item;
-
-
 
 class PraEstLoc extends Component {
     initialFocus = null;
@@ -35,6 +26,7 @@ class PraEstLoc extends Component {
     state = {
         loading: true,
         open: false,
+        openDigital: false,
         parte: undefined,
         pecasFisicas: {},
         pesquisa: '',
@@ -73,9 +65,10 @@ class PraEstLoc extends Component {
 
     render() {
         const { navigation, screenProps } = this.props;
-        const { open, parte, pecasFisicas, filtered } = this.state;
+        const { open, openDigital, parte, pecasFisicas, filtered } = this.state;
 
         const selected = parte == undefined ? '' : parte._id;
+        const info = (screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' ? 'Escolha uma parte na lista de partes para obter sua localização nas peças físicas.' : 'Escolha uma parte na lista de partes para obter sua localização nas peças digitais.');
 
         return (
             <Container navigation={navigation}>
@@ -83,7 +76,7 @@ class PraEstLoc extends Component {
                 <Instrucoes
                     voz={screenProps.config.indexOf('voz') != -1}
                     info={[
-                        'Escolha uma parte na lista de partes para obter sua localização nas peças físicas.',
+                        info,
                         'Caso deseje, utilize o filtro a seguir para encontrar uma parte.'
                     ]}
                 />
@@ -107,6 +100,8 @@ class PraEstLoc extends Component {
                         {/* {screenProps.config.indexOf('talkback') != -1 && <Button type='primary' onPressOut={() => focusOnView(this.inputRef)}>Voltar para o filtro</Button>} */}
                     </Card.Body>
                 </Card>
+
+                {/* Modal Peças Físicas */}
                 <Modal
                     talkback={screenProps.config.indexOf('talkback') != -1}
                     open={open}
@@ -119,6 +114,21 @@ class PraEstLoc extends Component {
                     <ScrollView style={{ maxHeight: 280 }}>
                         <LocalizacaoPF parte={parte} pecasFisicas={pecasFisicas} />
                         <ReferenciasRelativas parte={parte} pecasFisicas={pecasFisicas} />
+                    </ScrollView>
+                </Modal>
+
+                {/* Modal Peças Digitais */}
+                <Modal
+                    talkback={true}
+                    open={openDigital}
+                    title={parte ? parte.nome : null}
+                    acc={`Aberto. Prossiga para ouvir o nome da parte e sua localização nas peças digitais.`}
+                    footer={[
+                        { text: 'Fechar', onPress: this.onCloseDigital, acc: `Fechar. Botão. Toque duas vezes para fechar os detalhes da Parte ${parte ? parte.nome : ''}` },
+                    ]}
+                >
+                    <ScrollView style={{ maxHeight: '87%' }}>
+                        <LocalizacaoPD parte={parte} pecasFisicas={pecasFisicas} exibirLabel={false} />
                     </ScrollView>
                 </Modal>
             </Container>
@@ -159,8 +169,18 @@ class PraEstLoc extends Component {
         });
     }
 
+    onOpenDigital = () => this.setState({ openDigital: true })
+
+    onCloseDigital = () => this.setState({ openDigital: false })
+
     onSelectParte = parte => e => {
-        this.setState({ parte, open: true })
+
+
+        if (this.props.screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica') {
+            this.setState({ parte, open: true })
+        } else if (this.props.screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital') {
+            this.setState({ parte, openDigital: true })
+        }
     }
 
 }

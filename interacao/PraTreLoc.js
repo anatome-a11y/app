@@ -1,12 +1,13 @@
-import React, { Component } from 'react';
-
-import Container from '../Container';
 import Toast from 'antd-mobile-rn/lib/toast';
-
+import React, { Component } from 'react';
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
+import Container from '../Container';
+import FormTreLoc from './FormTreLoc';
+import Resultados from './Resultados';
 
-import Resultados from './Resultados'
-import FormTreLoc from './FormTreLoc'
+
+
+
 
 class PraTreloc extends Component {
     timer = null;
@@ -21,7 +22,7 @@ class PraTreloc extends Component {
         pecasFisicas: [],
         tentativas: 0,
         sinalScroll: 0,
-        sinalTexto: 0        
+        sinalTexto: 0
     }
 
     // Componente iniciliazado
@@ -103,25 +104,26 @@ class PraTreloc extends Component {
     render() {
         const { navigation, screenProps } = this.props;
         const { data, count, sinalScroll, sinalTexto } = this.state;
-
+        const info = (screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' ? 'Informe as partes de cada peça física do roteiro e pressione o botão "Próximo" para submeter.' : 'Clique nas partes de cada peça digital do roteiro.');
 
         return (
             <Container sinalScroll={sinalScroll} navigation={navigation}>
                 {count < data.length ? (
                     <FormTreLoc
                         sinalTexto={sinalTexto}
-                        onSetSinalScroll={s => this.setState({sinalScroll: s})}                    
+                        onSetSinalScroll={s => this.setState({ sinalScroll: s })}
                         screenProps={screenProps}
                         mainState={this.state}
                         onGetRef={this.onGetRef}
                         onSetFocus={this.onSetFocus}
                         onChangeValor={this.onChangeValor}
+                        onChangeValorDigital={this.onChangeValorDigital}
                         onErrorClick={this.onErrorClick}
                         onSubmit={this.onSubmit}
                         interaction='Treinamento - Prático - Conteúdo-Localização'
                         info={[
-                            'Informe as partes de cada peça física do roteiro e pressione o botão "Próximo" para submeter.',
-                            `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${this.state.maxTime} segundos.`
+                            info,
+                            `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
                         ]}
                     />
                 ) : <Resultados data={data} onRepeat={this.onRepeat} formatter={e => e.texto} />}
@@ -151,7 +153,7 @@ class PraTreloc extends Component {
 
         let acertou = this.checkAcertos(data[count]);
 
-        if(timer > 0){
+        if (timer > 0) {
             if (acertou) {
                 Toast.success('Acertou!', 3, this.onNext(acertou));
                 announceForAccessibility('Acertou!')
@@ -163,11 +165,11 @@ class PraTreloc extends Component {
                 } else {
                     const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
                     const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
-                    Toast.fail(msg, 3, () => this.setState({sinalTexto: + new Date()}))
+                    Toast.fail(msg, 3, () => this.setState({ sinalTexto: + new Date() }))
                     announceForAccessibility(msg)
                 }
-            }            
-        }else{
+            }
+        } else {
             this.onNext(false)()
         }
 
@@ -200,7 +202,7 @@ class PraTreloc extends Component {
         }, () => {
             clearInterval(this.timer)
             this.onCount()
-            if (count + 1 < data.length) {
+            if (this.props.screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' && count + 1 < data.length) {
                 this.onSetFocus(count + 1)
             }
 
@@ -214,11 +216,11 @@ class PraTreloc extends Component {
         const { config } = this.props.screenProps;
         if (config.indexOf('talkback') !== -1) {
             focusOnView(this.fieldRef[count][idx])
-        }else{
+        } else {
             if (config.indexOf('nfc') == -1 && config.indexOf('voz') == -1) {
                 this.fieldRef[count][idx].focus()
-            }            
-        }        
+            }
+        }
     }
 
     checkAcertos = item => {
@@ -237,10 +239,10 @@ class PraTreloc extends Component {
 
     onChangeValor = idx => valor => {
         const { data, count, timer } = this.state;
-        
-        if(valor){
+
+        if (valor) {
             announceForAccessibility(`Texto detectado: ${valor}. Prossiga para submeter.`)
-        }else{
+        } else {
             announceForAccessibility(`Texto removido`)
         }
 
@@ -258,6 +260,33 @@ class PraTreloc extends Component {
                 ...data.slice(count + 1),
             ]
         })
+    }
+
+    onChangeValorDigital = async (idx, valor) => {
+        const { data, count } = this.state;
+
+        if (valor) {
+            announceForAccessibility(`Texto detectado: ${valor}. Prossiga para submeter.`)
+        } else {
+            announceForAccessibility(`Texto removido`)
+        }
+
+        await this.setState({
+            data: [
+                ...data.slice(0, count),
+                {
+                    ...data[count],
+                    valores: [
+                        ...data[count].valores.slice(0, idx),
+                        valor,
+                        ...data[count].valores.slice(idx + 1),
+                    ]
+                },
+                ...data.slice(count + 1),
+            ]
+        });
+
+        this.onSubmit();
     }
 }
 

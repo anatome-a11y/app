@@ -1,29 +1,32 @@
+import Toast from 'antd-mobile-rn/lib/toast';
+import 'intl';
+import 'intl/locale-data/jsonp/en.js';
+import 'intl/locale-data/jsonp/pt-BR.js';
 import React, { Component } from 'react';
-
-import { AppRegistry, Platform, AccessibilityInfo, Vibration } from 'react-native';
-import App from './App';
+import { IntlProvider } from 'react-intl';
+import { AccessibilityInfo, AppRegistry, Platform, Text, Vibration } from 'react-native';
+import { announceForAccessibility } from 'react-native-accessibility';
+import NfcManager, { NdefParser } from 'react-native-nfc-manager';
+import { createStackNavigator } from 'react-navigation';
 import Ajuda from './Ajuda';
+import App from './App';
+import { name as appName } from './app.json';
+import AppContext from './components/AppContext';
 import Config from './Config';
-import Roteiro from './Roteiro';
 import Info from './Info';
+import PraEstLoc from './interacao/PraEstLoc';
+import PraEstNom from './interacao/PraEstNom';
+import PraTreLoc from './interacao/PraTreLoc';
+import PraTreNom from './interacao/PraTreNom';
+import TeoEstLoc from './interacao/TeoEstLoc';
+import TeoEstNom from './interacao/TeoEstNom';
 import TeoTreLoc from './interacao/TeoTreLoc';
 import TeoTreNom from './interacao/TeoTreNom';
-import PraTreNom from './interacao/PraTreNom';
-import PraTreLoc from './interacao/PraTreLoc';
-import TeoEstNom from './interacao/TeoEstNom';
-import PraEstNom from './interacao/PraEstNom';
-import TeoEstLoc from './interacao/TeoEstLoc';
-import PraEstLoc from './interacao/PraEstLoc';
-import { name as appName } from './app.json';
-import Toast from 'antd-mobile-rn/lib/toast';
+import { flattenMessages, messages } from './messages';
+import Roteiro from './Roteiro';
 
-import NfcManager, { NdefParser } from 'react-native-nfc-manager';
-
-import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
-
-import AppContext from './components/AppContext'
-
-import { createStackNavigator } from 'react-navigation';
+// Para não exibir Warnings
+console.disableYellowBox = true;
 
 const Nav = createStackNavigator({
     App: { screen: App },
@@ -48,7 +51,7 @@ const Nav = createStackNavigator({
     }
 );
 
-
+const intlMessages = flattenMessages(messages['pt-BR'])
 
 class Root extends Component {
 
@@ -83,18 +86,18 @@ class Root extends Component {
         const { config } = this.state;
 
         AccessibilityInfo.fetch().then((isEnabled) => {
-            if(isEnabled){
-                this.setState({config: [...config, 'talkback', 'voz']})
-            }            
-        });   
-        
+            if (isEnabled) {
+                this.setState({ config: [...config, 'talkback', 'voz'] })
+            }
+        });
+
         AccessibilityInfo.addEventListener('change', (isEnabled) => {
-            if(isEnabled){
-                this.setState({config: [...config, 'talkback', 'voz']})
-            }else{
-                this.setState({config: this.state.config.filter(i => i != 'talkback')})
-            }            
-        });        
+            if (isEnabled) {
+                this.setState({ config: [...config, 'talkback', 'voz'] })
+            } else {
+                this.setState({ config: this.state.config.filter(i => i != 'talkback') })
+            }
+        });
         NfcManager.isSupported()
             .then(supported => {
                 this.setState({ supported });
@@ -116,26 +119,28 @@ class Root extends Component {
 
         const { config, modoInteracao, anatomp, inputConfig } = this.state;
 
-        return <AppContext.Provider value={{
-            config,  
-            inputConfig,
-            onReadNFC: this._startDetection,
-            onStopNFC: this._stopDetection,                                 
-        }}>
-            <Nav
-                {...this.props}
-                screenProps={{
-                    config,
-                    inputConfig,
-                    anatomp,
-                    modoInteracao,
-                    onChangeConfig: this.onChangeConfig,
-                    onChangeInputConfig: this.onChangeInputConfig,
-                    onSelectRoteiro: this.onSelectRoteiro,
-                    onChangeModoInteracao: this.onChangeModoInteracao,
-                }}
-            />
-        </AppContext.Provider>
+        return <IntlProvider textComponent={Text} locale="pt-BR" defaultLocale="pt-BR" messages={intlMessages}>
+            <AppContext.Provider value={{
+                config,
+                inputConfig,
+                onReadNFC: this._startDetection,
+                onStopNFC: this._stopDetection,
+            }}>
+                <Nav
+                    {...this.props}
+                    screenProps={{
+                        config,
+                        inputConfig,
+                        anatomp,
+                        modoInteracao,
+                        onChangeConfig: this.onChangeConfig,
+                        onChangeInputConfig: this.onChangeInputConfig,
+                        onSelectRoteiro: this.onSelectRoteiro,
+                        onChangeModoInteracao: this.onChangeModoInteracao,
+                    }}
+                />
+            </AppContext.Provider>
+        </IntlProvider>
     }
 
 
@@ -148,7 +153,7 @@ class Root extends Component {
         }
     }
 
-    onChangeInputConfig = field => value => this.setState({...this.state, inputConfig: {...this.state.inputConfig, [field]: value}})
+    onChangeInputConfig = field => value => this.setState({ ...this.state, inputConfig: { ...this.state.inputConfig, [field]: value } })
 
     onSelectRoteiro = anatomp => {
         this.setState({ anatomp });
