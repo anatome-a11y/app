@@ -127,8 +127,9 @@ class PraEstLoc extends Component {
                         { text: 'Fechar', onPress: this.onCloseDigital, acc: `Fechar. Botão. Toque duas vezes para fechar os detalhes da Parte ${parte ? parte.nome : ''}` },
                     ]}
                 >
-                    <ScrollView style={{ maxHeight: '87%' }}>
-                        <LocalizacaoPD parte={parte} pecasFisicas={pecasFisicas} exibirLabel={false} />
+                    <ScrollView style={{ maxHeight: '87%', padding: 5 }}>
+                        <ReferenciasRelativas parte={parte} pecasFisicas={pecasFisicas} />
+                        <LocalizacaoPD parte={parte} pecasFisicas={pecasFisicas} exibirLabel={true} mapa={screenProps.anatomp.mapa}/>
                     </ScrollView>
                 </Modal>
             </Container>

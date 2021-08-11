@@ -4,9 +4,16 @@ import { Image, View } from 'react-native';
 
 
 
-const LocalizacaoPD = ({ parte, pecasFisicas = [], exibirLabel = true }) => {
+const LocalizacaoPD = ({ parte, pecasFisicas = [], exibirLabel = true, mapa }) => {
 
     let pecasFisicasFiltradas = [];
+
+    const mapaParte = mapa.find(m => m.parte._id == parte._id)
+    // Caso seja uma parte referenciada
+    if (mapaParte && mapaParte.localizacao[0].referenciaRelativa.referencia != null) {
+        parte = mapaParte.localizacao[0].referenciaRelativa.referencia;
+    }
+
     Object.keys(pecasFisicas).map(key => {
 
         let peca = JSON.parse(JSON.stringify(pecasFisicas[key]));
@@ -44,8 +51,8 @@ const LocalizacaoPD = ({ parte, pecasFisicas = [], exibirLabel = true }) => {
         <View>
             <Image
                 style={{
-                    width: 400,
-                    height: 400,
+                    width: 380,
+                    height: 380,
                     resizeMode: 'stretch',
                     position: 'relative',
                 }}

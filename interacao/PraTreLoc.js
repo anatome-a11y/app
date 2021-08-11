@@ -6,9 +6,6 @@ import FormTreLoc from './FormTreLoc';
 import Resultados from './Resultados';
 
 
-
-
-
 class PraTreloc extends Component {
     timer = null;
     fieldRef = []
@@ -175,14 +172,13 @@ class PraTreloc extends Component {
 
     }
 
-
     onNext = acertou => () => {
         const { data, count, tentativas, timer } = this.state;
 
         // Ao ir para a próxima questão, calcular o novo tempo
         let newTimer = timer;
 
-        if(count < data.length - 1) {
+        if (count < data.length - 1) {
             newTimer = this.getMaxQuestionTime(data[count + 1])
         }
 
@@ -224,6 +220,31 @@ class PraTreloc extends Component {
     }
 
     checkAcertos = item => {
+
+        const { pecasFisicas } = this.state;
+
+        // Verifica se informou Parte Relativa
+        if (this.props.screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital') {
+            var verificaRefrenciaRelativa = false;
+            item.partes.forEach(parte => {
+                if (parte.referenciaRelativa.referencia != null) {
+                    Object.keys(pecasFisicas).forEach(key => {
+                        const partesNumeradas = pecasFisicas[key].partesNumeradas;
+                        var pn = partesNumeradas.find(pn => pn.parte._id == parte.referenciaRelativa.referencia._id)
+                        if (pn != undefined) {
+                            verificaRefrenciaRelativa = pn.numero == item.valores[0];
+                            if (verificaRefrenciaRelativa) {
+                                return true;
+                            }
+                        }
+                    });
+                }
+            });
+            if (verificaRefrenciaRelativa) {
+                return true;
+            }
+        }
+
         if (item.modo == 'singular') {
             return item.partes.find(p => p.numero == item.valores[0]) != undefined
         } else {

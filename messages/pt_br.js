@@ -9,7 +9,7 @@ export default {
         theoreticalKnowledge: 'Conhecimento teórico',
         locToContent: 'Localização - Conteúdo',
         part: 'Parte',
-        acertou: 'Acertou!',
+        correct: 'Acertou!',
         missed: 'Você errou!',
         summary: 'Resumo' ,
         step: 'Etapa',

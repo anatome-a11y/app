@@ -13,7 +13,6 @@ import Videos from '../components/Videos';
 import Placar from './Placar';
 
 
-
 const ListItem = List.Item;
 
 const _ni = 'Não identificado'
@@ -110,7 +109,7 @@ const DicaTeoria = ({ config, atual, _ref }) => {
 const DicaPratica = ({ atual, _ref, dica }) => {
     const identificador = (!atual.referenciaRelativa || atual.referenciaRelativa.referencia == null) ? atual.texto : (atual.texto + ': Selecione a parte localizada ' + atual.referenciaRelativa.referenciadoParaReferencia)
     return (
-        <View  accessible={true} ref={_ref} accessibilityLabel={`Dica: ${identificador}. Prossiga para informar ${dica}`}>
+        <View accessible={true} ref={_ref} accessibilityLabel={`Dica: ${identificador}. Prossiga para informar ${dica}`}>
             <Text style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
         </View>
     )
@@ -128,6 +127,7 @@ class FormTreLoc extends React.Component {
         this.time2Focus = setTimeout(() => {
             focusOnView(this.initialFocus)
         }, 500)
+
     }
 
     componentWillReceiveProps(next) {
@@ -181,11 +181,14 @@ class FormTreLoc extends React.Component {
         const { screenProps, mainState, onGetRef, onSetFocus, onChangeValor, onChangeValorDigital, onErrorClick, onSubmit, interaction, info, isTeoria } = this.props;
         const { anatomp, onReadNFC, onStopNFC, config } = screenProps;
         const { count, total, data, timer, pecasFisicas, tentativas } = mainState;
+        const pecaFisica = data[count].pecaFisica;
         const title = data[count].pecaFisica.nome;
         const dica = data[count].valores.length > 1 ? 'as partes' : 'a parte';
         const parte = data[count].partes[0].parte;
+        //    const localizacaoRelativa = data[count].partes[0].referenciaRelativa.referencia;
 
-        
+        //    const descricaoLocalizacaoRelativa = 'Clique na parte que localiza-se ' + data[count].partes[0].referenciaRelativa.referenciaParaReferenciado;
+
         return (
             <View accessible={true} >
                 <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={interaction} />
@@ -195,8 +198,13 @@ class FormTreLoc extends React.Component {
                     <Card.Body>
                         {isTeoria ? <DicaTeoria _ref={r => this.dicaDaParte = r} atual={data[count]} config={config} /> : <DicaPratica dica={dica} _ref={r => this.dicaDaParte = r} atual={data[count]} />}
 
+
+                        {/*(screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital' && localizacaoRelativa != null) &&
+                            <Text style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{descricaoLocalizacaoRelativa}</Text>
+        */}
+
                         {screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital' &&
-                            <LocalizacaoPDPartes parte={parte} pecasFisicas={pecasFisicas} exibirLabel={true} onClickParte={this.onClickParte} />
+                            <LocalizacaoPDPartes parte={parte} pecaFisica={pecaFisica} pecasFisicas={pecasFisicas} exibirLabel={true} onClickParte={this.onClickParte} />
                         }
 
                         {screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' && data[count].valores.map((value, idx) => (

@@ -3,17 +3,20 @@ import React from 'react';
 import { Image, View } from 'react-native';
 
 
-const LocalizacaoPDPartes = ({ parte, pecasFisicas = [], exibirLabel = true, onClickParte }) => {
+const LocalizacaoPDPartes = ({ parte, pecaFisica, pecasFisicas = [], exibirLabel = true, onClickParte }) => {
 
     let pecasFisicasFiltradas = [];
     Object.keys(pecasFisicas).map(key => {
 
         let peca = JSON.parse(JSON.stringify(pecasFisicas[key]));
-
+        if (peca._id == pecaFisica._id) {
+            pecasFisicasFiltradas.push(peca);
+        }
+        /*
         let pecaFiltrada = JSON.parse(JSON.stringify(pecasFisicas[key]));
         pecaFiltrada.midias = [];
         pecaFiltrada.localizacao = [];
-
+ 
         let pontos = [];
         for (let image of peca.midias) {
             let imageFiltrada = JSON.parse(JSON.stringify(image));
@@ -26,17 +29,18 @@ const LocalizacaoPDPartes = ({ parte, pecasFisicas = [], exibirLabel = true, onC
         if (pecaFiltrada.midias && pecaFiltrada.midias.length > 0) {
             pecasFisicasFiltradas.push(pecaFiltrada);
         }
+        */
 
     });
 
-    pecasFisicasFiltradas = pecasFisicasFiltradas.filter(p => p.midias.length > 0);
+    //  pecasFisicasFiltradas = pecasFisicasFiltradas.filter(p => p.midias.length > 0);
 
     return pecasFisicasFiltradas.map(peca => peca.midias.map((image, idx) =>
         <View accessible={true}>
             <Image
                 style={{
-                    width: 400,
-                    height: 400,
+                    width: 380,
+                    height: 380,
                     resizeMode: 'stretch',
                     position: 'relative',
                 }}

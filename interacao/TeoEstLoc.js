@@ -47,9 +47,21 @@ const LocalizacaoPF = ({ conteudo, pecasFisicas }) => {
 }
 
 
-const LocalizacaoPD = ({ conteudo, pecasFisicas = [], exibirLabel = true }) => {
+const LocalizacaoPD = ({ conteudo, pecasFisicas = [], exibirLabel = true, mapa }) => {
 
     let pecasFisicasFiltradas = [];
+
+    let conteudoFiltrado = JSON.parse(JSON.stringify(conteudo));
+    // Filtra as partes referenciadas
+    conteudo.partes.map(parte => {
+        const mapaParte = mapa.find(m => m.parte._id == parte._id)
+
+        // Caso seja uma parte referenciada
+        if (mapaParte && mapaParte.localizacao[0].referenciaRelativa.referencia != null) {
+            conteudoFiltrado.partes.push(mapaParte.localizacao[0].referenciaRelativa.referencia)
+        }
+    })
+
     Object.keys(pecasFisicas).map(key => {
 
         let peca = JSON.parse(JSON.stringify(pecasFisicas[key]));
@@ -63,7 +75,7 @@ const LocalizacaoPD = ({ conteudo, pecasFisicas = [], exibirLabel = true }) => {
             let imageFiltrada = JSON.parse(JSON.stringify(image));
             imageFiltrada.pontos = [];
 
-            conteudo.partes.map(cParte => {
+            conteudoFiltrado.partes.map(cParte => {
                 imageFiltrada.pontos = image.pontos.filter(ponto => ponto.parte._id == cParte._id);
                 if (imageFiltrada && imageFiltrada.pontos && imageFiltrada.pontos.length > 0) {
                     pontos = pontos.concat(imageFiltrada.pontos);
@@ -87,8 +99,8 @@ const LocalizacaoPD = ({ conteudo, pecasFisicas = [], exibirLabel = true }) => {
         <View>
             <Image
                 style={{
-                    width: 400,
-                    height: 400,
+                    width: 380,
+                    height: 380,
                     resizeMode: 'stretch',
                     position: 'relative',
                 }}
@@ -237,8 +249,9 @@ class TeoEstLoc extends Component {
                         { text: 'Fechar', onPress: this.onCloseDigital, acc: `Fechar. Botão. Toque duas vezes para fechar os detalhes do conteúdo ${conteudo ? conteudo.texto : ''}` },
                     ]}
                 >
-                    <ScrollView style={{ maxHeight: '87%' }}>
-                        <LocalizacaoPD conteudo={conteudo} pecasFisicas={pecasFisicas} exibirLabel={false} />
+                    <ScrollView style={{ maxHeight: '87%', padding: 5 }}>
+                        {conteudo && conteudo.partes.map(p => <ReferenciasRelativas attrName='localizacao' key={p._id} parte={p} pecasFisicas={pecasFisicas} />)}
+                        <LocalizacaoPD conteudo={conteudo} pecasFisicas={pecasFisicas} exibirLabel={true} mapa={screenProps.anatomp.mapa} />
                     </ScrollView>
                 </Modal>
             </Container>

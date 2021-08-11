@@ -90,14 +90,36 @@ class _FormContainer extends React.Component {
         const { anatomp, config } = screenProps;
         const { count, total, data, timer, tentativas, open } = mainState;
 
+        const localizacao = data[count].localizacao;
+        const localizacaoRelativa = localizacao.referenciaRelativa.referencia;
+
         const pecasFisicas = anatomp.pecasFisicas;
         const title = data[count].localizacao.pecaFisica.nome;
-        const parte = data[count].parte;
-        const identificador = data[count].localizacao.referenciaRelativa.referencia == null ? (i18n('common.part') + ' ' + data[count].localizacao.numero) : (i18n('teoTreNom.common.inRelationToThePart') + data[count].localizacao.numero + ', ' + i18n('teoTreNom.common.isLocatedAt') + ' ' + data[count].localizacao.referenciaRelativa.referenciaParaReferenciado);
+        const parte = localizacaoRelativa != null ? localizacaoRelativa : data[count].parte;
+        //  const identificador = screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' ? (data[count].localizacao.referenciaRelativa.referencia == null ? (i18n('common.part') + ' ' + data[count].localizacao.numero) : (i18n('teoTreNom.common.inRelationToThePart') + data[count].localizacao.numero + ', ' + i18n('teoTreNom.common.isLocatedAt') + ' ' + data[count].localizacao.referenciaRelativa.referenciaParaReferenciado)) : (data[count].localizacao.referenciaRelativa.referencia == null ? (i18n('common.part') + ' ' + data[count].localizacao.numero) : (i18n('teoTreNom.common.inRelationToThePart') + ' informada na imagem, ' + i18n('teoTreNom.common.isLocatedAt') + ' ' + data[count].localizacao.referenciaRelativa.referenciaParaReferenciado));
+
+
+        let labelLocalizacaoRelativa;
+
+        if (localizacaoRelativa != null && screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital') {
+            Object.keys(pecasFisicas).map(key => {
+                let peca = JSON.parse(JSON.stringify(pecasFisicas[key]));
+                for (let image of peca.midias) {
+                    let pontoFiltrado = image.pontos.filter(ponto => ponto.parte._id == parte._id);
+                    if (pontoFiltrado.length > 0) {
+                        labelLocalizacaoRelativa = pontoFiltrado[0].label;
+                    }
+                }
+            });
+        }
+
+        const identificador = data[count].localizacao.referenciaRelativa.referencia == null ? (i18n('common.part') + ' ' + data[count].localizacao.numero) : (i18n('teoTreNom.common.inRelationToThePart') + labelLocalizacaoRelativa + ', ' + i18n('teoTreNom.common.isLocatedAt') + ' ' + data[count].localizacao.referenciaRelativa.referenciaParaReferenciado);
+
         const isTB = config.indexOf('talkback') != -1;
 
         const disabled = data[count].respostaParte.length == 0 || data[count].respostaConteudos.length == 0;
         const disabledVerificacao = timer == 0 || tentativas == maxTentativa;
+
 
         return (
             <View>
@@ -114,12 +136,12 @@ class _FormContainer extends React.Component {
                     <Card.Body>
                         <View>
 
-                            {screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' &&
-                                <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`${identificador}. Prossiga para informar o nome da parte e os conteúdo associados.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
+                            {(screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital' && localizacaoRelativa != null) &&
+                                <Text style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
                             }
 
                             {screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital' &&
-                                <LocalizacaoPD parte={parte} pecasFisicas={pecasFisicas} exibirLabel={false} />
+                                <LocalizacaoPD parte={parte} pecasFisicas={pecasFisicas} exibirLabel={true} />
                             }
 
                             <Input
@@ -239,7 +261,7 @@ class TeoTreNom extends Component {
         count: 0,
         total: 0,
         open: false,
-    //    timer: 3 * this.props.screenProps.inputConfig.tempo,
+        //    timer: 3 * this.props.screenProps.inputConfig.tempo,
         timer: 60,
         maxTime: 60,
         tentativas: 0,
@@ -285,7 +307,7 @@ class TeoTreNom extends Component {
         const texto = obj.parte.nome;
         let tamanho = texto.length;
 
-        if(!!obj.conteudos) {
+        if (!!obj.conteudos) {
             tamanho += obj.conteudos
                 .map(text => text.length)
                 .reduce((prev, cur) => prev + cur);
@@ -362,7 +384,7 @@ class TeoTreNom extends Component {
         this.setState({
             data: dados,
             count: 0,
-        //    timer: 3 * this.props.screenProps.inputConfig.tempo,
+            //    timer: 3 * this.props.screenProps.inputConfig.tempo,
             timer: this.state.maxTime,
             tentativas: 0
         }, () => this.onCount())
@@ -403,13 +425,13 @@ class TeoTreNom extends Component {
         const { data, count, tentativas, timer } = this.state;
         let newTimer = timer;
 
-        if(count < data.length - 1) {
+        if (count < data.length - 1) {
             newTimer = this.getMaxQuestionTime(data[count + 1])
         }
 
         this.setState({
             count: count + 1,
-        //    timer: 3 * this.props.screenProps.inputConfig.tempo,
+            //    timer: 3 * this.props.screenProps.inputConfig.tempo,
             timer: newTimer,
             maxTime: newTimer,
             tentativas: 0,
@@ -441,7 +463,9 @@ class TeoTreNom extends Component {
     }
 
     checkAcertos = item => {
+
         return item.correcao.every(i => i === true)
+        
     }
 
     onCount = () => {

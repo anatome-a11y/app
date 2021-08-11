@@ -68,9 +68,24 @@ class FormContainer extends React.Component {
         const { found, pesquisa } = this.state;
 
         const pecasFisicas = anatomp.pecasFisicas;
-        const value = data[count].valores[0];
-        const parte = data[count].parte;
-        const identificador = data[count].referenciaRelativa.referencia == null ? ('Nome da parte ' + data[count].numero) : ('Em relação à parte ' + data[count].numero + ', informe o nome da parte localizada ' + data[count].referenciaRelativa.referenciaParaReferenciado)
+        const localizacaoRelativa = data[count].referenciaRelativa.referencia;
+        const parte = localizacaoRelativa != null ? localizacaoRelativa : data[count].parte;
+
+        let labelLocalizacaoRelativa;
+
+        if (localizacaoRelativa != null && screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital') {
+            Object.keys(pecasFisicas).map(key => {
+                let peca = JSON.parse(JSON.stringify(pecasFisicas[key]));
+                for (let image of peca.midias) {
+                    let pontoFiltrado = image.pontos.filter(ponto => ponto.parte._id == parte._id);
+                    if (pontoFiltrado.length > 0) {
+                        labelLocalizacaoRelativa = pontoFiltrado[0].label;
+                    }
+                }
+            });
+        }
+
+        const identificador = data[count].referenciaRelativa.referencia == null ? ('Nome da parte ' + data[count].numero) : ('Em relação à parte ' + labelLocalizacaoRelativa + ', informe o nome da parte localizada ' + data[count].referenciaRelativa.referenciaParaReferenciado)
 
         const info = (screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' ? 'Para cada parte (isto é, sua localização) em cada peça física, selecione o nome da parte e em seguida pressione o botão "Próximo" para submeter' : 'Para cada parte (isto é, sua localização) em cada peça digital, informe o nome da parte e em seguida pressione o botão "Próximo" para submeter.');
 
@@ -89,12 +104,11 @@ class FormContainer extends React.Component {
                     <Card.Body>
                         <View>
 
-                            {screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' &&
-                                <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`${identificador}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
-                            }
+                            <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`${identificador}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
+
 
                             {screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital' &&
-                                <LocalizacaoPD parte={parte} pecasFisicas={pecasFisicas} exibirLabel={false} />
+                                <LocalizacaoPD parte={parte} pecasFisicas={pecasFisicas} exibirLabel={true} mapa={screenProps.anatomp.mapa} />
                             }
 
                             <Input
@@ -106,7 +120,7 @@ class FormContainer extends React.Component {
                             />
                             {!found || pesquisa == '' && <Text style={{ padding: 5 }}>Nenhuma parte foi identificada</Text>}
                         </View>
-                        <Button  accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
+                        <Button accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
                     </Card.Body>
                 </Card>
 
@@ -321,7 +335,7 @@ class PraTreNom extends Component {
         const { data, count, tentativas, timer } = this.state;
         let newTimer = timer;
 
-        if(count < data.length - 1) {
+        if (count < data.length - 1) {
             newTimer = this.getMaxQuestionTime(data[count + 1])
         }
 
