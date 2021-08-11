@@ -1,181 +1,247 @@
-import React, { Component, Fragment } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { Component, Fragment } from "react";
+import { StyleSheet, Text, View } from "react-native";
 
-import Icon from 'antd-mobile-rn/lib/icon';
-import List from 'antd-mobile-rn/lib/list';
-import Toast from 'antd-mobile-rn/lib/toast';
-import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
+import Icon from "antd-mobile-rn/lib/icon";
+import List from "antd-mobile-rn/lib/list";
+import Toast from "antd-mobile-rn/lib/toast";
+import {
+  announceForAccessibility,
+  focusOnView,
+} from "react-native-accessibility";
 
-import Container from './Container'
-import BC from './components/Breadcrumbs'
-import { withI18n } from './messages/withI18n';
+import Container from "./Container";
+import BC from "./components/Breadcrumbs";
+import { withI18n } from "./messages/withI18n";
 
 const ListItem = List.Item;
 const Brief = ListItem.Brief;
 
-
 const getMediaIcon = (media, idx) => {
-  const [main, type] = media.split('/');
+  const [main, type] = media.split("/");
 
   let code = null;
 
   switch (main) {
-    case 'application': code = '\ue65f'; break;
-    case 'audio': code = '\ue677'; break;
-    case 'video': code = '\ue66b'; break;
-    case 'text': code = '\ue6b8'; break;
-    case 'image': code = '\ue674'; break;
-    default: code = '\ue63a';
+    case "application":
+      code = "\ue65f";
+      break;
+    case "audio":
+      code = "\ue677";
+      break;
+    case "video":
+      code = "\ue66b";
+      break;
+    case "text":
+      code = "\ue6b8";
+      break;
+    case "image":
+      code = "\ue674";
+      break;
+    default:
+      code = "\ue63a";
   }
 
   switch (type) {
-    case 'pdf':
-    case 'doc':
-    case 'docx': code = '\ue6b8'; break;
-    case 'xls':
-    case 'xlsx': code = '\ue664'; break;
+    case "pdf":
+    case "doc":
+    case "docx":
+      code = "\ue6b8";
+      break;
+    case "xls":
+    case "xlsx":
+      code = "\ue664";
+      break;
   }
 
-  return <Icon type={code} />
-}
+  return <Icon type={code} />;
+};
 
 const getMediaLabel = (media, idx) => {
-  const [main, type] = media.split('/');
+  const [main, type] = media.split("/");
 
   let code = null;
   switch (main) {
-    case 'application': code = 'Executável'; break;
-    case 'audio': code = 'Áudio'; break;
-    case 'video': code = 'Vídeo'; break;
-    case 'text': code = 'Texto'; break;
-    case 'image': code = 'Imagem'; break;
+    case "application":
+      code = "Executável";
+      break;
+    case "audio":
+      code = "Áudio";
+      break;
+    case "video":
+      code = "Vídeo";
+      break;
+    case "text":
+      code = "Texto";
+      break;
+    case "image":
+      code = "Imagem";
+      break;
   }
 
   switch (type) {
-    case 'pdf':
-    case 'doc':
-    case 'docx': code = 'Documento de texto'; break;
-    case 'xls':
-    case 'xlsx': code = 'Planilha'; break;
+    case "pdf":
+    case "doc":
+    case "docx":
+      code = "Documento de texto";
+      break;
+    case "xls":
+    case "xlsx":
+      code = "Planilha";
+      break;
   }
 
-
-  return code != null ? (code + ' ' + type.toUpperCase()) : null;
-}
-
+  return code != null ? code + " " + type.toUpperCase() : null;
+};
 
 const _Midias = ({ value, color, i18n }) => {
   //   const unicos = value.filter(function(item, pos) {
 
   //     return value.findIndex(v => v.media == item.media) == pos;
   // })
-  return <View>
-    <View style={{ flexWrap: 'wrap', alignItems: 'flex-start', flexDirection: 'row' }}>
-      <Brief style={{ color }} >{i18n('home.sections.learningScripts.outputFormats')} </Brief>
-      <View accessibilityLabel={'Leitor de tela'}><Icon style={{ padding: 5, color }} type={'\uE698'} /></View>
-      {value.map((v, idx) => <View key={idx} accessibilityLabel={getMediaLabel(v)}>{getMediaIcon(v)}</View>)}
+  return (
+    <View>
+      <View
+        style={{
+          flexWrap: "wrap",
+          alignItems: "flex-start",
+          flexDirection: "row",
+        }}
+      >
+        <Brief style={{ color }}>
+          {i18n("home.sections.learningScripts.outputFormats")}{" "}
+        </Brief>
+        <View accessibilityLabel={"Leitor de tela"}>
+          <Icon style={{ padding: 5, color }} type={"\uE698"} />
+        </View>
+        {value.map((v, idx) => (
+          <View key={idx} accessibilityLabel={getMediaLabel(v)}>
+            {getMediaIcon(v)}
+          </View>
+        ))}
+      </View>
     </View>
-  </View>
-}
+  );
+};
 
-const Midias = withI18n(_Midias)
+const Midias = withI18n(_Midias);
 
 class App extends Component {
-
   initialFocus = null;
 
   state = {
     anatomps: [],
     loading: true,
     open: true,
-  }
+  };
 
   componentDidMount() {
     this.onGetData();
   }
 
-
   render() {
     const { anatomps, msg, loading } = this.state;
     const { navigation, screenProps, i18n } = this.props;
 
-    const selected = screenProps.anatomp != null ? screenProps.anatomp._id : false
+    const selected =
+      screenProps.anatomp != null ? screenProps.anatomp._id : false;
 
     return (
-        <Container navigation={navigation} refreshing={loading} onRefresh={this.onGetData} >
-          <BC _ref={r => this.initialFocus = r} head={i18n('common.scripts')} acc='Prossiga para acessar a lista de roteiros' />
-          <List accessibilityLabel={`Roteiros de Aprendizagem. Lista com ${anatomps.length} itens. Prossiga para escolher um roteiro`} renderHeader={() => i18n('home.sections.learningScripts.title')}>
-            {
-              anatomps.map(anatomp => {
-                const color = selected == anatomp._id ? '#108ee9' : '#00000070'
-                return (
-                  <ListItem
-                    onClick={this.onSelectRoteiro(anatomp)}
-                    style={{ backgroundColor: selected == anatomp._id ? '#108ee930' : '#fff' }}
-                    key={anatomp.roteiro._id}
-                    wrap
-                    multipleLine
-                    align="center"
-                    arrow="horizontal"
-                  >
-                    <Text style={{ fontWeight: 'bold', fontSize: 15, color }} accessibilityLabel={anatomp.nome + " .Roteiro"}>{anatomp.nome}</Text>
-                    <Brief style={{ color }}>{anatomp.roteiro.curso} | {anatomp.roteiro.disciplina} | {anatomp.instituicao}</Brief>
-                    <Text accessibilityLabel='Toque duas vezes para selecionar.'></Text>
-                    <Midias color={color} value={anatomp.roteiro.resumoMidias} />
-                  </ListItem>
-                )
-              })
-            }
-          </List>
-        </Container>
+      <Container
+        navigation={navigation}
+        refreshing={loading}
+        onRefresh={this.onGetData}
+      >
+        <BC
+          _ref={(r) => (this.initialFocus = r)}
+          head={i18n("common.scripts")}
+          acc="Prossiga para acessar a lista de roteiros"
+        />
+        <List
+          accessibilityLabel={`Roteiros de Aprendizagem. Lista com ${anatomps.length} itens. Prossiga para escolher um roteiro`}
+          renderHeader={() => i18n("home.sections.learningScripts.title")}
+        >
+          {anatomps.map((anatomp) => {
+            const color = selected == anatomp._id ? "#108ee9" : "#00000070";
+            return (
+              <ListItem
+                onClick={this.onSelectRoteiro(anatomp)}
+                style={{
+                  backgroundColor:
+                    selected == anatomp._id ? "#108ee930" : "#fff",
+                }}
+                key={anatomp.roteiro._id}
+                wrap
+                multipleLine
+                align="center"
+                arrow="horizontal"
+              >
+                <Text
+                  style={{ fontWeight: "bold", fontSize: 15, color }}
+                  accessibilityLabel={anatomp.nome + " .Roteiro"}
+                >
+                  {anatomp.nome}
+                </Text>
+                <Brief style={{ color }}>
+                  {anatomp.roteiro.curso} | {anatomp.roteiro.disciplina} |{" "}
+                  {anatomp.instituicao}
+                </Brief>
+                <Text accessibilityLabel="Toque duas vezes para selecionar."></Text>
+                <Midias color={color} value={anatomp.roteiro.resumoMidias} />
+              </ListItem>
+            );
+          })}
+        </List>
+      </Container>
     );
   }
 
-
-
   onGetData = () => {
-    announceForAccessibility('Carregando...');
-    Toast.loading('Carregando...', 0)
+    announceForAccessibility("Carregando...");
+    Toast.loading("Carregando...", 0);
 
-    fetch('https://anatome.herokuapp.com/anatomp', {
+    const apiUrl = "https://anatome.herokuapp.com";
+    fetch(`${apiUrl}/anatomp`, {
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        Accept: "application/json",
+        "Content-Type": "application/json",
       },
     })
-      .then(r => r.json())
-      .then(r => {
-        Toast.hide()
-        setTimeout(() => { focusOnView(this.initialFocus) }, 300)
+      .then((r) => r.json())
+      .then((r) => {
+        Toast.hide();
+        setTimeout(() => {
+          focusOnView(this.initialFocus);
+        }, 300);
         if (r.status == 200) {
-          this.setState({ anatomps: r.data })
+          this.setState({ anatomps: r.data });
         } else {
-          throw r.error
+          throw r.error;
         }
       })
-      .catch(e => {
-        const msg = typeof e == 'string' ? e : 'Não foi possível obter os roteiros de aprendizagem'
-        Toast.hide()
-        Toast.fail(msg)
-        announceForAccessibility(msg)
+      .catch((e) => {
+        const msg =
+          typeof e == "string"
+            ? e
+            : "Não foi possível obter os roteiros de aprendizagem";
+        Toast.hide();
+        Toast.fail(msg);
+        announceForAccessibility(msg);
       })
-      .finally(() => this.setState({ loading: false }))
-  }
+      .finally(() => this.setState({ loading: false }));
+  };
 
-
-  onSelectRoteiro = roteiro => () => {
+  onSelectRoteiro = (roteiro) => () => {
     const { navigation, screenProps } = this.props;
     screenProps.onSelectRoteiro(roteiro);
-    navigation.navigate('Roteiro')
-  }
+    navigation.navigate("Roteiro");
+  };
 }
 
 const styles = StyleSheet.create({
   listItemTitle: {
-    fontWeight: 'bold',
-    fontSize: 15
-  }
+    fontWeight: "bold",
+    fontSize: 15,
+  },
 });
-
 
 export default withI18n(App);
