@@ -60,6 +60,9 @@ class PraTreloc extends Component {
         // Obter o tempo máximo para requestão inicial
         const timer = this.getMaxQuestionTime(dados[this.state.count]);
 
+        // Randomizar a ordem das partes
+        dados.sort(() => (Math.random() > .5) ? 1 : -1);
+
         // O tempo máximo é definido em `timer` e `maxTime`
         // `timer`: Tempo restante atualmente (reduz a cada um segundo)
         // `maxTime`: Tempo máximo para a questão atual

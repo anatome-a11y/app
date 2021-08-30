@@ -18,16 +18,7 @@ import Container from '../Container';
 import { withI18n } from '../messages/withI18n';
 
 
-
-
-
-
-
-
 const ListItem = List.Item;
-
-
-
 
 const ModalBody = ({ conteudos, config }) => {
     return conteudos.length > 0 && (conteudos.map(c => (
@@ -48,7 +39,7 @@ class FormEstNom extends Component {
     refBtnDetalhes = null;
 
     state = {
-        pecasFisicas: {},
+        pecasFisicas: { },
         pecaFisica: '',
         loading: true,
         parte: undefined,
@@ -63,7 +54,7 @@ class FormEstNom extends Component {
         announceForAccessibility('Aguarde...')
 
         //Objeto de indexação
-        let pecasFisicas = {};
+        let pecasFisicas = { };
         anatomp.pecasFisicas.forEach(pf => {
             pecasFisicas[pf._id] = { ...pf, partesNumeradas: [] };
         })
@@ -176,6 +167,9 @@ class FormEstNom extends Component {
                                 parte={parte.parte}
                                 pecasFisicas={[pecasFisicas[pecaFisica]]}
                                 attrName='partesNumeradas'
+                                isTeoria={isTeoria}
+                                conteudos={screenProps.anatomp.roteiro.conteudos}
+                                config={screenProps.config}
                             />
                         </ScrollView>
                     ) :
@@ -259,6 +253,7 @@ class FormEstNom extends Component {
                 conteudos = this.props.screenProps.anatomp.roteiro.conteudos.filter(c => c.partes.find(p => p._id == parte.parte._id)).map(c => ({ texto: c.singular, midias: c.midias }));
             } else {
                 const referenciaAsPartes = pecasFisicas[pecaFisica].partesNumeradas.filter(m => m.referenciaRelativa.referencia != null && m.referenciaRelativa.referencia._id == parte.parte._id)
+
                 if (referenciaAsPartes.length > 0) {
                     announceForAccessibility(parte.parte.nome + '. Prossiga para ouvir as partes referenciadas')
                 } else {

@@ -27,6 +27,11 @@ class FormContainer extends React.Component {
     }
 
     componentDidMount() {
+        const { mainState } = this.props;
+
+        // Randomizar a ordem das partes
+        mainState.data.sort(() => (Math.random() > .5) ? 1 : -1);
+
         this.time2Focus = setTimeout(() => {
             focusOnView(this.initialFocus)
         }, 500)

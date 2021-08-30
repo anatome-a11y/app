@@ -8,10 +8,12 @@ const LocalizacaoPD = ({ parte, pecasFisicas = [], exibirLabel = true, mapa }) =
 
     let pecasFisicasFiltradas = [];
 
-    const mapaParte = mapa.find(m => m.parte._id == parte._id)
-    // Caso seja uma parte referenciada
-    if (mapaParte && mapaParte.localizacao[0].referenciaRelativa.referencia != null) {
-        parte = mapaParte.localizacao[0].referenciaRelativa.referencia;
+    if (mapa) {
+        const mapaParte = mapa.find(m => m.parte._id == parte._id)
+        // Caso seja uma parte referenciada
+        if (mapaParte && mapaParte.localizacao[0].referenciaRelativa.referencia != null) {
+            parte = mapaParte.localizacao[0].referenciaRelativa.referencia;
+        }
     }
 
     Object.keys(pecasFisicas).map(key => {

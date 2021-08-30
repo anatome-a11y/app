@@ -1,10 +1,8 @@
 
-import React, { Component } from 'react';
-
-import { View, Text } from 'react-native';
-
-
 import Checkbox from 'antd-mobile-rn/lib/checkbox';
+import React from 'react';
+import { Text, View } from 'react-native';
+
 
 const getAcc = (pre, checked, simple = false) => {
     const sel = checked ? 'Selecionado' : 'Não selecionado';
