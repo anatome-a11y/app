@@ -130,7 +130,7 @@ class TeoTreLoc extends Component {
                         isTeoria={true}
                         info={[
                             info,
-                            `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
+                            `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempoBase} segundos.`
                         ]}
                     />
                 ) : <Resultados data={data} onRepeat={this.onRepeat} formatter={e => e.texto} />}

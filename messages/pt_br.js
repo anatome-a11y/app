@@ -38,7 +38,7 @@ export default {
         sections: {
             instructions: {                
                 hints: {
-                    inform: 'Dada a localização de cada parte, informe o seu nome e seus respectivos conteúdos teóricos',
+                    inform: 'Dada a localização de cada parte, informe o nome e os respectivos conteúdos teóricos dela',
                     verify: 'Após informar estes dados, verifique quais você acertou',
                     chances: 'Você tem {chances} chances para acertar e um tempo máximo de {tempo} segundos para cada tentativa.'
                 }
@@ -61,7 +61,7 @@ export default {
     estNom: {
         hints: {
             select: 'Selecione uma peça física e indique a localização de uma parte para obter seu ',
-            selectDigital: 'Selecione uma peça física e clique na localização de uma parte para obter seu '
+            selectDigital: 'Selecione uma peça física e clique na localização de uma parte para obter '
         }
     }
 }

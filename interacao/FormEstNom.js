@@ -1,10 +1,11 @@
 import Badge from 'antd-mobile-rn/lib/badge';
 import Button from 'antd-mobile-rn/lib/button';
 import Card from 'antd-mobile-rn/lib/card';
+import Icon from 'antd-mobile-rn/lib/icon';
 import List from 'antd-mobile-rn/lib/list';
 import Toast from 'antd-mobile-rn/lib/toast';
 import React, { Component } from 'react';
-import { Image, ScrollView, Text, View } from 'react-native';
+import { Dimensions, Image, ScrollView, Text, View } from 'react-native';
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 import BC from '../components/Breadcrumbs';
 import Imagens from '../components/Imagens';
@@ -19,6 +20,7 @@ import { withI18n } from '../messages/withI18n';
 
 
 const ListItem = List.Item;
+const windowWidth = Dimensions.get('window').width;
 
 const ModalBody = ({ conteudos, config }) => {
     return conteudos.length > 0 && (conteudos.map(c => (
@@ -39,7 +41,7 @@ class FormEstNom extends Component {
     refBtnDetalhes = null;
 
     state = {
-        pecasFisicas: { },
+        pecasFisicas: {},
         pecaFisica: '',
         loading: true,
         parte: undefined,
@@ -54,7 +56,7 @@ class FormEstNom extends Component {
         announceForAccessibility('Aguarde...')
 
         //Objeto de indexação
-        let pecasFisicas = { };
+        let pecasFisicas = {};
         anatomp.pecasFisicas.forEach(pf => {
             pecasFisicas[pf._id] = { ...pf, partesNumeradas: [] };
         })
@@ -75,15 +77,15 @@ class FormEstNom extends Component {
 
     render() {
         const { navigation, screenProps, isTeoria, interaction, i18n } = this.props;
-        const { value, pecasFisicas, pecaFisica, parte, conteudos, open } = this.state;
+        const { value, pecasFisicas, pecaFisica, parte, conteudos, open, openImageInformation, imageInformation } = this.state;
 
         // const btnNovoFluxo = this.props.screenProps.config.indexOf('talkback') != -1 ? [{
         //     text: 'Nova seleção',
         //     onPress: () => focusOnView(this.initialFocus)
         // }] : []
 
-        const view = isTeoria ? 'nome,  conteúdos associados e referências relativas.' : 'nome e referências relativas';
-        const accBtn = isTeoria ? 'Informações da parte. ' : 'Partes referenciadas. '
+        const view = isTeoria ? ' o nome,  conteúdos associados e referências relativas.' : 'nome e referências relativas';
+        const accBtn = 'Informações da parte. ';//isTeoria ? 'Informações da parte. ' : 'Partes referenciadas. '
 
         const info = (screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' ? i18n('estNom.hints.select') : i18n('estNom.hints.selectDigital')) + view;
 
@@ -97,7 +99,7 @@ class FormEstNom extends Component {
                     ]}
                 />
                 <Card style={{ marginBottom: 10 }}>
-                    <Card.Header title={i18n('common.physicalPieces')} accessibilityLabel='Peças físicas. Prossiga para selecionar uma peça física.' />
+                    <Card.Header title={'Peças'} accessibilityLabel='Peças físicas. Prossiga para selecionar uma peça física.' />
                     <Card.Body>
                         <List>
                             {
@@ -142,7 +144,15 @@ class FormEstNom extends Component {
                                     onErrorClick: this.onErrorClick,
                                 }}
                             />
-                            {<Button ref={r => this.refBtnDetalhes = r} accessibilityLabel={accBtn + 'Botão. Toque duas vezes para ouvir ou retorne para informar uma nova parte'} style={{ margin: 5 }} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>{isTeoria ? i18n('common.partInformation') : i18n('common.referencedParts')}</Button>}
+                            {<Button
+                                ref={r => this.refBtnDetalhes = r}
+                                accessibilityLabel={accBtn + 'Botão. Toque duas vezes para ouvir ou retorne para informar uma nova parte'}
+                                style={{ margin: 5 }}
+                                disabled={(!parte && !value) || !pecaFisica}
+                                onPressOut={this.onOpen}
+                                type='primary'>
+                                {i18n('common.partInformation')}
+                            </Button>}
                             {/* {(this.props.isTeoria && screenProps.config.indexOf('talkback') == -1) && <Button ref={r => this.refBtnDetalhes = r} accessibilityLabel='Nome da parte. Botão. Toque duas vezes para obter o nome da parte' style={{margin: 5}} disabled={(!parte && !value) || !pecaFisica} onPressOut={this.onOpen} type='primary'>Nome da parte</Button>} */}
                             {/* {screenProps.config.indexOf('talkback') != -1 && <Button type='primary' onPressOut={() => focusOnView(this.fieldRef)}>Voltar para o filtro</Button>} */}
                         </Card.Body>
@@ -187,8 +197,8 @@ class FormEstNom extends Component {
                                         <View>
                                             <Image
                                                 style={{
-                                                    width: 380,
-                                                    height: 380,
+                                                    width: windowWidth - 30,
+                                                    height: windowWidth - 30,
                                                     resizeMode: 'stretch',
                                                     position: 'relative',
                                                 }}
@@ -200,6 +210,17 @@ class FormEstNom extends Component {
                                                     style={{ top: point.y + "%", left: point.x + "%", position: 'absolute' }}>
                                                 </Badge>
                                             )}
+                                            <Button
+                                                onPressOut={this.onOpenImageInformation(image)}
+                                                style={{
+                                                    position: 'relative',
+                                                    width: 60,
+                                                    right: 0,
+                                                    borderRadius: 100,
+                                                    borderWidth: 0
+                                                }}>
+                                                <Icon type={'\ue629'} size='xs' />
+                                            </Button>
                                         </View>
                                     )
                                 ) : (<View></View>)
@@ -207,6 +228,25 @@ class FormEstNom extends Component {
                         </Card.Body>
                     </Card>
                 }
+
+                <Modal
+                    talkback={screenProps.config.indexOf('talkback') != -1}
+                    open={openImageInformation}
+                    title={'Informações'}
+                    acc={`Aberto. Prossiga para ouvir`}
+                    footer={[
+                        { text: i18n('actions.close'), onPress: this.onCloseImageInformation, acc: `Fechar. Botão. Toque duas vezes para fechar` },
+                    ]}
+                >
+                    {imageInformation &&
+                        <Text style={{ marginBottom: 8 }}>
+                            <Text style={{ fontWeight: 'bold' }}>Referência: </Text>{"\n"}
+                            <Text>{imageInformation.referencia}</Text>{"\n\n"}
+                            <Text style={{ fontWeight: 'bold' }}>Vista: </Text>{"\n"}
+                            <Text>{imageInformation.vista}</Text>
+                        </Text>
+                    }
+                </Modal>
             </Container>
         )
     }
@@ -216,6 +256,12 @@ class FormEstNom extends Component {
     onClose = () => this.setState({ open: false })
 
     onErrorClick = () => { Toast.info('Parte não registrada'); announceForAccessibility('Parte não registrada') }
+
+    onOpenImageInformation = image => () => this.setState({ openImageInformation: true, imageInformation: image })
+
+    onCloseImageInformation = () => this.setState({ openImageInformation: false })
+
+
 
     onChange = value => {
         const { pecasFisicas, pecaFisica } = this.state;

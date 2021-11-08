@@ -46,15 +46,23 @@ const ReferenciasRelativas = ({ parte, pecasFisicas, attrName = 'locFlat', title
                     });
                 }
 
+                referenciados.map(ref => {
+                    const locParteReferencia = pf[attrName].find(l => l.parte._id == ref.referenciaRelativa.referencia._id);
+                    ref.numero = locParteReferencia.numero;
+                });
+
                 return <View>
                     {referenciados.map(l => (
-                        <Text key={l.parte._id} style={{ marginBottom: 5, textAlign: 'justify' }}>
-                            <Text style={{ fontWeight: 'bold', color: '#108ee9' }}>Peça {pf.nome}: </Text>
-                            <Text style={{ fontWeight: 'bold' }}> {parte.nome} </Text>
-                            referencia a parte
-                            <Text style={{ fontWeight: 'bold' }}> {l.parte.nome} </Text>
-                            que está localizada {l.referenciaRelativa.referenciaParaReferenciado}
-                        </Text>
+                        <View>
+                            <Text key={l.parte._id} style={{ marginBottom: 5, textAlign: 'justify' }}>
+                                <Text style={{ fontWeight: 'bold', color: '#108ee9' }}>Peça {pf.nome}: </Text>
+                                <Text style={{ fontWeight: 'bold' }}> {parte.nome} </Text>
+                                referencia a parte
+                                <Text style={{ fontWeight: 'bold' }}> {l.parte.nome} </Text>
+                                que está localizada {l.referenciaRelativa.referenciaParaReferenciado}
+                            </Text>
+
+                        </View>
                     ))
                     }
                     {isTeoria && <ConteudosReferenciasRelativas conteudos={conteudosReferenciasRelativas} config={config} />}
@@ -66,14 +74,27 @@ const ReferenciasRelativas = ({ parte, pecasFisicas, attrName = 'locFlat', title
                     minQtdRef = referencias.length;
                 }
 
+                referencias.map(ref => {
+                    const locParteReferencia = pf[attrName].find(l => l.parte._id == ref.referenciaRelativa.referencia._id);
+                    ref.numero = locParteReferencia.numero;
+                });
+
                 return referencias.map(l => (
-                    <Text key={l.parte._id} style={{ marginBottom: 5, textAlign: 'justify' }}>
-                        <Text style={{ fontWeight: 'bold', color: '#108ee9' }}>Peça {pf.nome}: </Text>
-                        <Text style={{ fontWeight: 'bold' }}> {parte.nome} </Text>
-                        é referenciada pela parte
-                        <Text style={{ fontWeight: 'bold' }}> {l.referenciaRelativa.referencia.nome} </Text>
-                        que está localizada {l.referenciaRelativa.referenciadoParaReferencia}
-                    </Text>
+                    <View>
+                        <Text key={l.parte._id} style={{ marginBottom: 5, textAlign: 'justify' }}>
+                            <Text style={{ fontWeight: 'bold', color: '#108ee9' }}>Peça {pf.nome}: </Text>
+                            <Text style={{ fontWeight: 'bold' }}> {parte.nome} </Text>
+                            é referenciada pela parte
+                            <Text style={{ fontWeight: 'bold' }}> {l.referenciaRelativa.referencia.nome} </Text>
+                            que está localizada {l.referenciaRelativa.referenciadoParaReferencia}
+                        </Text>
+
+                        <Text key={l.parte._id} style={{ marginBottom: 5, textAlign: 'justify' }}>
+                            <Text style={{ fontWeight: 'bold' }}>{l.referenciaRelativa.referencia.nome}:  </Text>
+                            parte {l.numero} na peça
+                            <Text style={{ fontWeight: 'bold' }}> {l.pecaFisica.nome} </Text>.
+                        </Text>
+                    </View>
                 ))
             }
         } else {

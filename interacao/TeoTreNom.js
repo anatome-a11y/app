@@ -133,7 +133,7 @@ class _FormContainer extends React.Component {
                     info={[
                         i18n('teoTreNom.sections.instructions.hints.inform'),
                         i18n('teoTreNom.sections.instructions.hints.verify'),
-                        i18n('teoTreNom.sections.instructions.hints.chances', { chances: screenProps.inputConfig.chances, tempo: 3 * screenProps.inputConfig.tempo }),
+                        i18n('teoTreNom.sections.instructions.hints.chances', { chances: screenProps.inputConfig.chances, tempo: screenProps.inputConfig.tempoBase }),
                     ]} />
                 <Card style={{ marginBottom: 10 }}>
                     <Card.Header ref={r => this.nomeDaPeca = r} accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a parte anatômica`} title={title} />
@@ -265,7 +265,7 @@ class TeoTreNom extends Component {
         count: 0,
         total: 0,
         open: false,
-        //    timer: 3 * this.props.screenProps.inputConfig.tempo,
+        timer: /*3 * */this.props.screenProps.inputConfig.tempoBase,
         timer: 60,
         maxTime: 60,
         tentativas: 0,
@@ -361,7 +361,7 @@ class TeoTreNom extends Component {
                     onSubmit={this.onSubmit}
                     maxTentativa={this.props.screenProps.inputConfig.chances}
                 />
-            ) : <Resultados bc={['Roteiros', screenProps.anatomp.nome, 'Treinamento - Teórico - Localização-Conteúdo']} data={data} onRepeat={this.onRepeat} formatter={e => `Numero ${e.localizacao.numero}, peça ${e.localizacao.pecaFisica.nome}`} />
+            ) : <Resultados bc={['Roteiros', screenProps.anatomp.nome, 'Treinamento - Teórico - Localização-Conteúdo']} data={data} onRepeat={this.onRepeat} formatter={e => `Número ${e.localizacao.numero}, peça ${e.localizacao.pecaFisica.nome}`} />
         )
 
         return (
@@ -388,7 +388,7 @@ class TeoTreNom extends Component {
         this.setState({
             data: dados,
             count: 0,
-            //    timer: 3 * this.props.screenProps.inputConfig.tempo,
+            //    timer: 3 * this.props.screenProps.inputConfig.tempoBase,
             timer: this.state.maxTime,
             tentativas: 0
         }, () => this.onCount())
@@ -415,7 +415,7 @@ class TeoTreNom extends Component {
                     const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
                     const msg = i18n('teoTreNom.alerts.correctTheAnswer', { num, sufixo: num == 1 ? '' : 's' })
                     Toast.fail(msg, 3, () => this.onSetFocus(count))
-                    this.setState({ timer: 3 * this.props.screenProps.inputConfig.tempo, })
+                    this.setState({ timer: /*3 * */this.props.screenProps.inputConfig.tempoBase, })
                     announceForAccessibility(msg)
                 }
             }
@@ -435,7 +435,7 @@ class TeoTreNom extends Component {
 
         this.setState({
             count: count + 1,
-            //    timer: 3 * this.props.screenProps.inputConfig.tempo,
+            //    timer: 3 * this.props.screenProps.inputConfig.tempoBase,
             timer: newTimer,
             maxTime: newTimer,
             tentativas: 0,

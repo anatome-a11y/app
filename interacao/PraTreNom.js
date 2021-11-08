@@ -102,7 +102,7 @@ class FormContainer extends React.Component {
                     info={[
                         info,
                         'Utilize o campo "Nome da parte" para informar o nome da parte.',
-                        `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
+                        `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempoBase} segundos.`
                     ]} />
                 <Card style={{ marginBottom: 10 }}>
                     <Card.Header ref={r => this.nomeDaPeca = r} accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a parte anatômica`} title={title} />
@@ -283,7 +283,7 @@ class PraTreNom extends Component {
                     onSubmit={this.onSubmit}
                     maxTentativa={this.props.screenProps.inputConfig.chances}
                 />
-            ) : <Resultados bc={['Roteiros', screenProps.anatomp.nome, 'Treinamento - Prático - Localização-Conteúdo']} data={data} onRepeat={this.onRepeat} formatter={e => `Numero ${e.numero}, peça ${e.pecaFisica.nome}`} />
+            ) : <Resultados bc={['Roteiros', screenProps.anatomp.nome, 'Treinamento - Prático - Localização-Conteúdo']} data={data} onRepeat={this.onRepeat} formatter={e => `Número ${e.numero}, peça ${e.pecaFisica.nome}`} />
         )
 
         return (

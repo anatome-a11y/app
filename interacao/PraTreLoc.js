@@ -104,7 +104,7 @@ class PraTreloc extends Component {
     render() {
         const { navigation, screenProps } = this.props;
         const { data, count, sinalScroll, sinalTexto } = this.state;
-        const info = (screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' ? 'Informe as partes de cada peça física do roteiro e pressione o botão "Próximo" para submeter.' : 'Clique nas partes de cada peça digital do roteiro.');
+        const info = (screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' ? 'Informe o identificador de localização da parte solicitada pelo sistema na respectiva peça e pressione o botão próximo.' : 'Clique nas partes de cada peça digital do roteiro.');
 
         return (
             <Container sinalScroll={sinalScroll} navigation={navigation}>
@@ -123,7 +123,7 @@ class PraTreloc extends Component {
                         interaction='Treinamento - Prático - Conteúdo-Localização'
                         info={[
                             info,
-                            `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
+                            `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempoBase} segundos.`
                         ]}
                     />
                 ) : <Resultados data={data} onRepeat={this.onRepeat} formatter={e => e.texto} />}

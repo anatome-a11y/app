@@ -1,9 +1,11 @@
 import Badge from 'antd-mobile-rn/lib/badge';
 import React from 'react';
-import { Image, View } from 'react-native';
+import { Dimensions, Image, View } from 'react-native';
 
+const windowWidth = Dimensions.get('window').width;
 
 const LocalizacaoPDPartes = ({ parte, pecaFisica, pecasFisicas = [], exibirLabel = true, onClickParte }) => {
+
 
     let pecasFisicasFiltradas = [];
     Object.keys(pecasFisicas).map(key => {
@@ -39,8 +41,8 @@ const LocalizacaoPDPartes = ({ parte, pecaFisica, pecasFisicas = [], exibirLabel
         <View accessible={true}>
             <Image
                 style={{
-                    width: 380,
-                    height: 380,
+                    width: windowWidth - 30,
+                    height: windowWidth - 30,
                     resizeMode: 'stretch',
                     position: 'relative',
                 }}

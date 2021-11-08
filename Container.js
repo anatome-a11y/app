@@ -87,7 +87,7 @@ class Container extends Component {
       case 'Info': return <Text ref={r => this.refTitle = r} accessibilityLabel='Informações. Título' style={styles.title}>Informações</Text>;
       case 'Ajuda': return <Text ref={r => this.refTitle = r} accessibilityLabel='Ajuda. Título' style={styles.title}>Ajuda</Text>;
       case 'Config': return <Text ref={r => this.refTitle = r} accessibilityLabel='Configurações. Título' style={styles.title}>Configurações</Text>;
-      case 'Roteiro': return <Text ref={r => this.refTitle = r} accessibilityLabel='Interações. Título' style={styles.title}>Interações</Text>;
+      case 'Roteiro': return <Text ref={r => this.refTitle = r} accessibilityLabel='Interações. Título' style={styles.title}>Anatome</Text>;
       default: return <Text ref={r => this.refTitle = r} accessibilityLabel='anatome. Título' style={styles.title}>Anatome</Text>;
     }
   }

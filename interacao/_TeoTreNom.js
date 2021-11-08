@@ -94,7 +94,7 @@ class FormContainer extends React.Component {
                 info={[
                     'Para cada parte de cada peça física selecione o conteúdo teórico correspondente e em seguida pressione o botão "Próximo" no fim da lista.',
                     'Caso necessário, utilize o filtro para buscar um conteúdo',
-                    `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempo} segundos.`
+                    `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempoBase} segundos.`
                 ]} />
                 <Card style={{ marginBottom: 10 }}>
                     <Card.Header accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a parte anatômica`} ref={r => this.nomeDaPeca = r} title={title} />
@@ -164,7 +164,7 @@ class TeoTreNom extends Component {
         data: [],
         count: 0,
         total: 0,
-        timer: this.props.screenProps.inputConfig.tempo,
+        timer: this.props.screenProps.inputConfig.tempoBase,
         conteudos: [],
         tentativas: 0,
         loading: true
@@ -229,7 +229,7 @@ class TeoTreNom extends Component {
         }
 
         if (this.state.count != nextState.count) {
-            this.setState({ timer: this.props.screenProps.inputConfig.tempo });
+            this.setState({ timer: this.props.screenProps.inputConfig.tempoBase });
         }
     }
 
@@ -255,7 +255,7 @@ class TeoTreNom extends Component {
                     onChangeValor={this.onChangeValor}
                     onSubmit={this.onSubmit}
                 />
-            ) : <Resultados data={data} onRepeat={this.onRepeat} formatter={e => `Numero ${e.numero}, peça ${e.pecaFisica.nome}`} />
+            ) : <Resultados data={data} onRepeat={this.onRepeat} formatter={e => `Número ${e.numero}, peça ${e.pecaFisica.nome}`} />
         )
 
         return (
@@ -274,7 +274,7 @@ class TeoTreNom extends Component {
         this.setState({
             data: dados,
             count: 0,
-            timer: this.props.screenProps.inputConfig.tempo,
+            timer: this.props.screenProps.inputConfig.tempoBase,
             tentativas: 0
         }, () => this.onCount())
     }
@@ -314,7 +314,7 @@ class TeoTreNom extends Component {
 
         this.setState({
             count: count + 1,
-            timer: this.props.screenProps.inputConfig.tempo,
+            timer: this.props.screenProps.inputConfig.tempoBase,
             tentativas: 0,
             data: [
                 ...data.slice(0, count),

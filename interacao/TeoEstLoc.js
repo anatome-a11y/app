@@ -4,7 +4,7 @@ import Card from 'antd-mobile-rn/lib/card';
 import List from 'antd-mobile-rn/lib/list';
 import Toast from 'antd-mobile-rn/lib/toast';
 import React, { Component } from 'react';
-import { Image, ScrollView, Text, View } from 'react-native';
+import { Dimensions, Image, ScrollView, Text, View } from 'react-native';
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 import BC from '../components/Breadcrumbs';
 import Imagens from '../components/Imagens';
@@ -17,12 +17,9 @@ import Container from '../Container';
 import { norm } from '../utils';
 
 
-
-
-
-
 const ListItem = List.Item;
 
+const windowWidth = Dimensions.get('window').width;
 
 
 const LocalizacaoPF = ({ conteudo, pecasFisicas }) => {
@@ -99,8 +96,8 @@ const LocalizacaoPD = ({ conteudo, pecasFisicas = [], exibirLabel = true, mapa }
         <View>
             <Image
                 style={{
-                    width: 380,
-                    height: 380,
+                    width: windowWidth - 30,
+                    height: windowWidth - 30,
                     resizeMode: 'stretch',
                     position: 'relative',
                 }}
@@ -112,6 +109,18 @@ const LocalizacaoPD = ({ conteudo, pecasFisicas = [], exibirLabel = true, mapa }
                     style={{ top: point.y + "%", left: point.x + "%", position: 'absolute' }}>
                 </Badge>
             )}
+            {image.vista &&
+                <Text style={{ marginBottom: 8 }}>
+                    <Text style={{ fontSize: 10, fontWeight: 'bold' }}>Vista: </Text>{"\n"}
+                    <Text style={{ fontSize: 10 }}>{image.vista}</Text>
+                </Text>
+            }
+            {image.referencia &&
+                <Text style={{ marginBottom: 8 }}>
+                    <Text style={{ fontSize: 10, fontWeight: 'bold' }}>Referência: </Text>{"\n"}
+                    <Text style={{ fontSize: 10 }}>{image.referencia}</Text>
+                </Text>
+            }
         </View>
     ))
 }

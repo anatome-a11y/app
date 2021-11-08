@@ -2,7 +2,7 @@ import Button from 'antd-mobile-rn/lib/button';
 import Card from 'antd-mobile-rn/lib/card';
 import List from 'antd-mobile-rn/lib/list';
 import React, { Component } from 'react';
-import { Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { focusOnView } from 'react-native-accessibility';
 import BC from '../components/Breadcrumbs';
 import Imagens from '../components/Imagens';
@@ -106,12 +106,12 @@ const DicaTeoria = ({ config, atual, _ref }) => {
 }
 
 
-const DicaPratica = ({ atual, _ref, dica }) => {
-    const identificador = (!atual.referenciaRelativa || atual.referenciaRelativa.referencia == null) ? atual.texto : (atual.texto + ': Selecione a parte localizada ' + atual.referenciaRelativa.referenciadoParaReferencia)
+const DicaPratica = ({ atual, _ref, dica, tipoPecaMapeamento = 'pecaFisica' }) => {
+    const identificador = (!atual.referenciaRelativa || atual.referenciaRelativa.referencia == null) ? atual.texto : (atual.texto + (tipoPecaMapeamento == 'pecaFisica' ? ': Informe a parte localizada ' : ': Selecione a parte localizada ') + atual.referenciaRelativa.referenciadoParaReferencia)
     return (
-        <View accessible={true} ref={_ref} accessibilityLabel={`Dica: ${identificador}. Prossiga para informar ${dica}`}>
+        <ScrollView accessible={true} ref={_ref} accessibilityLabel={`Dica: ${identificador}. Prossiga para informar ${dica}`}>
             <Text style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
-        </View>
+        </ScrollView>
     )
 }
 
@@ -196,12 +196,12 @@ class FormTreLoc extends React.Component {
                 <Card style={{ marginBottom: 10 }}>
                     <Card.Header accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a dica d${dica}.`} ref={r => this.nomeDaPeca = r} title={title} />
                     <Card.Body>
-                        {isTeoria ? <DicaTeoria _ref={r => this.dicaDaParte = r} atual={data[count]} config={config} /> : <DicaPratica dica={dica} _ref={r => this.dicaDaParte = r} atual={data[count]} />}
+                        {isTeoria ? <DicaTeoria _ref={r => this.dicaDaParte = r} atual={data[count]} config={config} tipoPecaMapeamento={screenProps.anatomp.tipoPecaMapeamento} /> : <DicaPratica dica={dica} _ref={r => this.dicaDaParte = r} atual={data[count]} tipoPecaMapeamento={screenProps.anatomp.tipoPecaMapeamento} />}
 
 
                         {/*(screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital' && localizacaoRelativa != null) &&
                             <Text style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{descricaoLocalizacaoRelativa}</Text>
-        */}
+                        */}
 
                         {screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital' &&
                             <LocalizacaoPDPartes parte={parte} pecaFisica={pecaFisica} pecasFisicas={pecasFisicas} exibirLabel={true} onClickParte={this.onClickParte} />
@@ -228,7 +228,10 @@ class FormTreLoc extends React.Component {
                                     idx={idx}
                                 />
                             </View>
-                        )) &&
+                        ))
+                        }
+
+                        {screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' &&
                             <Button ref={r => this.btnProximo = r} accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
                         }
                     </Card.Body>

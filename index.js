@@ -98,21 +98,23 @@ class Root extends Component {
                 this.setState({ config: this.state.config.filter(i => i != 'talkback') })
             }
         });
-        NfcManager.isSupported()
-            .then(supported => {
-                this.setState({ supported });
-                if (supported) {
-                    // this.setState({config: [...config, 'nfc']})
-                    this._startNfc();
-                } else {
-                    const msg = 'Seu dispositivo não possui suporte a NFC';
-                    Toast.fail(msg)
-                    announceForAccessibility(msg)
-                }
-            })
-            .catch(e => {
-                // console.error(e)
-            })
+        // Verifica suporte a NFC
+        /*    NfcManager.isSupported()
+                .then(supported => {
+                    this.setState({ supported });
+                    if (supported) {
+                        // this.setState({config: [...config, 'nfc']})
+                        this._startNfc();
+                    } else {
+                        const msg = 'Seu dispositivo não possui suporte a NFC';
+                        Toast.fail(msg)
+                        announceForAccessibility(msg)
+                    }
+                })
+                .catch(e => {
+                    // console.error(e)
+                })
+        */
     }
 
     render() {

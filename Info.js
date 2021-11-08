@@ -14,10 +14,10 @@ import { announceForAccessibility, focusOnView } from 'react-native-accessibilit
 const ListItem = List.Item;
 
 const siglas = [
-    ['A.', 'A', 'Artéria'],
-    ['Aa.', 'AA', 'Artérias'],
-    ['Art.', 'ART', 'Articulação'],
-    ['Artt.', 'ARTT', 'Articulações'],
+    ['a.', 'A', 'Artéria'],
+    ['aa.', 'AA', 'Artérias'],
+    ['art.', 'ART', 'Articulação'],
+    ['artt.', 'ARTT', 'Articulações'],
     ['B.', 'B', 'Bolsa'],
     ['Bb.', 'BB', 'Bolsas'],
     ['For.', 'FOR', 'Forame'],
