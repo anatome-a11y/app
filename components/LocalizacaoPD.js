@@ -68,13 +68,13 @@ const LocalizacaoPD = ({ parte, pecasFisicas = [], exibirLabel = true, mapa }) =
                 </Badge>
             )}
             {image.vista &&
-                <Text style={{ marginBottom: 8 }}>
+                <Text style={{ marginBottom: 8, marginLeft: 8 }}>
                     <Text style={{ fontSize: 10, fontWeight: 'bold' }}>Vista: </Text>{"\n"}
                     <Text style={{ fontSize: 10 }}>{image.vista}</Text>
                 </Text>
             }
             {image.referencia &&
-                <Text style={{ marginBottom: 8 }}>
+                <Text style={{ marginBottom: 8, marginLeft: 8 }}>
                     <Text style={{ fontSize: 10, fontWeight: 'bold' }}>Referência: </Text>{"\n"}
                     <Text style={{ fontSize: 10 }}>{image.referencia}</Text>
                 </Text>

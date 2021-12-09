@@ -110,13 +110,13 @@ const LocalizacaoPD = ({ conteudo, pecasFisicas = [], exibirLabel = true, mapa }
                 </Badge>
             )}
             {image.vista &&
-                <Text style={{ marginBottom: 8 }}>
+                <Text style={{ marginBottom: 8, marginLeft: 8 }}>
                     <Text style={{ fontSize: 10, fontWeight: 'bold' }}>Vista: </Text>{"\n"}
                     <Text style={{ fontSize: 10 }}>{image.vista}</Text>
                 </Text>
             }
             {image.referencia &&
-                <Text style={{ marginBottom: 8 }}>
+                <Text style={{ marginBottom: 8, marginLeft: 8 }}>
                     <Text style={{ fontSize: 10, fontWeight: 'bold' }}>Referência: </Text>{"\n"}
                     <Text style={{ fontSize: 10 }}>{image.referencia}</Text>
                 </Text>
@@ -255,11 +255,14 @@ class TeoEstLoc extends Component {
                     title={modalTitle}
                     acc={`Aberto. Prossiga para ouvir o nome da parte e sua localização nas peças digitais.`}
                     footer={[
-                        { text: 'Fechar', onPress: this.onCloseDigital, acc: `Fechar. Botão. Toque duas vezes para fechar os detalhes do conteúdo ${conteudo ? conteudo.texto : ''}` },
+                        {
+                            text: 'Fechar', onPress: this.onCloseDigital,
+                            acc: `Fechar. Botão. Toque duas vezes para fechar os detalhes do conteúdo ${conteudo ? conteudo.texto : ''}`
+                        },
                     ]}
                 >
                     <ScrollView style={{ maxHeight: '87%', padding: 5 }}>
-                        {conteudo && conteudo.partes.map(p => <ReferenciasRelativas attrName='localizacao' key={p._id} parte={p} pecasFisicas={pecasFisicas} />)}
+                        {/*conteudo && conteudo.partes.map(p => <ReferenciasRelativas attrName='localizacao' key={p._id} parte={p} pecasFisicas={pecasFisicas} />)*/}
                         <LocalizacaoPD conteudo={conteudo} pecasFisicas={pecasFisicas} exibirLabel={true} mapa={screenProps.anatomp.mapa} />
                     </ScrollView>
                 </Modal>

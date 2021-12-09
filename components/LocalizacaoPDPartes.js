@@ -1,11 +1,11 @@
 import Badge from 'antd-mobile-rn/lib/badge';
 import React from 'react';
-import { Dimensions, Image, View } from 'react-native';
+import { Dimensions, Image, Text, View } from 'react-native';
 
 const windowWidth = Dimensions.get('window').width;
 
-const LocalizacaoPDPartes = ({ parte, pecaFisica, pecasFisicas = [], exibirLabel = true, onClickParte }) => {
 
+const LocalizacaoPDPartes = ({ parte, pecaFisica, pecasFisicas = [], exibirLabel = true, onClickParte }) => {
 
     let pecasFisicasFiltradas = [];
     Object.keys(pecasFisicas).map(key => {
@@ -37,25 +37,40 @@ const LocalizacaoPDPartes = ({ parte, pecaFisica, pecasFisicas = [], exibirLabel
 
     //  pecasFisicasFiltradas = pecasFisicasFiltradas.filter(p => p.midias.length > 0);
 
-    return pecasFisicasFiltradas.map(peca => peca.midias.map((image, idx) =>
-        <View accessible={true}>
-            <Image
-                style={{
-                    width: windowWidth - 30,
-                    height: windowWidth - 30,
-                    resizeMode: 'stretch',
-                    position: 'relative',
-                }}
-                source={{ uri: image.url }}
-            />
-            {image.pontos.map((point, idxPonto) =>
-                <Badge
-                    onStartShouldSetResponder={onClickParte(point.label)} text={exibirLabel ? point.label : "  "}
-                    style={{ top: point.y + "%", left: point.x + "%", position: 'absolute' }}>
-                </Badge>
-            )}
-        </View>
-    ))
+    return (
+        <View>
+            {pecasFisicasFiltradas.map(peca => peca.midias.map((image, idx) =>
+                <View accessible={true}>
+                    <Image
+                        style={{
+                            width: windowWidth - 30,
+                            height: windowWidth - 30,
+                            resizeMode: 'stretch',
+                            position: 'relative',
+                        }}
+                        source={{ uri: image.url }}
+                    />
+                    {image.pontos.map((point, idxPonto) =>
+                        <Badge
+                            onStartShouldSetResponder={onClickParte(point.label)} text={exibirLabel ? point.label : "  "}
+                            style={{ top: point.y + "%", left: point.x + "%", position: 'absolute' }}>
+                        </Badge>
+                    )}
+                    {image.vista &&
+                        <Text style={{ marginBottom: 8, marginLeft: 8 }}>
+                            <Text style={{ fontSize: 10, fontWeight: 'bold' }}>Vista: </Text>{"\n"}
+                            <Text style={{ fontSize: 10 }}>{image.vista}</Text>
+                        </Text>
+                    }
+                    {image.referencia &&
+                        <Text style={{ marginBottom: 8, marginLeft: 8 }}>
+                            <Text style={{ fontSize: 10, fontWeight: 'bold' }}>Referência: </Text>{"\n"}
+                            <Text style={{ fontSize: 10 }}>{image.referencia}</Text>
+                        </Text>
+                    }
+                </View>
+            ))}
+        </View>)
 }
 
 export default LocalizacaoPDPartes

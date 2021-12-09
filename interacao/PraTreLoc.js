@@ -160,7 +160,7 @@ class PraTreloc extends Component {
             } else {
                 this.setState({ tentativas: tentativas + 1 })
                 if (tentativas == this.props.screenProps.inputConfig.chances - 1) {
-                    Toast.fail('Você errou.', 3, this.onNext(acertou))
+                    Toast.fail('Você errou. Resposta correta: parte ' + this.getRespostaCorreta(data[count]), 3, this.onNext(acertou))
                     announceForAccessibility('Você errou.')
                 } else {
                     const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
@@ -254,6 +254,40 @@ class PraTreloc extends Component {
             return item.partes.every(p => item.valores.indexOf(p.numero) != -1)
         }
     }
+
+    getRespostaCorreta = item => {
+
+        const { pecasFisicas } = this.state;
+
+        // Verifica se informou Parte Relativa
+        if (this.props.screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital') {
+            var verificaRefrenciaRelativa = false;
+            item.partes.forEach(parte => {
+                if (parte.referenciaRelativa.referencia != null) {
+                    Object.keys(pecasFisicas).forEach(key => {
+                        const partesNumeradas = pecasFisicas[key].partesNumeradas;
+                        var pn = partesNumeradas.find(pn => pn.parte._id == parte.referenciaRelativa.referencia._id)
+                        if (pn != undefined) {
+                            verificaRefrenciaRelativa = pn.numero == item.valores[0];
+                            if (verificaRefrenciaRelativa) {
+                                return pn.numero;
+                            }
+                        }
+                    });
+                }
+            });
+            /* if (verificaRefrenciaRelativa) {
+                 return true;
+             }*/
+        }
+
+        if (item.modo == 'singular') {
+            return item.partes[0].numero;
+        } else {
+            return item.partes[0].numero;
+        }
+    }
+
 
     onCount = () => {
         this.timer = setInterval(() => {

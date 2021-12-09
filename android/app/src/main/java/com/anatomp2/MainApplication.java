@@ -1,4 +1,4 @@
-package com.anatomp;
+package com.anatomp2;
 
 import android.app.Application;
 

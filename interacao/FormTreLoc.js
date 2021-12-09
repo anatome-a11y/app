@@ -12,7 +12,6 @@ import LocalizacaoPDPartes from '../components/LocalizacaoPDPartes';
 import Videos from '../components/Videos';
 import Placar from './Placar';
 
-
 const ListItem = List.Item;
 
 const _ni = 'Não identificado'
@@ -171,11 +170,9 @@ class FormTreLoc extends React.Component {
         clearInterval(this.time2Focus)
     }
 
-
     onClickParte = label => e => {
         this.props.onChangeValorDigital(0, label);
     }
-
 
     render() {
         const { screenProps, mainState, onGetRef, onSetFocus, onChangeValor, onChangeValorDigital, onErrorClick, onSubmit, interaction, info, isTeoria } = this.props;
@@ -185,6 +182,8 @@ class FormTreLoc extends React.Component {
         const title = data[count].pecaFisica.nome;
         const dica = data[count].valores.length > 1 ? 'as partes' : 'a parte';
         const parte = data[count].partes[0].parte;
+
+
         //    const localizacaoRelativa = data[count].partes[0].referenciaRelativa.referencia;
 
         //    const descricaoLocalizacaoRelativa = 'Clique na parte que localiza-se ' + data[count].partes[0].referenciaRelativa.referenciaParaReferenciado;
@@ -204,7 +203,14 @@ class FormTreLoc extends React.Component {
                         */}
 
                         {screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital' &&
-                            <LocalizacaoPDPartes parte={parte} pecaFisica={pecaFisica} pecasFisicas={pecasFisicas} exibirLabel={true} onClickParte={this.onClickParte} />
+                            <LocalizacaoPDPartes
+                                parte={parte}
+                                pecaFisica={pecaFisica}
+                                pecasFisicas={pecasFisicas}
+                                exibirLabel={true}
+                                onClickParte={this.onClickParte}
+                                talkback={screenProps.config.indexOf('talkback')}
+                            />
                         }
 
                         {screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' && data[count].valores.map((value, idx) => (

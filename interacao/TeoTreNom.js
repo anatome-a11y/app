@@ -376,7 +376,12 @@ class TeoTreNom extends Component {
 
 
     onToggleDialog = (open, cb = () => { }) => () => {
+        const { data, count } = this.state;
         this.setState({ open }, cb)
+        let acertou = this.checkAcertos(data[count]);
+        if (acertou) {
+            this.onSubmit();
+        }
     }
 
     onRepeat = () => {

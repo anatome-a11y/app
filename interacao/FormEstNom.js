@@ -170,7 +170,7 @@ class FormEstNom extends Component {
                 >
                     {parte != undefined ? (
                         <ScrollView style={{ maxHeight: 280 }}>
-                            {isTeoria && <Text accessibilityLabel='Conhecimentos teóricos. Prossiga para ouvir.' style={{ fontWeight: 'bold', marginBottom: 5 }}>{i18n('common.theoreticalKnowledge')}:</Text>}
+                            {/*isTeoria && <Text accessibilityLabel='Conhecimentos teóricos. Prossiga para ouvir.' style={{ fontWeight: 'bold', marginBottom: 5 }}>{i18n('common.theoreticalKnowledge')}:</Text>*/}
                             {isTeoria && <ModalBody conteudos={conteudos} config={screenProps.config} />}
                             <ReferenciasRelativas
                                 title={isTeoria ? <Text key='title' accessibilityLabel='Referências relativas. Prossiga para ouvir.' style={{ fontWeight: 'bold', marginTop: 15, marginBottom: 5 }}>Referências relativas:</Text> : null}
