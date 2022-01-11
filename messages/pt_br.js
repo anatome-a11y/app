@@ -52,7 +52,7 @@ export default {
             isLocatedAt: 'localiza-se'
         },
         actions: {
-            check: 'Verificar Respostas'
+            check: 'Verificar respostas'
         },
         alerts:{
             correctTheAnswer: 'Corrija ou complemente sua resposta. Você tem mais {num} tentativa{sufixo}'

@@ -222,8 +222,6 @@ class _FormContainer extends React.Component {
         )
     }
 
-
-
     onChangeCorrecao = idx => () => {
         const { data, count } = this.props.mainState
         announceForAccessibility(data[count].correcao[idx] ? `Seleção removida` : 'Selecionado!')
@@ -266,7 +264,6 @@ class TeoTreNom extends Component {
         total: 0,
         open: false,
         timer: /*3 * */this.props.screenProps.inputConfig.tempoBase,
-        timer: 60,
         maxTime: 60,
         tentativas: 0,
         loading: true,

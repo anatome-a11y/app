@@ -9,11 +9,12 @@ import BC from '../components/Breadcrumbs';
 import Input from '../components/Input';
 import Instrucoes from '../components/Instrucoes';
 import LocalizacaoPD from '../components/LocalizacaoPD';
+import Modal from '../components/Modal';
+import { Simple as Option } from '../components/Option';
 import Container from '../Container';
 import { norm } from '../utils';
 import Placar from './Placar';
 import Resultados from './Resultados';
-
 
 class FormContainer extends React.Component {
     initialFocus = null;
@@ -66,9 +67,9 @@ class FormContainer extends React.Component {
 
 
     render() {
-        const { screenProps, mainState, onGetRef, onSubmit } = this.props;
+        const { screenProps, mainState, onGetRef, onSubmit, maxTentativa } = this.props;
         const { anatomp } = screenProps;
-        const { count, total, data, timer, tentativas } = mainState;
+        const { count, total, data, timer, tentativas, open } = mainState;
         const title = data[count].pecaFisica.nome;
         const { found, pesquisa } = this.state;
 
@@ -94,6 +95,12 @@ class FormContainer extends React.Component {
 
         const info = (screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' ? 'Para cada parte (isto é, sua localização) em cada peça física, selecione o nome da parte e em seguida pressione o botão "Próximo" para submeter' : 'Para cada parte (isto é, sua localização) em cada peça digital, informe o nome da parte e em seguida pressione o botão "Próximo" para submeter.');
 
+        const disabled = this.state.pesquisa.length == 0;
+        const disabledVerificacao = timer == 0 || tentativas == maxTentativa;
+
+        const isTB = screenProps.config.indexOf('talkback') != -1;
+
+
         return (
             <View>
                 <BC _ref={r => this.initialFocus = r} body={['Roteiros', anatomp.nome]} head={'Treinamento - Prático - Localização-Conteúdo'} />
@@ -111,7 +118,6 @@ class FormContainer extends React.Component {
 
                             <Text ref={r => this.dicaDaParte = r} accessibilityLabel={`${identificador}. Prossiga para buscar a parte correspondente.`} style={{ margin: 10, fontSize: 18, textAlign: 'center' }}>{identificador}</Text>
 
-
                             {screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital' &&
                                 <LocalizacaoPD parte={parte} pecasFisicas={pecasFisicas} exibirLabel={true} mapa={screenProps.anatomp.mapa} />
                             }
@@ -125,9 +131,50 @@ class FormContainer extends React.Component {
                             />
                             {!found || pesquisa == '' && <Text style={{ padding: 5 }}>Nenhuma parte foi identificada</Text>}
                         </View>
-                        <Button accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={onSubmit} type='primary'>Próximo</Button>
+
+                        <Button
+                            disabled={disabled || disabledVerificacao}
+                            accessibilityLabel={(disabled || disabledVerificacao) ? 'Verificar resposta. Botão. Desabilitado. Informe a parte para habilitar' : `Verificar resposta. Botão. Toque duas vezes para abrir a verficação da resposta`}
+                            style={{ flex: 1, margin: 5, marginBottom: 0 }}
+                            onPressOut={this.props.onToggleDialog(true)}
+                            type='primary'>
+                            Verificar resposta
+                        </Button>
+                        <Button
+                            accessibilityLabel={`Próximo. Botão. Toque duas vezes para obter a próxima dica ou prossiga para ouvir as informações extras desta etapa`}
+                            style={{ flex: 1, margin: 5, marginBottom: 0 }}
+                            onPressOut={onSubmit}
+                            type='primary'>
+                            Próximo
+                        </Button>
                     </Card.Body>
                 </Card>
+
+                <Modal
+                    talkback={isTB}
+                    open={open}
+                    title={identificador}
+                    acc={`${identificador}. Aberto. Prossiga para ouvir as informações da parte`}
+                    footer={[{ text: 'Fechar', onPress: this.props.onToggleDialog(false), acc: `Fechar. Botão. Toque duas vezes para fechar a verificação de respostas.` }]}
+                >
+                    <View accessible={true}>
+                        <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 3 }}>{'Sua resposta'}:</Text>
+                        <Text>{data[count].respostaParte}</Text>
+                        <Text>{data[count].respostaConteudos}</Text>
+                        <Text accessibilityLabel='Prossiga para ouvir a lista de respostas esperadas'></Text>
+                    </View>
+                    <List>
+                        <List.Item>
+                            <Option
+                                label={data[count].parte.nome}
+                                checked={data[count].correcao}
+                                onChange={this.onChangeCorrecao}
+                                title={data[count].parte.nome}
+                            />
+                        </List.Item>
+
+                    </List>
+                </Modal>
 
                 <Card>
                     <Card.Header title='Resumo' />
@@ -175,6 +222,12 @@ class FormContainer extends React.Component {
         this.props.onChangeValor(parte)
         announceForAccessibility(`${parte.nome} selecionado`)
     }
+
+    onChangeCorrecao = () => {
+        const { data, count } = this.props.mainState
+        announceForAccessibility(data[count].correcao ? `Seleção removida` : 'Selecionado!')
+        this.props.onChange('correcao')(!data[count].correcao)
+    }
 }
 
 
@@ -195,7 +248,8 @@ class PraTreNom extends Component {
         maxTime: 60,
         partes: [],
         tentativas: 0,
-        loading: true
+        loading: true,
+        open: false,
     }
 
     componentDidMount() {
@@ -212,7 +266,16 @@ class PraTreNom extends Component {
 
         //Seta as partes e seus numeros para cada peça física
         anatomp.mapa.forEach(mapa => {
-            mapa.localizacao.map(loc => pecasFisicas[loc.pecaFisica._id].partesNumeradas.push({ parte: mapa.parte, numero: loc.numero, referenciaRelativa: loc.referenciaRelativa }))
+            mapa.localizacao.map(loc =>
+                pecasFisicas[loc.pecaFisica._id].partesNumeradas.push(
+                    {
+                        parte: mapa.parte,
+                        numero: loc.numero,
+                        referenciaRelativa: loc.referenciaRelativa,
+                        correcao: false
+                    }
+                )
+            )
         })
 
 
@@ -280,8 +343,10 @@ class PraTreNom extends Component {
                     mainState={this.state}
                     onGetRef={this.onGetRef}
                     onChangeValor={this.onChangeValor}
+                    onChange={this.onChange}
                     onSubmit={this.onSubmit}
                     maxTentativa={this.props.screenProps.inputConfig.chances}
+                    onToggleDialog={this.onToggleDialog}
                 />
             ) : <Resultados bc={['Roteiros', screenProps.anatomp.nome, 'Treinamento - Prático - Localização-Conteúdo']} data={data} onRepeat={this.onRepeat} formatter={e => `Número ${e.numero}, peça ${e.pecaFisica.nome}`} />
         )
@@ -291,6 +356,15 @@ class PraTreNom extends Component {
                 {_View}
             </Container>
         )
+    }
+
+    onToggleDialog = (open, cb = () => { }) => () => {
+        const { data, count } = this.state;
+        this.setState({ open }, cb)
+        let acertou = this.checkAcertos(data[count]);
+        if (acertou) {
+            this.onSubmit();
+        }
     }
 
     onRepeat = () => {
@@ -325,7 +399,7 @@ class PraTreNom extends Component {
                     announceForAccessibility('Você errou.')
                 } else {
                     const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
-                    const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
+                    const msg = `Corrija ou complemente sua resposta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
                     Toast.fail(msg, 3, () => this.onSetFocus(count))
                     announceForAccessibility(msg)
                 }
@@ -375,11 +449,10 @@ class PraTreNom extends Component {
                 this.fieldRef[count].focus()
             }
         }
-
     }
 
     checkAcertos = item => {
-        return item.valores[0]._id == item.parte._id
+        return item.correcao === true;
     }
 
     onCount = () => {
@@ -401,6 +474,29 @@ class PraTreNom extends Component {
                 ...data.slice(count + 1),
             ]
         })
+    }
+
+
+    onChange = field => value => {
+        const { data, count, timer } = this.state;
+
+        if (value) {
+            announceForAccessibility(`Texto detectado: ${value}`)
+        } else {
+            announceForAccessibility('Texto removido')
+        }
+
+        this.setState({
+            data: [
+                ...data.slice(0, count),
+                {
+                    ...data[count],
+                    [field]: value
+                },
+                ...data.slice(count + 1),
+            ]
+        })
+
     }
 }
 
