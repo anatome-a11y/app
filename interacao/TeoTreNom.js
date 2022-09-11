@@ -92,7 +92,7 @@ class _FormContainer extends React.Component {
     render() {
         const { screenProps, mainState, onGetRef, maxTentativa, onChange, i18n, } = this.props;
         const { anatomp, config } = screenProps;
-        const { count, total, data, timer, tentativas, open } = mainState;
+        const { count, total, data, timer, tentativas, open, maxTime } = mainState;
 
         const localizacao = data[count].localizacao;
         const localizacaoRelativa = localizacao.referenciaRelativa.referencia;
@@ -133,7 +133,7 @@ class _FormContainer extends React.Component {
                     info={[
                         i18n('teoTreNom.sections.instructions.hints.inform'),
                         i18n('teoTreNom.sections.instructions.hints.verify'),
-                        i18n('teoTreNom.sections.instructions.hints.chances', { chances: screenProps.inputConfig.chances, tempo: screenProps.inputConfig.tempoBase }),
+                        i18n('teoTreNom.sections.instructions.hints.chances', { chances: screenProps.inputConfig.chances, tempo: maxTime }),
                     ]} />
                 <Card style={{ marginBottom: 10 }}>
                     <Card.Header ref={r => this.nomeDaPeca = r} accessibilityLabel={`Peça: ${title}. Prossiga para ouvir a parte anatômica`} title={title} />
@@ -264,7 +264,7 @@ class TeoTreNom extends Component {
         total: 0,
         open: false,
         timer: /*3 * */this.props.screenProps.inputConfig.tempoBase,
-        maxTime: 60,
+        maxTime: this.props.screenProps.inputConfig.tempoBase,
         tentativas: 0,
         loading: true,
         sinalScroll: 0,
@@ -333,6 +333,7 @@ class TeoTreNom extends Component {
             if (nextState.count !== nextState.data.length) {
                 Toast.info('Tempo limite excedido!')
                 announceForAccessibility('Tempo limite excedido!')
+                this.onNext(false)()
             }
         }
     }

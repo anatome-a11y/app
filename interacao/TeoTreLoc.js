@@ -99,6 +99,7 @@ class TeoTreLoc extends Component {
             if (nextState.count !== nextState.data.length) {
                 Toast.info('Tempo limite excedido!')
                 announceForAccessibility('Tempo limite excedido!')
+                this.onNext(false)()
             }
         }
     }
@@ -109,7 +110,7 @@ class TeoTreLoc extends Component {
 
     render() {
         const { navigation, screenProps } = this.props;
-        const { data, count, sinalScroll, sinalTexto } = this.state;
+        const { data, count, sinalScroll, sinalTexto, maxTime } = this.state;
         const info = (screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' ? 'Para cada conteúdo teórico informe a parte correspondente e em seguida pressione o botão "Próximo" para submeter.' : 'Para cada conteúdo teórico clique na parte correspondente.');
 
         return (
@@ -130,7 +131,7 @@ class TeoTreLoc extends Component {
                         isTeoria={true}
                         info={[
                             info,
-                            `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${screenProps.inputConfig.tempoBase} segundos.`
+                            `Você tem ${screenProps.inputConfig.chances} chances para acertar e um tempo máximo de ${maxTime} segundos.`
                         ]}
                     />
                 ) : <Resultados data={data} onRepeat={this.onRepeat} formatter={e => e.texto} />}

@@ -262,7 +262,7 @@ class TeoEstLoc extends Component {
                     ]}
                 >
                     <ScrollView style={{ maxHeight: '87%', padding: 5 }}>
-                        {/*conteudo && conteudo.partes.map(p => <ReferenciasRelativas attrName='localizacao' key={p._id} parte={p} pecasFisicas={pecasFisicas} />)*/}
+                        {conteudo && conteudo.partes.map(p => <ReferenciasRelativas attrName='localizacao' parte={p} pecasFisicas={pecasFisicas} />)}
                         <LocalizacaoPD conteudo={conteudo} pecasFisicas={pecasFisicas} exibirLabel={true} mapa={screenProps.anatomp.mapa} />
                     </ScrollView>
                 </Modal>

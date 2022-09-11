@@ -93,6 +93,7 @@ class PraTreloc extends Component {
             if (nextState.count !== nextState.data.length) {
                 Toast.info('Tempo limite excedido!')
                 announceForAccessibility('Tempo limite excedido!')
+                this.onNext(false)();
             }
         }
     }

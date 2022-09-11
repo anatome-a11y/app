@@ -142,6 +142,22 @@ class App extends Component {
     const { anatomps, msg, loading } = this.state;
     const { navigation, screenProps, i18n } = this.props;
 
+    var anatompsFilter = [];
+    var encontrouVazio = false;
+    anatomps.forEach((anatomp) => {
+      encontrouVazio = false
+      anatomp.mapa.forEach(mapa => {
+        mapa.localizacao.forEach(localizacao => {
+          if (localizacao.pecaFisica == null) {
+            encontrouVazio = true;
+          }
+        })
+      })
+      if (!encontrouVazio) {
+        anatompsFilter.push(anatomp);
+      }
+    });
+
     const selected =
       screenProps.anatomp != null ? screenProps.anatomp._id : false;
 
@@ -157,10 +173,10 @@ class App extends Component {
           acc="Prossiga para acessar a lista de roteiros"
         />
         <List
-          accessibilityLabel={`Roteiros de Aprendizagem. Lista com ${anatomps.length} itens. Prossiga para escolher um roteiro`}
+          accessibilityLabel={`Roteiros de Aprendizagem. Lista com ${anatompsFilter.length} itens. Prossiga para escolher um roteiro`}
           renderHeader={() => i18n("home.sections.learningScripts.title")}
         >
-          {anatomps.map((anatomp) => {
+          {anatompsFilter.map((anatomp) => {
             const color = selected == anatomp._id ? "#108ee9" : "#00000070";
             return (
               <ListItem
