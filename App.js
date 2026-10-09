@@ -215,7 +215,7 @@ class App extends Component {
     announceForAccessibility("Carregando...");
     Toast.loading("Carregando...", 0);
 
-    const apiUrl = "https://anatome.herokuapp.com";
+    const apiUrl = "https://anatome-api.onrender.com";
     fetch(`${apiUrl}/anatomp`, {
       headers: {
         Accept: "application/json",

@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "scripts": {
+    "postinstall": "node scripts/patch-metro-blacklist.js && node scripts/patch-android-repos.js",
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "start:android": "npx react-native run-android",
     "test": "jest"

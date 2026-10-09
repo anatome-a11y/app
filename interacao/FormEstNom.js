@@ -1,11 +1,10 @@
-import Badge from 'antd-mobile-rn/lib/badge';
 import Button from 'antd-mobile-rn/lib/button';
 import Card from 'antd-mobile-rn/lib/card';
 import Icon from 'antd-mobile-rn/lib/icon';
 import List from 'antd-mobile-rn/lib/list';
 import Toast from 'antd-mobile-rn/lib/toast';
 import React, { Component } from 'react';
-import { Dimensions, Image, ScrollView, Text, View } from 'react-native';
+import { Dimensions, ScrollView, Text, View } from 'react-native';
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 import BC from '../components/Breadcrumbs';
 import Imagens from '../components/Imagens';
@@ -13,6 +12,7 @@ import Input from '../components/Input';
 import Instrucoes from '../components/Instrucoes';
 import Modal from '../components/Modal';
 import { Simple as Option } from '../components/Option';
+import MidiaPeca from '../components/pecaDigital/MidiaPeca';
 import ReferenciasRelativas from '../components/ReferenciasRelativas';
 import Videos from '../components/Videos';
 import Container from '../Container';
@@ -194,22 +194,12 @@ class FormEstNom extends Component {
                             {
                                 (pecasFisicas[pecaFisica] != undefined) ? (
                                     pecasFisicas[pecaFisica].midias.map((image, idx) =>
-                                        <View>
-                                            <Image
-                                                style={{
-                                                    width: windowWidth - 30,
-                                                    height: windowWidth - 30,
-                                                    resizeMode: 'stretch',
-                                                    position: 'relative',
-                                                }}
-                                                source={{ uri: image.url }}
+                                        <View key={(image._id || idx) + '-' + idx}>
+                                            <MidiaPeca
+                                                midia={image}
+                                                largura={windowWidth - 30}
+                                                onSelect={(label) => this.onChangeParte(label)()}
                                             />
-                                            {image.pontos.map((point, idxPonto) =>
-                                                <Badge
-                                                    onStartShouldSetResponder={this.onChangeParte(point.label)} text={point.label}
-                                                    style={{ top: point.y + "%", left: point.x + "%", position: 'absolute' }}>
-                                                </Badge>
-                                            )}
                                             <Button
                                                 onPressOut={this.onOpenImageInformation(image)}
                                                 style={{

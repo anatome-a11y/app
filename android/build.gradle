@@ -2,10 +2,14 @@
 
 buildscript {
     repositories {
-        jcenter()
         maven {
             url 'https://maven.google.com/'
             name 'Google'
+        }
+        mavenCentral()
+        // O plugin Android 2.3.3 saiu do jcenter e não está no Maven do Google.
+        maven {
+            url 'https://maven.aliyun.com/repository/public'
         }
     }
     dependencies {
@@ -19,18 +23,31 @@ buildscript {
 allprojects {
     repositories {
         mavenLocal()
-        jcenter()
         maven {
             // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
-            url "$rootDir/../node_modules/react-native/android"
+            url "$rootProject.projectDir/../node_modules/react-native/android"
         }
         maven {
             url 'https://maven.google.com/'
             name 'Google'
         }
+        mavenCentral()
+        maven {
+            url 'https://maven.aliyun.com/repository/public'
+        }
     }
 }
 
+
+subprojects { subproject ->
+    subproject.configurations.all {
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == 'com.facebook.react' && details.requested.name == 'react-native') {
+                details.useVersion '0.55.4'
+            }
+        }
+    }
+}
 
 subprojects {
     afterEvaluate {project ->

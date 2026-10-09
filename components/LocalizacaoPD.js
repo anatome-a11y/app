@@ -1,6 +1,6 @@
-import Badge from 'antd-mobile-rn/lib/badge';
 import React from 'react';
-import { Dimensions, Image, Text, View } from 'react-native';
+import { Dimensions, Text, View } from 'react-native';
+import MidiaPeca from './pecaDigital/MidiaPeca';
 
 const windowWidth = Dimensions.get('window').width;
 
@@ -51,22 +51,8 @@ const LocalizacaoPD = ({ parte, pecasFisicas = [], exibirLabel = true, mapa }) =
     pecasFisicasFiltradas = pecasFisicasFiltradas.filter(p => p.midias.length > 0);
 
     return pecasFisicasFiltradas.map(peca => peca.midias.map((image, idx) =>
-        <View>
-            <Image
-                style={{
-                    width: windowWidth - 30,
-                    height: windowWidth - 30,
-                    resizeMode: 'stretch',
-                    position: 'relative',
-                }}
-                source={{ uri: image.url }}
-            />
-            {image.pontos.map((point, idxPonto) =>
-                <Badge
-                    text={exibirLabel ? point.label : "  "}
-                    style={{ top: point.y + "%", left: point.x + "%", position: 'absolute' }}>
-                </Badge>
-            )}
+        <View key={(image._id || peca._id) + '-' + idx}>
+            <MidiaPeca midia={image} exibirLabel={exibirLabel} largura={windowWidth - 30} />
             {image.vista &&
                 <Text style={{ marginBottom: 8, marginLeft: 8 }}>
                     <Text style={{ fontSize: 10, fontWeight: 'bold' }}>Vista: </Text>{"\n"}

@@ -1,10 +1,9 @@
-import Badge from 'antd-mobile-rn/lib/badge';
 import Button from 'antd-mobile-rn/lib/button';
 import Card from 'antd-mobile-rn/lib/card';
 import List from 'antd-mobile-rn/lib/list';
 import Toast from 'antd-mobile-rn/lib/toast';
 import React, { Component } from 'react';
-import { Dimensions, Image, ScrollView, Text, View } from 'react-native';
+import { Dimensions, ScrollView, Text, View } from 'react-native';
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 import BC from '../components/Breadcrumbs';
 import Imagens from '../components/Imagens';
@@ -12,6 +11,7 @@ import Input from '../components/Input';
 import Instrucoes from '../components/Instrucoes';
 import Modal from '../components/Modal';
 import ReferenciasRelativas from '../components/ReferenciasRelativas';
+import MidiaPeca from '../components/pecaDigital/MidiaPeca';
 import Videos from '../components/Videos';
 import Container from '../Container';
 import { norm } from '../utils';
@@ -93,22 +93,8 @@ const LocalizacaoPD = ({ conteudo, pecasFisicas = [], exibirLabel = true, mapa }
     pecasFisicasFiltradas = pecasFisicasFiltradas.filter(p => p.midias.length > 0);
 
     return pecasFisicasFiltradas.map(peca => peca.midias.map((image, idx) =>
-        <View>
-            <Image
-                style={{
-                    width: windowWidth - 30,
-                    height: windowWidth - 30,
-                    resizeMode: 'stretch',
-                    position: 'relative',
-                }}
-                source={{ uri: image.url }}
-            />
-            {image.pontos.map((point, idxPonto) =>
-                <Badge
-                    text={exibirLabel ? point.label : "  "}
-                    style={{ top: point.y + "%", left: point.x + "%", position: 'absolute' }}>
-                </Badge>
-            )}
+        <View key={(image._id || peca._id) + '-' + idx}>
+            <MidiaPeca midia={image} exibirLabel={exibirLabel} largura={windowWidth - 30} />
             {image.vista &&
                 <Text style={{ marginBottom: 8, marginLeft: 8 }}>
                     <Text style={{ fontSize: 10, fontWeight: 'bold' }}>Vista: </Text>{"\n"}
