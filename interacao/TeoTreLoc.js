@@ -2,6 +2,7 @@ import Toast from 'antd-mobile-rn/lib/toast';
 import React, { Component } from 'react';
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 import Container from '../Container';
+import { pecaNoIndice } from '../utils';
 import FormTreLoc from './FormTreLoc';
 import Resultados from './Resultados';
 
@@ -37,7 +38,9 @@ class TeoTreLoc extends Component {
         //Seta as partes e seus numeros para cada peça física
         anatomp.mapa.forEach(mapa => {
             mapa.localizacao.forEach(loc => {
-                pecasFisicas[loc.pecaFisica._id].partesNumeradas.push({ parte: mapa.parte, numero: loc.numero, referenciaRelativa: loc.referenciaRelativa })
+                const peca = pecaNoIndice(pecasFisicas, loc);
+                if (!peca) return;
+                peca.partesNumeradas.push({ parte: mapa.parte, numero: loc.numero, referenciaRelativa: loc.referenciaRelativa })
             })
         })
 

@@ -12,7 +12,7 @@ import LocalizacaoPF from '../components/LocalizacaoPF';
 import Modal from '../components/Modal';
 import ReferenciasRelativas from '../components/ReferenciasRelativas';
 import Container from '../Container';
-import { norm } from '../utils';
+import { norm, pecaNoIndice } from '../utils';
 
 
 const ListItem = List.Item;
@@ -48,7 +48,9 @@ class PraEstLoc extends Component {
         //Seta as partes e seus numeros para cada peça física
         anatomp.mapa.forEach(mapa => {
             mapa.localizacao.forEach(loc => {
-                pecasFisicas[loc.pecaFisica._id].locFlat.push({ parte: mapa.parte, ...loc })
+                const peca = pecaNoIndice(pecasFisicas, loc);
+                if (!peca) return;
+                peca.locFlat.push({ parte: mapa.parte, ...loc })
             })
         })
 

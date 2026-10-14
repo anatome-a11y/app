@@ -1,3 +1,10 @@
+export const pecaNoIndice = (pecasFisicas, loc) => {
+    const peca = loc && loc.pecaFisica;
+    if (!peca) return null;
+    const id = typeof peca === 'object' ? peca._id : peca;
+    return (id && pecasFisicas[id]) || null;
+};
+
 export const norm = s => {
     return s.toLowerCase()
     .replace(new RegExp("\\s", 'g'),"")

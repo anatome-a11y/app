@@ -16,6 +16,7 @@ import MidiaPeca from '../components/pecaDigital/MidiaPeca';
 import ReferenciasRelativas from '../components/ReferenciasRelativas';
 import Videos from '../components/Videos';
 import Container from '../Container';
+import { pecaNoIndice } from '../utils';
 import { withI18n } from '../messages/withI18n';
 
 
@@ -63,7 +64,11 @@ class FormEstNom extends Component {
 
         //Seta as partes e seus numeros para cada peça física
         anatomp.mapa.forEach(mapa => {
-            mapa.localizacao.map(loc => pecasFisicas[loc.pecaFisica._id].partesNumeradas.push({ parte: mapa.parte, numero: loc.numero, referenciaRelativa: loc.referenciaRelativa }));
+            mapa.localizacao.forEach(loc => {
+                const peca = pecaNoIndice(pecasFisicas, loc);
+                if (!peca) return;
+                peca.partesNumeradas.push({ parte: mapa.parte, numero: loc.numero, referenciaRelativa: loc.referenciaRelativa });
+            })
         })
 
         this.setState({ loading: false, pecasFisicas, pecaFisica: Object.keys(pecasFisicas)[0] }, () => {

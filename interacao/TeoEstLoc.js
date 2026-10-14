@@ -14,7 +14,7 @@ import ReferenciasRelativas from '../components/ReferenciasRelativas';
 import MidiaPeca from '../components/pecaDigital/MidiaPeca';
 import Videos from '../components/Videos';
 import Container from '../Container';
-import { norm } from '../utils';
+import { norm, pecaNoIndice } from '../utils';
 
 
 const ListItem = List.Item;
@@ -157,7 +157,9 @@ class TeoEstLoc extends Component {
         //Seta as partes e seus numeros para cada peça física
         anatomp.mapa.forEach(mapa => {
             mapa.localizacao.forEach(loc => {
-                pecasFisicas[loc.pecaFisica._id].localizacao.push({ parte: mapa.parte, ...loc })
+                const peca = pecaNoIndice(pecasFisicas, loc);
+                if (!peca) return;
+                peca.localizacao.push({ parte: mapa.parte, ...loc })
             })
         })
 

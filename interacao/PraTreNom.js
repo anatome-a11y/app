@@ -12,7 +12,7 @@ import LocalizacaoPD from '../components/LocalizacaoPD';
 import Modal from '../components/Modal';
 import { Simple as Option } from '../components/Option';
 import Container from '../Container';
-import { norm } from '../utils';
+import { norm, pecaNoIndice } from '../utils';
 import Placar from './Placar';
 import Resultados from './Resultados';
 
@@ -266,8 +266,10 @@ class PraTreNom extends Component {
 
         //Seta as partes e seus numeros para cada peça física
         anatomp.mapa.forEach(mapa => {
-            mapa.localizacao.map(loc =>
-                pecasFisicas[loc.pecaFisica._id].partesNumeradas.push(
+            mapa.localizacao.forEach(loc => {
+                const peca = pecaNoIndice(pecasFisicas, loc);
+                if (!peca) return;
+                peca.partesNumeradas.push(
                     {
                         parte: mapa.parte,
                         numero: loc.numero,
@@ -275,7 +277,7 @@ class PraTreNom extends Component {
                         correcao: false
                     }
                 )
-            )
+            })
         })
 
 
