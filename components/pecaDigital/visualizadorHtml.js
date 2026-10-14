@@ -95,6 +95,11 @@ scene.add(grupoPinos);
 var carga = 0;
 var urlCarregada = '';
 var carregando = false;
+var raioModelo = 1;
+var modoPinos = 'leitura';
+var raycaster = new THREE.Raycaster();
+var direcao = new THREE.Vector3();
+var posicaoPino = new THREE.Vector3();
 
 function tamanho() {
   var largura = view.clientWidth || 300;
@@ -141,6 +146,7 @@ function descartarModelo() {
 function enquadrar(objeto) {
   var esfera = new THREE.Box3().setFromObject(objeto).getBoundingSphere(new THREE.Sphere());
   var raio = esfera.radius > 0 ? esfera.radius : 1;
+  raioModelo = raio;
   var centro = esfera.center;
   var fovV = THREE.MathUtils.degToRad(camera.fov);
   var fovH = 2 * Math.atan(Math.tan(fovV / 2) * camera.aspect);
@@ -155,39 +161,116 @@ function enquadrar(objeto) {
   controls.update();
 }
 
+function criarPino(ponto, cor, modo, mostrarLabel) {
+  var pin = document.createElement('div');
+  pin.title = ponto.parteNome || '';
+  pin.style.width = '10px';
+  pin.style.height = '10px';
+  pin.style.boxSizing = 'border-box';
+  pin.style.borderRadius = '50%';
+  pin.style.background = cor;
+  pin.style.border = '2px solid #fff';
+  pin.style.boxShadow = '0 0 0 1px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.4)';
+  pin.style.pointerEvents = modo === 'selecao' ? 'auto' : 'none';
+  pin.style.transition = 'opacity 0.2s';
+
+  var haste = document.createElement('div');
+  haste.style.position = 'absolute';
+  haste.style.left = '50%';
+  haste.style.bottom = '100%';
+  haste.style.width = '2px';
+  haste.style.height = '12px';
+  haste.style.marginLeft = '-1px';
+  haste.style.background = '#fff';
+  haste.style.boxShadow = '0 0 0 0.5px rgba(0, 0, 0, 0.35)';
+  haste.style.pointerEvents = 'none';
+  pin.appendChild(haste);
+
+  if (mostrarLabel && ponto.label) {
+    var selo = document.createElement('div');
+    selo.textContent = String(ponto.label);
+    selo.style.position = 'absolute';
+    selo.style.left = '50%';
+    selo.style.bottom = 'calc(100% + 12px)';
+    selo.style.transform = 'translateX(-50%)';
+    selo.style.minWidth = '20px';
+    selo.style.height = '20px';
+    selo.style.padding = '0 6px';
+    selo.style.boxSizing = 'border-box';
+    selo.style.borderRadius = '10px';
+    selo.style.background = cor;
+    selo.style.border = '1px solid #fff';
+    selo.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.4)';
+    selo.style.color = '#fff';
+    selo.style.font = '600 12px sans-serif';
+    selo.style.lineHeight = '18px';
+    selo.style.textAlign = 'center';
+    selo.style.whiteSpace = 'nowrap';
+    selo.style.pointerEvents = 'none';
+    pin.appendChild(selo);
+  }
+
+  if (modo === 'selecao') {
+    pin.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      enviar({ type: 'select', label: String(ponto.label) });
+    });
+  }
+  return pin;
+}
+
+function superficieVisivel(objeto) {
+  for (var atual = objeto; atual; atual = atual.parent) {
+    if (!atual.visible) return false;
+  }
+  return true;
+}
+
+function primeiraSuperficie(raycasterAlvo, model) {
+  if (!model) return null;
+  var acertos = raycasterAlvo.intersectObject(model, true);
+  for (var i = 0; i < acertos.length; i++) {
+    var acerto = acertos[i];
+    if (acerto.object.isMesh && acerto.face && superficieVisivel(acerto.object)) {
+      return acerto;
+    }
+  }
+  return null;
+}
+
+function atualizarOclusao() {
+  if (!modelo || pinos.length === 0) return;
+  var tolerancia = raioModelo * 0.005;
+  for (var i = 0; i < pinos.length; i++) {
+    var pin = pinos[i];
+    pin.getWorldPosition(posicaoPino);
+    direcao.subVectors(posicaoPino, camera.position);
+    var distancia = direcao.length();
+    if (distancia === 0) continue;
+    raycaster.set(camera.position, direcao.normalize());
+    raycaster.far = distancia;
+    var acerto = primeiraSuperficie(raycaster, modelo);
+    var oculto = acerto !== null && acerto.distance < distancia - tolerancia;
+    pin.element.style.opacity = oculto ? '0.3' : '1';
+    pin.element.style.pointerEvents = (!oculto && modoPinos === 'selecao') ? 'auto' : 'none';
+  }
+}
+
 function desenharPinos(dados) {
   limparPinos();
-  var modo = dados.modo || 'leitura';
-  var cor = modo === 'leitura' ? '#108ee9' : '#f5222d';
+  modoPinos = dados.modo || 'leitura';
+  var cor = modoPinos === 'leitura' ? '#108ee9' : '#f5222d';
+  var mostrarLabel = dados.exibirLabel !== false;
   (dados.pontos || []).forEach(function (ponto) {
     if (ponto == null || ponto.z == null) return;
-    var el = document.createElement('div');
-    el.textContent = dados.exibirLabel === false ? '' : String(ponto.label);
-    el.title = ponto.parteNome || '';
-    el.style.minWidth = '22px';
-    el.style.height = '22px';
-    el.style.padding = '0 6px';
-    el.style.boxSizing = 'border-box';
-    el.style.borderRadius = '11px';
-    el.style.background = cor;
-    el.style.color = '#fff';
-    el.style.font = '600 12px sans-serif';
-    el.style.lineHeight = '22px';
-    el.style.textAlign = 'center';
-    el.style.border = '2px solid #fff';
-    el.style.pointerEvents = 'auto';
-    if (modo === 'selecao') {
-      el.addEventListener('click', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        enviar({ type: 'select', label: String(ponto.label) });
-      });
-    }
+    var el = criarPino(ponto, cor, modoPinos, mostrarLabel);
     var obj = new CSS2DObject(el);
     obj.position.set(Number(ponto.x), Number(ponto.y), Number(ponto.z));
     grupoPinos.add(obj);
     pinos.push(obj);
   });
+  atualizarOclusao();
 }
 
 function publicar(objeto, dados) {
@@ -278,9 +361,15 @@ window.__fila = [];
 diag('2. Three.js pronto', 'aguardando o app enviar a URL');
 enviar({ type: 'ready' });
 
+var ultimoOclusao = 0;
 function quadro() {
   requestAnimationFrame(quadro);
   controls.update();
+  var agora = (window.performance && performance.now) ? performance.now() : Date.now();
+  if (agora - ultimoOclusao > 100) {
+    ultimoOclusao = agora;
+    atualizarOclusao();
+  }
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
 }

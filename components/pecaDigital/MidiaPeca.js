@@ -12,8 +12,8 @@ const MidiaPeca = ({ midia, exibirLabel = true, onSelect, largura }) => {
 
     if (modelo) {
         const dica = onSelect
-            ? 'Arraste para girar. Toque no número para escolher a parte.'
-            : 'Arraste para girar. A parte em azul é a desta etapa.';
+            ? 'Arraste para girar. Toque no número nítido para escolher a parte. Número esmaecido está do outro lado da peça.'
+            : 'Arraste para girar. Marca nítida está na face visível; marca esmaecida está do outro lado da peça.';
         return (
             <View accessibilityLabel={dica}>
                 <VisualizadorModelo
