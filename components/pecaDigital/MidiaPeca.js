@@ -1,13 +1,14 @@
 import Badge from 'antd-mobile-rn/lib/badge';
 import React from 'react';
 import { Image, Text, View } from 'react-native';
-import { ehModelo3d } from './midia';
+import { ehModelo3d, urlSegura } from './midia';
 import VisualizadorModelo from './VisualizadorModelo';
 
 const MidiaPeca = ({ midia, exibirLabel = true, onSelect, largura }) => {
     const lado = largura;
     const pontos = (midia && midia.pontos) || [];
-    const modelo = midia && (ehModelo3d(midia.name) || ehModelo3d(midia.url));
+    const endereco = urlSegura(midia && midia.url);
+    const modelo = midia && (ehModelo3d(midia.name) || ehModelo3d(endereco));
 
     if (modelo) {
         const dica = onSelect
@@ -16,8 +17,8 @@ const MidiaPeca = ({ midia, exibirLabel = true, onSelect, largura }) => {
         return (
             <View accessibilityLabel={dica}>
                 <VisualizadorModelo
-                    url={midia.url}
-                    nome={midia.name || midia.url}
+                    url={endereco}
+                    nome={midia.name || endereco}
                     pontos={pontos}
                     modo={onSelect ? 'selecao' : 'leitura'}
                     exibirLabel={exibirLabel}
@@ -39,7 +40,7 @@ const MidiaPeca = ({ midia, exibirLabel = true, onSelect, largura }) => {
                     resizeMode: 'stretch',
                     position: 'relative',
                 }}
-                source={{ uri: midia.url }}
+                source={{ uri: endereco }}
             />
             {pontos.map((point, idxPonto) =>
                 <Badge

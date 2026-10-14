@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { View } from 'react-native';
 import FitImage from 'react-native-fit-image';
+import { urlSegura } from './pecaDigital/midia';
 
 
 const Imagens = ({ midias, config }) => (
@@ -10,7 +11,7 @@ const Imagens = ({ midias, config }) => (
                 midias.filter(midia => midia.type.indexOf('image') != -1).map(midia => (
                     <View key={midia._id}>
                         <FitImage
-                            source={{ uri: midia.url }}
+                            source={{ uri: urlSegura(midia.url) }}
                         />
                     </View>
                 ))

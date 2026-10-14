@@ -39,7 +39,13 @@ export const pontos3d = pontos => {
     }).filter(ponto => ponto);
 };
 
+export const urlSegura = url => (
+    typeof url === 'string'
+        ? url.replace(/^http:\/\/(anatome-api\.onrender\.com)/i, 'https://$1')
+        : url
+);
+
 export const origemDaUrl = url => {
-    const match = String(url || '').match(/^(https?:\/\/[^/]+)/i);
+    const match = String(urlSegura(url) || '').match(/^(https?:\/\/[^/]+)/i);
     return match ? match[1] + '/' : 'https://localhost/';
 };

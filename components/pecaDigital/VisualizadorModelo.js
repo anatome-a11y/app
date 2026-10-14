@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Text, View, WebView } from 'react-native';
 import { announceForAccessibility } from 'react-native-accessibility';
-import { extensao, origemDaUrl, pontos3d } from './midia';
+import { extensao, origemDaUrl, pontos3d, urlSegura } from './midia';
 import { HTML_VISUALIZADOR } from './visualizadorHtml';
 
 class VisualizadorModelo extends Component {
@@ -11,6 +11,7 @@ class VisualizadorModelo extends Component {
 
     state = {
         erro: '',
+        diag: '0. Componente montado, WebView ainda nao abriu',
     }
 
     componentDidUpdate(prev) {
@@ -20,15 +21,25 @@ class VisualizadorModelo extends Component {
         this.enviarCena();
     }
 
+    registrar = texto => {
+        console.log('[modelo3d] ' + texto);
+        if (texto !== this.state.diag) {
+            this.setState({ diag: texto });
+        }
+    }
+
     enviarCena = () => {
         if (!this.web || !this.web.postMessage) {
+            this.registrar('WebView sem postMessage');
             return;
         }
         const { url, nome, pontos, modo, exibirLabel } = this.props;
+        const endereco = urlSegura(url);
+        const tipo = extensao(nome || url);
         const msg = JSON.stringify({
             type: 'load',
-            url: url,
-            fileType: extensao(nome || url),
+            url: endereco,
+            fileType: tipo,
             pontos: pontos3d(pontos),
             modo: modo || 'leitura',
             exibirLabel: exibirLabel !== false,
@@ -37,6 +48,7 @@ class VisualizadorModelo extends Component {
             return;
         }
         this.ultima = msg;
+        this.registrar('App enviou a URL (' + (tipo || 'sem extensao') + ')\n' + endereco);
         this.web.postMessage(msg);
     }
 
@@ -47,15 +59,22 @@ class VisualizadorModelo extends Component {
         } catch (e) {
             return;
         }
+        if (data.type === 'diag') {
+            const texto = [data.etapa, data.extra].filter(Boolean).join('\n');
+            this.registrar(texto);
+        }
         if (data.type === 'ready') {
             this.ultima = '';
+            this.registrar('WebView pronto, pedindo o modelo');
             this.enviarCena();
         }
         if (data.type === 'loaded') {
+            this.registrar('Modelo exibido');
             this.setState({ erro: '' });
         }
         if (data.type === 'error') {
             const erro = data.message || 'Não foi possível carregar o modelo 3D.';
+            this.registrar(erro);
             this.setState({ erro: erro });
             announceForAccessibility(erro);
         }
@@ -70,7 +89,7 @@ class VisualizadorModelo extends Component {
         const lado = largura;
 
         return (
-            <View style={{ width: lado, height: altura || lado }}>
+            <View style={{ width: lado }}>
                 <WebView
                     ref={r => { this.web = r; }}
                     source={{ html: HTML_VISUALIZADOR, baseUrl: origemDaUrl(url) }}
@@ -79,10 +98,17 @@ class VisualizadorModelo extends Component {
                     domStorageEnabled={true}
                     scalesPageToFit={false}
                     scrollEnabled={false}
-                    onLoadEnd={this.enviarCena}
+                    onLoadEnd={() => {
+                        this.registrar('WebView terminou de abrir a pagina');
+                        this.enviarCena();
+                    }}
+                    onError={() => this.registrar('WebView disparou onError')}
                     onMessage={this.onMessage}
                     mixedContentMode="always"
                 />
+                <Text style={{ fontSize: 11, color: '#222', backgroundColor: '#fff7d6', padding: 6 }}>
+                    {this.state.diag}
+                </Text>
                 {erro ? (
                     <Text style={{ position: 'absolute', left: 8, right: 8, top: '45%', textAlign: 'center', color: 'rgba(0, 0, 0, 0.45)' }}>
                         {erro}

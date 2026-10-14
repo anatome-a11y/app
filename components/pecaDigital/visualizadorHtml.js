@@ -7,17 +7,26 @@ export const HTML_VISUALIZADOR = `<!DOCTYPE html>
   html, body { margin: 0; height: 100%; background: #f7f7f7; overflow: hidden; }
   #view { position: relative; width: 100%; height: 100%; touch-action: none; }
   #status {
-    position: absolute; left: 8px; right: 8px; top: 50%;
-    transform: translateY(-50%); text-align: center;
-    color: rgba(0, 0, 0, 0.45); font: 14px sans-serif;
+    position: absolute; left: 8px; right: 8px; top: 8px; z-index: 5;
+    text-align: left; white-space: pre-wrap; word-break: break-all;
+    background: rgba(255, 255, 255, 0.94); color: #222;
+    font: 12px sans-serif; padding: 6px; border-radius: 4px;
   }
 </style>
 </head>
 <body>
-<div id="view"><div id="status">Carregando modelo 3D...</div></div>
+<div id="view"><div id="status">1. Pagina do visualizador aberta</div></div>
 <script>
 window.__fila = [];
 window.__receber = null;
+window.__threeOk = false;
+window.onerror = function (msg, src, line) {
+  var el = document.getElementById('status');
+  if (el) el.textContent = 'Erro JS: ' + msg + ' (linha ' + line + ')';
+  try {
+    window.__enviar(JSON.stringify({ type: 'diag', etapa: 'erro js', extra: String(msg) + ' linha ' + line }));
+  } catch (e) {}
+};
 function __aoMensagem(e) {
   var raw = e && e.data ? e.data : e;
   if (typeof raw !== 'string') return;
@@ -36,6 +45,13 @@ window.__enviar = function (data) {
   if (window.postMessage) window.postMessage(data);
 };
 </script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.156.1/build/three.module.js"
+  }
+}
+</script>
 <script type="module">
 import * as THREE from 'https://unpkg.com/three@0.156.1/build/three.module.js';
 import { OrbitControls } from 'https://unpkg.com/three@0.156.1/examples/jsm/controls/OrbitControls.js';
@@ -43,6 +59,7 @@ import { GLTFLoader } from 'https://unpkg.com/three@0.156.1/examples/jsm/loaders
 import { OBJLoader } from 'https://unpkg.com/three@0.156.1/examples/jsm/loaders/OBJLoader.js';
 import { CSS2DRenderer, CSS2DObject } from 'https://unpkg.com/three@0.156.1/examples/jsm/renderers/CSS2DRenderer.js';
 
+window.__threeOk = true;
 var view = document.getElementById('view');
 var statusEl = document.getElementById('status');
 var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -90,6 +107,12 @@ function tamanho() {
 
 function enviar(obj) {
   window.__enviar(JSON.stringify(obj));
+}
+
+function diag(etapa, extra) {
+  var texto = etapa + (extra ? '\\n' + extra : '');
+  statusEl.textContent = texto;
+  enviar({ type: 'diag', etapa: etapa, extra: extra || '' });
 }
 
 function limparPinos() {
@@ -183,14 +206,23 @@ function publicar(objeto, dados) {
   enviar({ type: 'loaded' });
 }
 
-function falha() {
-  statusEl.textContent = 'Não foi possível carregar o modelo 3D.';
-  enviar({ type: 'error', message: 'Não foi possível carregar o modelo 3D.' });
+function detalheErro(erro) {
+  if (!erro) return 'sem detalhe';
+  if (erro.message) return String(erro.message);
+  if (erro.status) return 'HTTP ' + erro.status + ' ' + (erro.statusText || '');
+  if (erro.type) return String(erro.type);
+  try { return JSON.stringify(erro); } catch (e) { return String(erro); }
+}
+
+function falha(erro, url) {
+  var texto = 'Falha ao carregar' + (url ? '\\n' + url : '') + '\\n' + detalheErro(erro);
+  statusEl.textContent = texto;
+  enviar({ type: 'error', message: texto });
 }
 
 function carregar(dados) {
   if (!dados.url) {
-    falha();
+    falha({ message: 'URL vazia' }, '');
     return;
   }
   if (dados.url === urlCarregada && modelo) {
@@ -205,25 +237,32 @@ function carregar(dados) {
   var id = ++carga;
   urlCarregada = dados.url;
   carregando = true;
-  statusEl.textContent = 'Carregando modelo 3D...';
-  var tipo = dados.fileType || '';
+  var tipo = dados.fileType || '(sem extensao)';
+  diag('3. Baixando modelo', tipo + '\\n' + dados.url);
   var aoPronto = function (objeto) {
     if (id !== carga) return;
     carregando = false;
     publicar(objeto, dados);
   };
-  var aoErro = function () {
+  var aoProgresso = function (evento) {
+    if (id !== carga || !evento) return;
+    var pct = evento.lengthComputable && evento.total
+      ? Math.round(evento.loaded / evento.total * 100) + '%'
+      : String(evento.loaded || 0) + ' bytes';
+    statusEl.textContent = '3. Baixando ' + pct + '\\n' + dados.url;
+  };
+  var aoErro = function (erro) {
     if (id !== carga) return;
     carregando = false;
     urlCarregada = '';
-    falha();
+    falha(erro, dados.url);
   };
   if (tipo === 'obj') {
-    new OBJLoader().load(dados.url, aoPronto, undefined, aoErro);
+    new OBJLoader().load(dados.url, aoPronto, aoProgresso, aoErro);
   } else if (tipo === 'glb' || tipo === 'gltf') {
-    new GLTFLoader().load(dados.url, function (gltf) { aoPronto(gltf.scene); }, undefined, aoErro);
+    new GLTFLoader().load(dados.url, function (gltf) { aoPronto(gltf.scene); }, aoProgresso, aoErro);
   } else {
-    aoErro();
+    aoErro({ message: 'Formato nao suportado: ' + tipo });
   }
 }
 
@@ -236,6 +275,7 @@ window.__receber = function (bruto) {
 
 window.__fila.forEach(window.__receber);
 window.__fila = [];
+diag('2. Three.js pronto', 'aguardando o app enviar a URL');
 enviar({ type: 'ready' });
 
 function quadro() {
@@ -247,6 +287,17 @@ function quadro() {
 tamanho();
 quadro();
 window.addEventListener('resize', tamanho);
+</script>
+<script>
+setTimeout(function () {
+  if (!window.__threeOk) {
+    var el = document.getElementById('status');
+    if (el) el.textContent = 'Three.js nao iniciou.\\nO WebView nao concluiu o import de https://unpkg.com';
+    try {
+      window.__enviar(JSON.stringify({ type: 'diag', etapa: 'three nao iniciou', extra: 'import unpkg nao concluiu' }));
+    } catch (e) {}
+  }
+}, 8000);
 </script>
 </body>
 </html>`;

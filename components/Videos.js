@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { View } from 'react-native';
 
 import Video from 'react-native-video-controls';
+import { urlSegura } from './pecaDigital/midia';
 
 const Videos = ({ midias, config }) => (
     (config.indexOf('video_imagem') != -1 && config.indexOf('talkback') == -1) && (
@@ -10,7 +11,7 @@ const Videos = ({ midias, config }) => (
                 midias.filter(midia => midia.type.indexOf('video') != -1).map(midia => (
                     <View key={midia._id}>
                         <Video
-                            source={{ uri: midia.url }}
+                            source={{ uri: urlSegura(midia.url) }}
                             resizeMode={"cover"}
                             // repeat={true}
                             paused
