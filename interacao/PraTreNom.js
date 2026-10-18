@@ -1,6 +1,5 @@
 import Button from 'antd-mobile-rn/lib/button';
 import Card from 'antd-mobile-rn/lib/card';
-import List from 'antd-mobile-rn/lib/list';
 import Toast from 'antd-mobile-rn/lib/toast';
 import React, { Component } from 'react';
 import { Text, View } from 'react-native';
@@ -9,8 +8,6 @@ import BC from '../components/Breadcrumbs';
 import Input from '../components/Input';
 import Instrucoes from '../components/Instrucoes';
 import LocalizacaoPD from '../components/LocalizacaoPD';
-import Modal from '../components/Modal';
-import { Simple as Option } from '../components/Option';
 import Container from '../Container';
 import { norm, pecaNoIndice } from '../utils';
 import Placar from './Placar';
@@ -69,7 +66,7 @@ class FormContainer extends React.Component {
     render() {
         const { screenProps, mainState, onGetRef, onSubmit, maxTentativa } = this.props;
         const { anatomp } = screenProps;
-        const { count, total, data, timer, tentativas, open } = mainState;
+        const { count, total, data, timer, tentativas } = mainState;
         const title = data[count].pecaFisica.nome;
         const { found, pesquisa } = this.state;
 
@@ -97,9 +94,6 @@ class FormContainer extends React.Component {
 
         const disabled = this.state.pesquisa.length == 0;
         const disabledVerificacao = timer == 0 || tentativas == maxTentativa;
-
-        const isTB = screenProps.config.indexOf('talkback') != -1;
-
 
         return (
             <View>
@@ -134,9 +128,9 @@ class FormContainer extends React.Component {
 
                         <Button
                             disabled={disabled || disabledVerificacao}
-                            accessibilityLabel={(disabled || disabledVerificacao) ? 'Verificar resposta. Botão. Desabilitado. Informe a parte para habilitar' : `Verificar resposta. Botão. Toque duas vezes para abrir a verficação da resposta`}
+                            accessibilityLabel={(disabled || disabledVerificacao) ? 'Verificar resposta. Botão. Desabilitado. Informe a parte para habilitar' : `Verificar resposta. Botão. Toque duas vezes para verificar a resposta`}
                             style={{ flex: 1, margin: 5, marginBottom: 0 }}
-                            onPressOut={this.props.onToggleDialog(true)}
+                            onPressOut={onSubmit}
                             type='primary'>
                             Verificar resposta
                         </Button>
@@ -149,32 +143,6 @@ class FormContainer extends React.Component {
                         </Button>
                     </Card.Body>
                 </Card>
-
-                <Modal
-                    talkback={isTB}
-                    open={open}
-                    title={identificador}
-                    acc={`${identificador}. Aberto. Prossiga para ouvir as informações da parte`}
-                    footer={[{ text: 'Fechar', onPress: this.props.onToggleDialog(false), acc: `Fechar. Botão. Toque duas vezes para fechar a verificação de respostas.` }]}
-                >
-                    <View accessible={true}>
-                        <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 3 }}>{'Sua resposta'}:</Text>
-                        <Text>{data[count].respostaParte}</Text>
-                        <Text>{data[count].respostaConteudos}</Text>
-                        <Text accessibilityLabel='Prossiga para ouvir a lista de respostas esperadas'></Text>
-                    </View>
-                    <List>
-                        <List.Item>
-                            <Option
-                                label={data[count].parte.nome}
-                                checked={data[count].correcao}
-                                onChange={this.onChangeCorrecao}
-                                title={data[count].parte.nome}
-                            />
-                        </List.Item>
-
-                    </List>
-                </Modal>
 
                 <Card>
                     <Card.Header title='Resumo' />
@@ -222,19 +190,7 @@ class FormContainer extends React.Component {
         this.props.onChangeValor(parte)
         announceForAccessibility(`${parte.nome} selecionado`)
     }
-
-    onChangeCorrecao = () => {
-        const { data, count } = this.props.mainState
-        announceForAccessibility(data[count].correcao ? `Seleção removida` : 'Selecionado!')
-        this.props.onChange('correcao')(!data[count].correcao)
-    }
 }
-
-
-
-const ListItem = List.Item;
-
-const _ni = 'Não identificado'
 
 class PraTreNom extends Component {
     timer = null;
@@ -324,8 +280,9 @@ class PraTreNom extends Component {
         if (this.state.timer != 0 && nextState.timer <= 0) {
             clearInterval(this.timer)
             if (nextState.count !== nextState.data.length) {
-                Toast.info('Tempo limite excedido!')
-                announceForAccessibility('Tempo limite excedido!')
+                const nome = this.state.data[this.state.count].parte.nome;
+                Toast.info('Tempo limite excedido! Resposta correta: ' + nome)
+                announceForAccessibility('Tempo limite excedido! Resposta correta: ' + nome)
                 this.onNext(false)()
             }
         }
@@ -398,8 +355,9 @@ class PraTreNom extends Component {
             } else {
                 this.setState({ tentativas: tentativas + 1 })
                 if (tentativas == this.props.screenProps.inputConfig.chances - 1) {
-                    Toast.fail('Você errou.', 3, this.onNext(acertou))
-                    announceForAccessibility('Você errou.')
+                    const nome = data[count].parte.nome;
+                    Toast.fail('Você errou. Resposta correta: ' + nome, 3, this.onNext(acertou))
+                    announceForAccessibility('Você errou. Resposta correta: ' + nome)
                 } else {
                     const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
                     const msg = `Corrija ou complemente sua resposta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
@@ -455,7 +413,15 @@ class PraTreNom extends Component {
     }
 
     checkAcertos = item => {
-        return item.correcao === true;
+        const escolhida = item.valores && item.valores[0];
+        if (!escolhida || !item.parte) {
+            return false;
+        }
+        if (escolhida._id && item.parte._id && String(escolhida._id) === String(item.parte._id)) {
+            return true;
+        }
+        const nome = escolhida.nome || escolhida;
+        return norm(String(nome)) === norm(item.parte.nome || '');
     }
 
     onCount = () => {

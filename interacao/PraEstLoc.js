@@ -11,6 +11,7 @@ import LocalizacaoPD from '../components/LocalizacaoPD';
 import LocalizacaoPF from '../components/LocalizacaoPF';
 import Modal from '../components/Modal';
 import ReferenciasRelativas from '../components/ReferenciasRelativas';
+import { registrarRolagem, soltarRolagem } from '../components/rolagem';
 import Container from '../Container';
 import { norm, pecaNoIndice } from '../utils';
 
@@ -22,6 +23,7 @@ class PraEstLoc extends Component {
     modalBody = null;
     refListaPartes = null;
     inputRef = null;
+    scrollDigital = null;
 
     state = {
         loading: true,
@@ -129,13 +131,19 @@ class PraEstLoc extends Component {
                         { text: 'Fechar', onPress: this.onCloseDigital, acc: `Fechar. Botão. Toque duas vezes para fechar os detalhes da Parte ${parte ? parte.nome : ''}` },
                     ]}
                 >
-                    <ScrollView style={{ maxHeight: '87%', padding: 5 }}>
+                    <ScrollView ref={this.refScrollDigital} style={{ maxHeight: '87%', padding: 5 }}>
                         <ReferenciasRelativas parte={parte} pecasFisicas={pecasFisicas} />
                         <LocalizacaoPD parte={parte} pecasFisicas={pecasFisicas} exibirLabel={true} mapa={screenProps.anatomp.mapa}/>
                     </ScrollView>
                 </Modal>
             </Container>
         )
+    }
+
+    refScrollDigital = r => {
+        if (!r && this.scrollDigital) soltarRolagem(this.scrollDigital);
+        this.scrollDigital = r;
+        if (r) registrarRolagem(r);
     }
 
     getRef = r => this.inputRef = r

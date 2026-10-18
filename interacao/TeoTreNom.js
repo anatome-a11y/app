@@ -1,6 +1,5 @@
 import Button from 'antd-mobile-rn/lib/button';
 import Card from 'antd-mobile-rn/lib/card';
-import List from 'antd-mobile-rn/lib/list';
 import Toast from 'antd-mobile-rn/lib/toast';
 import React, { Component } from 'react';
 import { Text, View } from 'react-native';
@@ -9,9 +8,8 @@ import BC from '../components/Breadcrumbs';
 import Input from '../components/Input';
 import Instrucoes from '../components/Instrucoes';
 import LocalizacaoPD from '../components/LocalizacaoPD';
-import Modal from '../components/Modal';
-import { Simple as Option } from '../components/Option';
 import Container from '../Container';
+import { norm } from '../utils';
 import { withI18n } from '../messages/withI18n';
 import Placar from './Placar';
 import Resultados from './Resultados';
@@ -119,8 +117,6 @@ class _FormContainer extends React.Component {
 
         const identificador = data[count].localizacao.referenciaRelativa.referencia == null ? (i18n('common.part') + ' ' + data[count].localizacao.numero) : (i18n('teoTreNom.common.inRelationToThePart') + labelLocalizacaoRelativa + ', ' + i18n('teoTreNom.common.isLocatedAt') + ' ' + data[count].localizacao.referenciaRelativa.referenciaParaReferenciado);
 
-        const isTB = config.indexOf('talkback') != -1;
-
         const disabled = data[count].respostaParte.length == 0 || data[count].respostaConteudos.length == 0;
         const disabledVerificacao = timer == 0 || tentativas == maxTentativa;
 
@@ -167,45 +163,10 @@ class _FormContainer extends React.Component {
                                 }}
                             />
                         </View>
-                        <Button disabled={disabled || disabledVerificacao} accessibilityLabel={(disabled || disabledVerificacao) ? 'Verificar Respostas. Botão. Desabilitado. Informe a parte e os conteúdos para habilitar' : `Verificar respostas. Botão. Toque duas vezes para abrir a verficação de respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={this.props.onToggleDialog(true)} type='primary'>{i18n('teoTreNom.actions.check')}</Button>
+                        <Button disabled={disabled || disabledVerificacao} accessibilityLabel={(disabled || disabledVerificacao) ? 'Verificar Respostas. Botão. Desabilitado. Informe a parte e os conteúdos para habilitar' : `Verificar respostas. Botão. Toque duas vezes para verificar as respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={this.props.onSubmit} type='primary'>{i18n('teoTreNom.actions.check')}</Button>
                         <Button accessibilityLabel={`Próximo. Botão. Toque duas vezes para confirmar suas respostas`} style={{ flex: 1, margin: 5, marginBottom: 0 }} onPressOut={this.props.onSubmit} type='primary'>{i18n('actions.next')}</Button>
                     </Card.Body>
                 </Card>
-                <Modal
-                    talkback={isTB}
-                    open={open}
-                    title={identificador}
-                    acc={`${identificador}. Aberto. Prossiga para ouvir as informações da parte`}
-                    footer={[{ text: i18n('actions.close'), onPress: this.props.onToggleDialog(false), acc: `Fechar. Botão. Toque duas vezes para fechar a verificação de respostas.` }]}
-                >
-                    <View accessible={true}>
-                        <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 3 }}>{i18n('teoTreNom.common.yourAnswer')}:</Text>
-                        <Text>{data[count].respostaParte}</Text>
-                        <Text>{data[count].respostaConteudos}</Text>
-                        <Text accessibilityLabel='Prossiga para ouvir a lista de respostas esperadas'></Text>
-                    </View>
-                    <Text accessibilityLabel={`Respostas esperadas. ${data[count].conteudos.length + 1} itens na lista. Prossiga para marcar as opções que você acertou.`} accessible style={{ color: '#000', marginBottom: 3, marginTop: 6 }}><Text style={{ fontWeight: 'bold' }}>{i18n('teoTreNom.common.expectedAnswers')} </Text>({i18n('teoTreNom.common.checkTheRights')}):</Text>
-                    <List>
-                        <List.Item>
-                            <Option
-                                label={`${i18n('common.part')} ${data[count].parte.nome}`}
-                                checked={data[count].correcao[0]}
-                                onChange={this.onChangeCorrecao(0)}
-                                title={data[count].parte.nome}
-                            />
-                        </List.Item>
-                        {data[count].conteudos.map((c, idx) => (
-                            <List.Item key={idx}>
-                                <Option
-                                    label={c}
-                                    checked={data[count].correcao[idx + 1]}
-                                    onChange={this.onChangeCorrecao(idx + 1)}
-                                    title={c}
-                                />
-                            </List.Item>
-                        ))}
-                    </List>
-                </Modal>
                 <Card>
                     <Card.Header title={i18n('common.summary')} />
                     <Card.Body>
@@ -221,23 +182,7 @@ class _FormContainer extends React.Component {
             </View>
         )
     }
-
-    onChangeCorrecao = idx => () => {
-        const { data, count } = this.props.mainState
-        announceForAccessibility(data[count].correcao[idx] ? `Seleção removida` : 'Selecionado!')
-        this.props.onChange('correcao')([
-            ...data[count].correcao.slice(0, idx),
-            !data[count].correcao[idx],
-            ...data[count].correcao.slice(idx + 1),
-        ])
-    }
 }
-
-
-
-const ListItem = List.Item;
-
-const _ni = 'Não identificado'
 
 
 const getValue = (field, value, item) => {
@@ -331,8 +276,9 @@ class TeoTreNom extends Component {
         if (this.state.timer != 0 && nextState.timer <= 0) {
             clearInterval(this.timer)
             if (nextState.count !== nextState.data.length) {
-                Toast.info('Tempo limite excedido!')
-                announceForAccessibility('Tempo limite excedido!')
+                const texto = this.textoResposta(this.state.data[this.state.count]);
+                Toast.info('Tempo limite excedido! Resposta correta: ' + texto)
+                announceForAccessibility('Tempo limite excedido! Resposta correta: ' + texto)
                 this.onNext(false)()
             }
         }
@@ -412,8 +358,9 @@ class TeoTreNom extends Component {
             } else {
                 this.setState({ tentativas: tentativas + 1 })
                 if (tentativas == this.props.screenProps.inputConfig.chances - 1) {
-                    Toast.fail(i18n('common.missed'), 3, this.onNext(acertou))
-                    announceForAccessibility('Você errou.')
+                    const texto = this.textoResposta(data[count]);
+                    Toast.fail(i18n('common.missed') + ' Resposta correta: ' + texto, 3, this.onNext(acertou))
+                    announceForAccessibility('Você errou. Resposta correta: ' + texto)
                 } else {
                     const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
                     const msg = i18n('teoTreNom.alerts.correctTheAnswer', { num, sufixo: num == 1 ? '' : 's' })
@@ -469,10 +416,21 @@ class TeoTreNom extends Component {
         }
     }
 
+    textoResposta = item => {
+        const nome = item && item.parte ? item.parte.nome : '';
+        const textos = item && item.conteudos ? item.conteudos.filter(Boolean).join(' ') : '';
+        return textos ? nome + '. ' + textos : nome;
+    }
+
     checkAcertos = item => {
-
-        return item.correcao.every(i => i === true)
-
+        const nomeOk = norm(item.respostaParte || '') === norm(item.parte && item.parte.nome || '');
+        const digitado = norm(item.respostaConteudos || '');
+        const conteudos = item.conteudos || [];
+        const conteudoOk = conteudos.every(texto => {
+            const esperado = norm(texto || '');
+            return !esperado || digitado.indexOf(esperado) !== -1;
+        });
+        return nomeOk && conteudoOk;
     }
 
     onCount = () => {

@@ -100,8 +100,9 @@ class TeoTreLoc extends Component {
         if (this.state.timer != 0 && nextState.timer <= 0) {
             clearInterval(this.timer)
             if (nextState.count !== nextState.data.length) {
-                Toast.info('Tempo limite excedido!')
-                announceForAccessibility('Tempo limite excedido!')
+                const resposta = this.getRespostaCorreta(this.state.data[this.state.count]);
+                Toast.info('Tempo limite excedido! Resposta correta: parte ' + resposta)
+                announceForAccessibility('Tempo limite excedido! Resposta correta: parte ' + resposta)
                 this.onNext(false)()
             }
         }
@@ -172,8 +173,8 @@ class TeoTreLoc extends Component {
             } else {
                 this.setState({ tentativas: tentativas + 1 })
                 if (tentativas == this.props.screenProps.inputConfig.chances - 1) {
-                    Toast.fail('Você errou.', 3, this.onNext(acertou))
-                    announceForAccessibility('Você errou.')
+                    Toast.fail('Você errou. Resposta correta: parte ' + this.getRespostaCorreta(data[count]), 3, this.onNext(acertou))
+                    announceForAccessibility('Você errou. Resposta correta: parte ' + this.getRespostaCorreta(data[count]))
                 } else {
                     const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
                     const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
@@ -277,6 +278,13 @@ class TeoTreLoc extends Component {
         }
     }
 
+    getRespostaCorreta = item => {
+        if (!item || !item.partes || !item.partes.length) {
+            return '';
+        }
+        return item.partes.map(p => p.numero).filter(numero => numero != null && numero !== '').join(', ');
+    }
+
     onCount = () => {
         this.timer = setInterval(() => {
             this.setState({ timer: this.state.timer - 1 })
@@ -308,31 +316,31 @@ class TeoTreLoc extends Component {
         })
     }
 
-    onChangeValorDigital = async (idx, valor) => {
-        const { data, count, timer } = this.state;
-
+    onChangeValorDigital = (idx, valor) => {
         if (valor) {
             announceForAccessibility(`Texto detectado: ${valor}. Prossiga para submeter.`)
         } else {
             announceForAccessibility(`Texto removido`)
         }
 
-        await this.setState({
-            data: [
-                ...data.slice(0, count),
-                {
-                    ...data[count],
-                    valores: [
-                        ...data[count].valores.slice(0, idx),
-                        valor,
-                        ...data[count].valores.slice(idx + 1),
-                    ]
-                },
-                ...data.slice(count + 1),
-            ]
-        })
-
-        this.onSubmit();
+        const { count } = this.state;
+        this.setState(prev => {
+            const data = prev.data;
+            return {
+                data: [
+                    ...data.slice(0, count),
+                    {
+                        ...data[count],
+                        valores: [
+                            ...data[count].valores.slice(0, idx),
+                            valor,
+                            ...data[count].valores.slice(idx + 1),
+                        ]
+                    },
+                    ...data.slice(count + 1),
+                ]
+            };
+        }, () => this.onSubmit());
     }
 }
 

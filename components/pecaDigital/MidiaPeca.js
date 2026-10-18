@@ -10,12 +10,15 @@ const MidiaPeca = ({ midia, exibirLabel = true, onSelect, largura }) => {
     const endereco = urlSegura(midia && midia.url);
     const modelo = midia && (ehModelo3d(midia.name) || ehModelo3d(endereco));
 
+    const tipo = modelo ? '3D' : '2D';
+
     if (modelo) {
         const dica = onSelect
             ? 'Arraste para girar. Toque no número nítido para escolher a parte. Número esmaecido está do outro lado da peça.'
             : 'Arraste para girar. Marca nítida está na face visível; marca esmaecida está do outro lado da peça.';
         return (
-            <View accessibilityLabel={dica}>
+            <View accessibilityLabel={'Peça ' + tipo + '. ' + dica}>
+                <Text style={{ marginLeft: 8, marginBottom: 4, fontSize: 12, fontWeight: 'bold' }}>{tipo}</Text>
                 <VisualizadorModelo
                     url={endereco}
                     nome={midia.name || endereco}
@@ -32,7 +35,8 @@ const MidiaPeca = ({ midia, exibirLabel = true, onSelect, largura }) => {
     }
 
     return (
-        <View>
+        <View accessibilityLabel={'Peça ' + tipo}>
+            <Text style={{ marginLeft: 8, marginBottom: 4, fontSize: 12, fontWeight: 'bold' }}>{tipo}</Text>
             <Image
                 style={{
                     width: lado,
@@ -45,7 +49,13 @@ const MidiaPeca = ({ midia, exibirLabel = true, onSelect, largura }) => {
             {pontos.map((point, idxPonto) =>
                 <Badge
                     key={point._id || idxPonto}
-                    onStartShouldSetResponder={onSelect ? () => { onSelect(point.label); } : undefined}
+                    onStartShouldSetResponder={onSelect ? () => {
+                        const parte = point.parte;
+                        onSelect(point.label, {
+                            parteId: parte && parte._id ? parte._id : parte,
+                            parteNome: parte && parte.nome ? parte.nome : '',
+                        });
+                    } : undefined}
                     text={exibirLabel ? point.label : '  '}
                     style={{ top: point.y + '%', left: point.x + '%', position: 'absolute' }}>
                 </Badge>

@@ -10,6 +10,9 @@ import Resultados from './Resultados';
 class PraTreloc extends Component {
     timer = null;
     fieldRef = []
+    bloqueado = false;
+    avancou = false;
+    esperaAvanco = null;
 
     state = {
         data: [],
@@ -93,16 +96,16 @@ class PraTreloc extends Component {
     componentWillUpdate(nextProps, nextState) {
         if (this.state.timer != 0 && nextState.timer <= 0) {
             clearInterval(this.timer)
-            if (nextState.count !== nextState.data.length) {
-                Toast.info('Tempo limite excedido!')
-                announceForAccessibility('Tempo limite excedido!')
-                this.onNext(false)();
+            if (!this.bloqueado && nextState.count !== nextState.data.length) {
+                const numero = this.getRespostaCorreta(this.state.data[this.state.count]);
+                this.avisarEAvancar(false, 'Tempo limite excedido!\nResposta correta:\nparte ' + numero, 'info');
             }
         }
     }
 
     componentWillUnmount() {
         clearInterval(this.timer)
+        clearTimeout(this.esperaAvanco)
     }
 
     render() {
@@ -152,34 +155,67 @@ class PraTreloc extends Component {
 
     onErrorClick = () => { Toast.info('Parte não registrada'); announceForAccessibility('Parte não registrada') }
 
-    onSubmit = () => {
-        const { data, count, tentativas, timer } = this.state;
-
-        let acertou = this.checkAcertos(data[count]);
-
-        if (timer > 0) {
-            if (acertou) {
-                Toast.success('Acertou!', 3, this.onNext(acertou));
-                announceForAccessibility('Acertou!')
+    avisarEAvancar = (acertou, mensagem, tipo) => {
+        if (this.bloqueado) {
+            return;
+        }
+        this.bloqueado = true;
+        clearInterval(this.timer);
+        if (mensagem) {
+            const texto = String(mensagem);
+            if (tipo === 'success') {
+                Toast.success(texto, 2);
+            } else if (tipo === 'info') {
+                Toast.info(texto, 3);
             } else {
-                this.setState({ tentativas: tentativas + 1 })
-                if (tentativas == this.props.screenProps.inputConfig.chances - 1) {
-                    Toast.fail('Você errou. Resposta correta: parte ' + this.getRespostaCorreta(data[count]), 3, this.onNext(acertou))
-                    announceForAccessibility('Você errou.')
-                } else {
-                    const num = this.props.screenProps.inputConfig.chances - tentativas - 1;
-                    const msg = `Resposta incorreta. Você tem mais ${num} tentativa${num == 1 ? '' : 's'}`
-                    Toast.fail(msg, 3, () => this.setState({ sinalTexto: + new Date() }))
-                    announceForAccessibility(msg)
-                }
+                Toast.fail(texto, 3);
             }
-        } else {
-            this.onNext(false)()
+            announceForAccessibility(texto.replace(/\n/g, ' '));
+        }
+        this.esperaAvanco = setTimeout(() => this.onNext(acertou)(), mensagem ? 1600 : 0);
+    }
+
+    onSubmit = () => {
+        if (this.bloqueado) {
+            return;
+        }
+        const { data, count, tentativas, timer } = this.state;
+        if (!data[count]) {
+            return;
         }
 
+        const chances = this.props.screenProps.inputConfig.chances;
+        const acertou = this.checkAcertos(data[count]);
+
+        if (!(timer > 0)) {
+            this.avisarEAvancar(false);
+            return;
+        }
+        if (acertou) {
+            this.avisarEAvancar(true, 'Acertou!', 'success');
+            return;
+        }
+
+        const usadas = tentativas + 1;
+        if (usadas >= chances) {
+            const numero = this.getRespostaCorreta(data[count]);
+            this.setState({ tentativas: chances });
+            this.avisarEAvancar(false, 'Você errou.\nResposta correta:\nparte ' + numero, 'fail');
+            return;
+        }
+
+        this.setState({ tentativas: usadas });
+        const num = chances - usadas;
+        const msg = 'Resposta incorreta. Você tem mais ' + num + ' tentativa' + (num == 1 ? '' : 's');
+        Toast.fail(msg, 2);
+        announceForAccessibility(msg);
     }
 
     onNext = acertou => () => {
+        if (this.avancou) {
+            return;
+        }
+        this.avancou = true;
         const { data, count, tentativas, timer } = this.state;
 
         // Ao ir para a próxima questão, calcular o novo tempo
@@ -203,8 +239,12 @@ class PraTreloc extends Component {
                 ...data.slice(count + 1),
             ]
         }, () => {
+            this.avancou = false;
+            this.bloqueado = false;
             clearInterval(this.timer)
-            this.onCount()
+            if (count + 1 < data.length) {
+                this.onCount()
+            }
             if (this.props.screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' && count + 1 < data.length) {
                 this.onSetFocus(count + 1)
             }
@@ -285,11 +325,8 @@ class PraTreloc extends Component {
              }*/
         }
 
-        if (item.modo == 'singular') {
-            return item.partes[0].numero;
-        } else {
-            return item.partes[0].numero;
-        }
+        const numeros = (item.partes || []).map(parte => parte.numero).filter(numero => numero != null && String(numero) !== '');
+        return numeros.length ? numeros.join(', ') : '';
     }
 
 
@@ -324,31 +361,31 @@ class PraTreloc extends Component {
         })
     }
 
-    onChangeValorDigital = async (idx, valor) => {
-        const { data, count } = this.state;
-
+    onChangeValorDigital = (idx, valor) => {
         if (valor) {
             announceForAccessibility(`Texto detectado: ${valor}. Prossiga para submeter.`)
         } else {
             announceForAccessibility(`Texto removido`)
         }
 
-        await this.setState({
-            data: [
-                ...data.slice(0, count),
-                {
-                    ...data[count],
-                    valores: [
-                        ...data[count].valores.slice(0, idx),
-                        valor,
-                        ...data[count].valores.slice(idx + 1),
-                    ]
-                },
-                ...data.slice(count + 1),
-            ]
-        });
-
-        this.onSubmit();
+        const { count } = this.state;
+        this.setState(prev => {
+            const data = prev.data;
+            return {
+                data: [
+                    ...data.slice(0, count),
+                    {
+                        ...data[count],
+                        valores: [
+                            ...data[count].valores.slice(0, idx),
+                            valor,
+                            ...data[count].valores.slice(idx + 1),
+                        ]
+                    },
+                    ...data.slice(count + 1),
+                ]
+            };
+        }, () => this.onSubmit());
     }
 }
 

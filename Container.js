@@ -7,6 +7,7 @@ import Flex from 'antd-mobile-rn/lib/flex';
 import {version} from './package.json'
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 import { withI18n } from './messages/withI18n';
+import { registrarRolagem, soltarRolagem } from './components/rolagem';
 
 const FlexItem = Flex.Item;
 const _fechar = '\ue633';
@@ -35,7 +36,11 @@ class Container extends Component {
         </Flex>
         <KeyboardAvoidingView style={styles.scroll}>
           <ScrollView
-            ref={r => this.scroll = r}
+            ref={r => {
+              if (!r && this.scroll) soltarRolagem(this.scroll);
+              this.scroll = r;
+              if (r) registrarRolagem(r);
+            }}
             contentContainerStyle={{ flexGrow: 1 }}
             refreshControl={onRefresh ? <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> : undefined }
           >

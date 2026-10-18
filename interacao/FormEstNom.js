@@ -188,7 +188,7 @@ class FormEstNom extends Component {
                             />
                         </ScrollView>
                     ) :
-                        (<Text style={{ padding: 5, textAlign: 'center' }}>Parte não setada nesta peça física</Text>
+                        (<Text style={{ padding: 5, textAlign: 'center' }}>{this.mensagemParteAusente()}</Text>
                         )}
                 </Modal>
 
@@ -203,7 +203,7 @@ class FormEstNom extends Component {
                                             <MidiaPeca
                                                 midia={image}
                                                 largura={windowWidth - 30}
-                                                onSelect={(label) => this.onChangeParte(label)()}
+                                                onSelect={(label, info) => this.onChangeParte(label, info)()}
                                             />
                                             <Button
                                                 onPressOut={this.onOpenImageInformation(image)}
@@ -258,9 +258,30 @@ class FormEstNom extends Component {
 
 
 
+    mensagemParteAusente = () => {
+        const digital = this.props.screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital';
+        return 'Parte não setada nesta peça ' + (digital ? 'digital' : 'física');
+    }
+
+    acharParte = (value, info) => {
+        const { pecasFisicas, pecaFisica } = this.state;
+        const lista = (pecasFisicas[pecaFisica] && pecasFisicas[pecaFisica].partesNumeradas) || [];
+        if (info && info.parteId) {
+            const porId = lista.find(p => p.parte && String(p.parte._id || p.parte) === String(info.parteId));
+            if (porId) {
+                return porId;
+            }
+        }
+        const direta = lista.find(p => p.numero == value && (!p.referenciaRelativa || p.referenciaRelativa.referencia == null));
+        if (direta) {
+            return direta;
+        }
+        return lista.find(p => p.numero == value);
+    }
+
     onChange = value => {
         const { pecasFisicas, pecaFisica } = this.state;
-        const parte = pecasFisicas[pecaFisica].partesNumeradas.find(p => p.numero == value && p.referenciaRelativa.referencia == null);
+        const parte = this.acharParte(value);
         let conteudos = [];
         if (parte != undefined) {
 
@@ -276,16 +297,16 @@ class FormEstNom extends Component {
                 }
             }
         } else {
-            announceForAccessibility('Parte não setada nesta peça física')
+            announceForAccessibility(this.mensagemParteAusente())
         }
         this.setState({ value, parte, conteudos })
     }
 
 
-    onChangeParte = value => e => {
+    onChangeParte = (value, info) => () => {
         const { pecasFisicas, pecaFisica } = this.state;
 
-        const parte = pecasFisicas[pecaFisica].partesNumeradas.find(p => p.numero == value && p.referenciaRelativa.referencia == null);
+        const parte = this.acharParte(value, info);
         let conteudos = [];
         if (parte != undefined) {
 
@@ -301,8 +322,19 @@ class FormEstNom extends Component {
                     announceForAccessibility(parte.parte.nome)
                 }
             }
+        } else if (info && info.parteNome) {
+            announceForAccessibility(info.parteNome)
+            this.setState({
+                value,
+                parte: { parte: { nome: info.parteNome, _id: info.parteId } },
+                conteudos: this.props.isTeoria
+                    ? this.props.screenProps.anatomp.roteiro.conteudos.filter(c => c.partes.find(p => p._id == info.parteId)).map(c => ({ texto: c.singular, midias: c.midias }))
+                    : [],
+            })
+            this.onOpen();
+            return;
         } else {
-            announceForAccessibility('Parte não setada nesta peça física')
+            announceForAccessibility(this.mensagemParteAusente())
         }
         this.setState({ value, parte, conteudos })
 

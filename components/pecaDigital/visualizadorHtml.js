@@ -20,6 +20,7 @@ export const HTML_VISUALIZADOR = `<!DOCTYPE html>
 window.__fila = [];
 window.__receber = null;
 window.__threeOk = false;
+window.__inicial = null;
 window.onerror = function (msg, src, line) {
   var el = document.getElementById('status');
   if (el) el.textContent = 'Erro JS: ' + msg + ' (linha ' + line + ')';
@@ -62,8 +63,9 @@ import { CSS2DRenderer, CSS2DObject } from 'https://unpkg.com/three@0.156.1/exam
 window.__threeOk = true;
 var view = document.getElementById('view');
 var statusEl = document.getElementById('status');
-var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+var renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(1);
+renderer.setClearColor(0x000000, 0);
 renderer.domElement.style.display = 'block';
 renderer.domElement.style.width = '100%';
 renderer.domElement.style.height = '100%';
@@ -85,8 +87,15 @@ camera.add(luz);
 scene.add(camera);
 
 var controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.zoomToCursor = true;
+controls.enableDamping = false;
+controls.zoomToCursor = false;
+
+function avisarGesto(ativo) {
+  enviar({ type: 'gesture', active: ativo });
+}
+view.addEventListener('touchstart', function () { avisarGesto(true); }, true);
+view.addEventListener('touchend', function (e) { avisarGesto(e.touches && e.touches.length > 0); }, true);
+view.addEventListener('touchcancel', function (e) { avisarGesto(e.touches && e.touches.length > 0); }, true);
 
 var modelo = null;
 var grupoPinos = new THREE.Group();
@@ -214,7 +223,7 @@ function criarPino(ponto, cor, modo, mostrarLabel) {
     pin.addEventListener('click', function (event) {
       event.preventDefault();
       event.stopPropagation();
-      enviar({ type: 'select', label: String(ponto.label) });
+      enviar({ type: 'select', label: String(ponto.label), parteId: ponto.parteId || '', parteNome: ponto.parteNome || '' });
     });
   }
   return pin;
@@ -270,7 +279,20 @@ function desenharPinos(dados) {
     grupoPinos.add(obj);
     pinos.push(obj);
   });
-  atualizarOclusao();
+  oclusaoPendente = true;
+  precisaDesenhar = true;
+  quadrosExtras = 8;
+}
+
+function contarTriangulos(objeto) {
+  var total = 0;
+  objeto.traverse(function (child) {
+    if (!child.isMesh || !child.geometry) return;
+    var geo = child.geometry;
+    if (geo.index) total += geo.index.count / 3;
+    else if (geo.attributes && geo.attributes.position) total += geo.attributes.position.count / 3;
+  });
+  return total;
 }
 
 function publicar(objeto, dados) {
@@ -282,11 +304,22 @@ function publicar(objeto, dados) {
     }
   });
   scene.add(modelo);
+  pesado = contarTriangulos(modelo) > 40000;
   tamanho();
   enquadrar(modelo);
   desenharPinos(dados);
   statusEl.textContent = '';
+  precisaDesenhar = true;
+  quadrosExtras = 8;
   enviar({ type: 'loaded' });
+}
+
+function aplicarFundo(cor) {
+  if (!cor) return;
+  document.documentElement.style.background = cor;
+  document.body.style.background = cor;
+  var painel = document.getElementById('view');
+  if (painel) painel.style.background = cor;
 }
 
 function detalheErro(erro) {
@@ -311,6 +344,8 @@ function carregar(dados) {
   if (dados.url === urlCarregada && modelo) {
     desenharPinos(dados);
     statusEl.textContent = '';
+    precisaDesenhar = true;
+    quadrosExtras = 8;
     enviar({ type: 'loaded' });
     return;
   }
@@ -353,25 +388,57 @@ window.__receber = function (bruto) {
   if (!bruto) return;
   var dados;
   try { dados = JSON.parse(bruto); } catch (e) { return; }
-  if (dados.type === 'load') carregar(dados);
+  if (dados.type === 'background') {
+    aplicarFundo(dados.color);
+    return;
+  }
+  if (dados.type === 'load') {
+    if (dados.background) aplicarFundo(dados.background);
+    carregar(dados);
+  }
 };
 
 window.__fila.forEach(window.__receber);
 window.__fila = [];
-diag('2. Three.js pronto', 'aguardando o app enviar a URL');
+if (window.__inicial && window.__inicial.background) aplicarFundo(window.__inicial.background);
+if (window.__inicial && window.__inicial.url) {
+  carregar(window.__inicial);
+} else {
+  diag('2. Three.js pronto', 'aguardando o app enviar a URL');
+}
 enviar({ type: 'ready' });
 
-var ultimoOclusao = 0;
-function quadro() {
+var precisaDesenhar = true;
+var quadrosExtras = 2;
+var oclusaoPendente = true;
+var pesado = false;
+var arrastando = false;
+var ultimoRender = 0;
+controls.addEventListener('change', function () { precisaDesenhar = true; });
+controls.addEventListener('start', function () { arrastando = true; });
+controls.addEventListener('end', function () {
+  arrastando = false;
+  oclusaoPendente = true;
+  precisaDesenhar = true;
+  quadrosExtras = 2;
+});
+function quadro(agora) {
   requestAnimationFrame(quadro);
-  controls.update();
-  var agora = (window.performance && performance.now) ? performance.now() : Date.now();
-  if (agora - ultimoOclusao > 100) {
-    ultimoOclusao = agora;
+  if (controls.update()) precisaDesenhar = true;
+  if (quadrosExtras > 0) {
+    quadrosExtras--;
+    precisaDesenhar = true;
+  }
+  if (!precisaDesenhar) return;
+  if (pesado && arrastando && agora - ultimoRender < 48) return;
+  ultimoRender = agora;
+  if (oclusaoPendente && !arrastando && !pesado) {
     atualizarOclusao();
+    oclusaoPendente = false;
   }
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
+  precisaDesenhar = false;
 }
 tamanho();
 quadro();
@@ -390,3 +457,8 @@ setTimeout(function () {
 </script>
 </body>
 </html>`;
+
+export function htmlVisualizador(inicial) {
+    const json = JSON.stringify(inicial || null).replace(/</g, '\\u003c');
+    return HTML_VISUALIZADOR.replace('window.__inicial = null;', 'window.__inicial = ' + json + ';');
+}
