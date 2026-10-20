@@ -28,6 +28,16 @@ export const pontos3d = pontos => {
         if (isNaN(x) || isNaN(y) || isNaN(z)) {
             return null;
         }
+        const faces = Array.isArray(ponto.faces)
+            ? ponto.faces.map(Number).filter(face => !isNaN(face))
+            : [];
+        const traco = Array.isArray(ponto.traco)
+            ? ponto.traco.map(item => ({
+                x: Number(item && item.x),
+                y: Number(item && item.y),
+                z: Number(item && item.z),
+            })).filter(item => !isNaN(item.x) && !isNaN(item.y) && !isNaN(item.z))
+            : [];
         return {
             x: x,
             y: y,
@@ -35,6 +45,9 @@ export const pontos3d = pontos => {
             label: ponto.label == null ? '' : String(ponto.label),
             parteId: parteId,
             parteNome: parte && parte.nome ? String(parte.nome) : '',
+            malha: ponto.malha ? String(ponto.malha) : '',
+            faces: faces,
+            traco: traco,
         };
     }).filter(ponto => ponto);
 };

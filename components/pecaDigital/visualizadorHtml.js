@@ -143,6 +143,14 @@ function descartarModelo() {
   if (!modelo) return;
   scene.remove(modelo);
   modelo.traverse(function (child) {
+    if (child.userData && child.userData.materialOriginal) {
+      var clone = child.material;
+      child.material = child.userData.materialOriginal;
+      var clones = Array.isArray(clone) ? clone : [clone];
+      clones.forEach(function (material) {
+        if (material && material.dispose) material.dispose();
+      });
+    }
     if (child.geometry) child.geometry.dispose();
     if (child.material) {
       var materiais = Array.isArray(child.material) ? child.material : [child.material];
@@ -266,19 +274,193 @@ function atualizarOclusao() {
   }
 }
 
+// Mesma chave e a mesma paleta de site/src/ObjectViewer/destaqueMalha.js.
+var CORES_PARTE = ['#f5222d', '#1890ff', '#52c41a', '#fa8c16', '#722ed1', '#13c2c2', '#eb2f96', '#faad14', '#2f54eb', '#a0d911'];
+
+function corDaParte(label) {
+  var numero = parseInt(label, 10);
+  var indice = isNaN(numero) ? 0 : Math.abs(numero) % CORES_PARTE.length;
+  return CORES_PARTE[indice];
+}
+
+function chaveMalha(mesh) {
+  var partes = [];
+  var atual = mesh;
+  while (atual) {
+    var nome = (atual.name || '').trim() || 'malha';
+    if (!atual.parent || atual.parent.isScene) {
+      partes.unshift(nome + '#raiz');
+      break;
+    }
+    var indice = atual.parent.children.indexOf(atual);
+    partes.unshift(nome + '#' + indice);
+    atual = atual.parent;
+  }
+  return partes.join('/');
+}
+
+function descartarMaterial(material) {
+  if (!material) return;
+  var lista = Array.isArray(material) ? material : [material];
+  lista.forEach(function (item) {
+    if (item && item.dispose) item.dispose();
+  });
+}
+
+function limparDestaques() {
+  if (!modelo) return;
+  var overlays = [];
+  modelo.traverse(function (child) {
+    if (child.userData && child.userData.destaqueParte) overlays.push(child);
+  });
+  overlays.forEach(function (overlay) {
+    if (overlay.parent) overlay.parent.remove(overlay);
+    if (overlay.geometry) overlay.geometry.dispose();
+    descartarMaterial(overlay.material);
+  });
+  modelo.traverse(function (child) {
+    if (!child.isMesh || !child.userData || !child.userData.materialOriginal) return;
+    var clone = child.material;
+    child.material = child.userData.materialOriginal;
+    delete child.userData.materialOriginal;
+    delete child.userData.marcacao;
+    descartarMaterial(clone);
+  });
+}
+
+function pintarMalhaInteira(mesh, cor) {
+  if (!mesh.userData.materialOriginal) mesh.userData.materialOriginal = mesh.material;
+  var origem = mesh.userData.materialOriginal;
+  var lista = Array.isArray(origem) ? origem : [origem];
+  var clones = lista.map(function (material) {
+    var clone = material.clone();
+    if (clone.color) clone.color.set(cor);
+    if (clone.emissive && clone.emissive.isColor) {
+      clone.emissive.set(cor);
+      clone.emissiveIntensity = 0.45;
+    }
+    if (clone.emissiveMap) clone.emissiveMap = null;
+    if (typeof clone.metalness === 'number') clone.metalness = Math.min(clone.metalness, 0.2);
+    clone.needsUpdate = true;
+    return clone;
+  });
+  mesh.material = Array.isArray(origem) ? clones : clones[0];
+}
+
+function criarOverlay(mesh, faces, cor) {
+  var geometry = mesh.geometry;
+  var position = geometry.attributes.position;
+  var index = geometry.index;
+  var coords = new Float32Array(faces.length * 9);
+  var offset = 0;
+  faces.forEach(function (face) {
+    for (var vertice = 0; vertice < 3; vertice++) {
+      var indice = index ? index.getX(face * 3 + vertice) : face * 3 + vertice;
+      coords[offset++] = position.getX(indice);
+      coords[offset++] = position.getY(indice);
+      coords[offset++] = position.getZ(indice);
+    }
+  });
+  var overlayGeometry = new THREE.BufferGeometry();
+  overlayGeometry.setAttribute('position', new THREE.BufferAttribute(coords, 3));
+  var material = new THREE.MeshBasicMaterial({
+    color: cor,
+    transparent: true,
+    opacity: 0.72,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    polygonOffsetUnits: -2
+  });
+  var overlay = new THREE.Mesh(overlayGeometry, material);
+  overlay.userData.destaqueParte = true;
+  overlay.renderOrder = 2;
+  return overlay;
+}
+
+function desenharTraco(parent, pontos, cor, marcacao) {
+  if (!parent || !pontos || pontos.length < 2) return;
+  var lista = [];
+  for (var i = 0; i < pontos.length; i++) {
+    var item = pontos[i];
+    if (!item) continue;
+    var ponto = new THREE.Vector3(Number(item.x), Number(item.y), Number(item.z));
+    if (isNaN(ponto.x) || isNaN(ponto.y) || isNaN(ponto.z)) continue;
+    lista.push(ponto);
+  }
+  if (lista.length < 2) return;
+  parent.updateWorldMatrix(true, false);
+  var locais = lista.map(function (ponto) { return parent.worldToLocal(ponto.clone()); });
+  var curva = locais.length === 2
+    ? new THREE.LineCurve3(locais[0], locais[1])
+    : new THREE.CatmullRomCurve3(locais);
+  var geo = new THREE.TubeGeometry(curva, Math.min(Math.max(locais.length * 3, 8), 300), Math.max(raioModelo * 0.006, 0.001), 5, false);
+  var mat = new THREE.MeshBasicMaterial({ color: cor, depthWrite: false, transparent: true, opacity: 0.95 });
+  var mesh = new THREE.Mesh(geo, mat);
+  mesh.userData.destaqueParte = true;
+  mesh.userData.marcacao = marcacao;
+  mesh.renderOrder = 3;
+  parent.add(mesh);
+}
+
+function destacar(pontos) {
+  limparDestaques();
+  if (!modelo) return;
+  var malhas = {};
+  modelo.traverse(function (child) {
+    if (child.isMesh && !(child.userData && child.userData.destaqueParte)) {
+      malhas[chaveMalha(child)] = child;
+    }
+  });
+  (pontos || []).forEach(function (ponto) {
+    if (!ponto) return;
+    var cor = corDaParte(ponto.label);
+    var marcacao = {
+      label: ponto.label == null ? '' : String(ponto.label),
+      parteId: ponto.parteId || '',
+      parteNome: ponto.parteNome || ''
+    };
+    var mesh = ponto.malha && malhas[ponto.malha];
+    if (mesh && ponto.faces && ponto.faces.length) {
+      var overlay = criarOverlay(mesh, ponto.faces, cor);
+      overlay.userData.marcacao = marcacao;
+      mesh.add(overlay);
+    }
+    if (ponto.traco && ponto.traco.length > 1) {
+      desenharTraco(modelo, ponto.traco, cor, marcacao);
+    }
+  });
+}
+
+function marcacaoNoRaio(raycasterAlvo) {
+  if (!modelo) return null;
+  var anterior = raycasterAlvo.far;
+  raycasterAlvo.far = Infinity;
+  var acertos = raycasterAlvo.intersectObject(modelo, true);
+  raycasterAlvo.far = anterior;
+  for (var i = 0; i < acertos.length; i++) {
+    var obj = acertos[i].object;
+    if (obj.userData && obj.userData.marcacao) return obj.userData.marcacao;
+  }
+  return null;
+}
+
 function desenharPinos(dados) {
   limparPinos();
   modoPinos = dados.modo || 'leitura';
-  var cor = modoPinos === 'leitura' ? '#108ee9' : '#f5222d';
+  var corPadrao = modoPinos === 'leitura' ? '#108ee9' : '#f5222d';
   var mostrarLabel = dados.exibirLabel !== false;
   (dados.pontos || []).forEach(function (ponto) {
     if (ponto == null || ponto.z == null) return;
+    var cor = (ponto.malha || (ponto.traco && ponto.traco.length > 1)) ? corDaParte(ponto.label) : corPadrao;
     var el = criarPino(ponto, cor, modoPinos, mostrarLabel);
     var obj = new CSS2DObject(el);
     obj.position.set(Number(ponto.x), Number(ponto.y), Number(ponto.z));
     grupoPinos.add(obj);
     pinos.push(obj);
   });
+  destacar(dados.pontos || []);
   oclusaoPendente = true;
   precisaDesenhar = true;
   quadrosExtras = 8;
@@ -407,6 +589,38 @@ if (window.__inicial && window.__inicial.url) {
   diag('2. Three.js pronto', 'aguardando o app enviar a URL');
 }
 enviar({ type: 'ready' });
+
+var selecaoInicio = null;
+var selecaoCancelada = false;
+renderer.domElement.addEventListener('pointerdown', function (event) {
+  if (event.button !== 0) return;
+  selecaoInicio = { x: event.clientX, y: event.clientY };
+  selecaoCancelada = false;
+});
+renderer.domElement.addEventListener('pointermove', function (event) {
+  if (!selecaoInicio || selecaoCancelada) return;
+  var dx = event.clientX - selecaoInicio.x;
+  var dy = event.clientY - selecaoInicio.y;
+  if (dx * dx + dy * dy > 25) selecaoCancelada = true;
+});
+renderer.domElement.addEventListener('pointerup', function (event) {
+  var inicio = selecaoInicio;
+  var clique = inicio && !selecaoCancelada && event.button === 0;
+  selecaoInicio = null;
+  selecaoCancelada = false;
+  if (!clique || modoPinos !== 'selecao' || !modelo) return;
+  var rect = renderer.domElement.getBoundingClientRect();
+  var largura = rect.width || 1;
+  var altura = rect.height || 1;
+  var ndc = new THREE.Vector2(
+    ((inicio.x - rect.left) / largura) * 2 - 1,
+    -((inicio.y - rect.top) / altura) * 2 + 1
+  );
+  raycaster.setFromCamera(ndc, camera);
+  var marca = marcacaoNoRaio(raycaster);
+  if (!marca) return;
+  enviar({ type: 'select', label: String(marca.label), parteId: marca.parteId || '', parteNome: marca.parteNome || '' });
+});
 
 var precisaDesenhar = true;
 var quadrosExtras = 2;
