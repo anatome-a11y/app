@@ -379,8 +379,7 @@ function criarOverlay(mesh, faces, cor) {
   return overlay;
 }
 
-function desenharTraco(parent, pontos, cor, marcacao) {
-  if (!parent || !pontos || pontos.length < 2) return;
+function pontosMundo(pontos) {
   var lista = [];
   for (var i = 0; i < pontos.length; i++) {
     var item = pontos[i];
@@ -389,13 +388,60 @@ function desenharTraco(parent, pontos, cor, marcacao) {
     if (isNaN(ponto.x) || isNaN(ponto.y) || isNaN(ponto.z)) continue;
     lista.push(ponto);
   }
-  if (lista.length < 2) return;
+  return lista;
+}
+
+function criarRecorte(parent, pontos, cor, marcacao) {
+  var lista = pontosMundo(pontos);
+  if (!parent || lista.length < 3) return;
+  parent.updateWorldMatrix(true, false);
+  var coords = new Float32Array(lista.length * 3);
+  for (var i = 0; i < lista.length; i++) {
+    var local = parent.worldToLocal(lista[i].clone());
+    coords[i * 3] = local.x;
+    coords[i * 3 + 1] = local.y;
+    coords[i * 3 + 2] = local.z;
+  }
+  var geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(coords, 3));
+  var mat = new THREE.MeshBasicMaterial({
+    color: cor,
+    transparent: true,
+    opacity: 0.72,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    polygonOffsetUnits: -2
+  });
+  var mesh = new THREE.Mesh(geo, mat);
+  mesh.userData.destaqueParte = true;
+  mesh.userData.marcacao = marcacao;
+  mesh.renderOrder = 2;
+  parent.add(mesh);
+}
+
+function desenharTraco(parent, pontos, cor, marcacao) {
+  var lista = pontosMundo(pontos || []);
+  if (!parent || lista.length < 2) return;
   parent.updateWorldMatrix(true, false);
   var locais = lista.map(function (ponto) { return parent.worldToLocal(ponto.clone()); });
-  var curva = locais.length === 2
-    ? new THREE.LineCurve3(locais[0], locais[1])
-    : new THREE.CatmullRomCurve3(locais);
-  var geo = new THREE.TubeGeometry(curva, Math.min(Math.max(locais.length * 3, 8), 300), Math.max(raioModelo * 0.006, 0.001), 5, false);
+  var caminho = new THREE.CurvePath();
+  for (var i = 1; i < locais.length; i++) {
+    if (locais[i].distanceToSquared(locais[i - 1]) < 1e-12) continue;
+    caminho.add(new THREE.LineCurve3(locais[i - 1], locais[i]));
+  }
+  if (!caminho.curves.length) return;
+  var escala = new THREE.Vector3();
+  parent.getWorldScale(escala);
+  var maior = Math.max(Math.abs(escala.x), Math.abs(escala.y), Math.abs(escala.z), 1e-6);
+  var espessura = Math.max((raioModelo * 0.0016) / maior, 1e-4);
+  var percurso = 0;
+  for (var j = 1; j < locais.length; j++) percurso += locais[j].distanceTo(locais[j - 1]);
+  if (locais.length > 2 && locais[0].distanceTo(locais[locais.length - 1]) <= Math.max(espessura * 6, percurso * 0.04)) {
+    caminho.add(new THREE.LineCurve3(locais[locais.length - 1], locais[0]));
+  }
+  var geo = new THREE.TubeGeometry(caminho, Math.min(Math.max(caminho.curves.length, 2), 400), espessura, 3, false);
   var mat = new THREE.MeshBasicMaterial({ color: cor, depthWrite: false, transparent: true, opacity: 0.95 });
   var mesh = new THREE.Mesh(geo, mat);
   mesh.userData.destaqueParte = true;
@@ -422,7 +468,9 @@ function destacar(pontos) {
       parteNome: ponto.parteNome || ''
     };
     var mesh = ponto.malha && malhas[ponto.malha];
-    if (mesh && ponto.faces && ponto.faces.length) {
+    if (ponto.recorte && ponto.recorte.length >= 3) {
+      criarRecorte(modelo, ponto.recorte, cor, marcacao);
+    } else if (mesh && ponto.faces && ponto.faces.length) {
       var overlay = criarOverlay(mesh, ponto.faces, cor);
       overlay.userData.marcacao = marcacao;
       mesh.add(overlay);
