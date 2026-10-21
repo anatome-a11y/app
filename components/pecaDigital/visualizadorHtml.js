@@ -49,16 +49,16 @@ window.__enviar = function (data) {
 <script type="importmap">
 {
   "imports": {
-    "three": "https://unpkg.com/three@0.156.1/build/three.module.js"
+    "three": "__ORIGEM__vendor/three/three.module.js"
   }
 }
 </script>
 <script type="module">
-import * as THREE from 'https://unpkg.com/three@0.156.1/build/three.module.js';
-import { OrbitControls } from 'https://unpkg.com/three@0.156.1/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 'https://unpkg.com/three@0.156.1/examples/jsm/loaders/GLTFLoader.js';
-import { OBJLoader } from 'https://unpkg.com/three@0.156.1/examples/jsm/loaders/OBJLoader.js';
-import { CSS2DRenderer, CSS2DObject } from 'https://unpkg.com/three@0.156.1/examples/jsm/renderers/CSS2DRenderer.js';
+import * as THREE from '__ORIGEM__vendor/three/three.module.js';
+import { OrbitControls } from '__ORIGEM__vendor/three/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from '__ORIGEM__vendor/three/jsm/loaders/GLTFLoader.js';
+import { OBJLoader } from '__ORIGEM__vendor/three/jsm/loaders/OBJLoader.js';
+import { CSS2DRenderer, CSS2DObject } from '__ORIGEM__vendor/three/jsm/renderers/CSS2DRenderer.js';
 
 window.__threeOk = true;
 var view = document.getElementById('view');
@@ -566,6 +566,61 @@ function falha(erro, url) {
   enviar({ type: 'error', message: texto });
 }
 
+function abrirCache() {
+  return new Promise(function (resolve, reject) {
+    if (!window.indexedDB) {
+      reject(new Error('sem cache'));
+      return;
+    }
+    var pedido = indexedDB.open('tcc-modelos', 1);
+    pedido.onupgradeneeded = function () {
+      var db = pedido.result;
+      if (!db.objectStoreNames.contains('arquivos')) db.createObjectStore('arquivos');
+    };
+    pedido.onsuccess = function () { resolve(pedido.result); };
+    pedido.onerror = function () { reject(pedido.error); };
+  });
+}
+
+function lerCache(url) {
+  return abrirCache().then(function (db) {
+    return new Promise(function (resolve, reject) {
+      var tx = db.transaction('arquivos', 'readonly');
+      var pedido = tx.objectStore('arquivos').get(url);
+      pedido.onsuccess = function () { resolve(pedido.result || null); };
+      pedido.onerror = function () { reject(pedido.error); };
+    });
+  });
+}
+
+function gravarCache(url, buffer) {
+  return abrirCache().then(function (db) {
+    return new Promise(function (resolve, reject) {
+      var tx = db.transaction('arquivos', 'readwrite');
+      tx.objectStore('arquivos').put(buffer, url);
+      tx.oncomplete = function () { resolve(); };
+      tx.onerror = function () { reject(tx.error); };
+    });
+  }).catch(function () {});
+}
+
+function baixarBytes(url, aoProgresso) {
+  return new Promise(function (resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'arraybuffer';
+    xhr.onprogress = function (evento) {
+      if (aoProgresso) aoProgresso(evento);
+    };
+    xhr.onload = function () {
+      if (xhr.status >= 200 && xhr.status < 300 && xhr.response) resolve(xhr.response);
+      else reject({ status: xhr.status, statusText: xhr.statusText || '' });
+    };
+    xhr.onerror = function () { reject({ message: 'falha de rede' }); };
+    xhr.send();
+  });
+}
+
 function carregar(dados) {
   if (!dados.url) {
     falha({ message: 'URL vazia' }, '');
@@ -595,9 +650,12 @@ function carregar(dados) {
   var aoProgresso = function (evento) {
     if (id !== carga || !evento) return;
     var pct = evento.lengthComputable && evento.total
-      ? Math.round(evento.loaded / evento.total * 100) + '%'
-      : String(evento.loaded || 0) + ' bytes';
-    statusEl.textContent = '3. Baixando ' + pct + '\\n' + dados.url;
+      ? Math.round(evento.loaded / evento.total * 100)
+      : null;
+    statusEl.textContent = pct == null
+      ? '3. Baixando ' + String(evento.loaded || 0) + ' bytes'
+      : '3. Baixando ' + pct + '%';
+    enviar({ type: 'progress', etapa: 'download', percent: pct == null ? 0 : pct });
   };
   var aoErro = function (erro) {
     if (id !== carga) return;
@@ -607,11 +665,39 @@ function carregar(dados) {
   };
   if (tipo === 'obj') {
     new OBJLoader().load(dados.url, aoPronto, aoProgresso, aoErro);
-  } else if (tipo === 'glb' || tipo === 'gltf') {
-    new GLTFLoader().load(dados.url, function (gltf) { aoPronto(gltf.scene); }, aoProgresso, aoErro);
-  } else {
-    aoErro({ message: 'Formato nao suportado: ' + tipo });
+    return;
   }
+  if (tipo !== 'glb' && tipo !== 'gltf') {
+    aoErro({ message: 'Formato nao suportado: ' + tipo });
+    return;
+  }
+
+  var publicarBuffer = function (buffer, guardar) {
+    if (id !== carga) return;
+    enviar({ type: 'progress', etapa: 'parse', percent: 100 });
+    statusEl.textContent = '4. Preparando modelo';
+    var base = dados.url.slice(0, dados.url.lastIndexOf('/') + 1);
+    new GLTFLoader().parse(buffer, base, function (gltf) {
+      if (id !== carga) return;
+      if (guardar) gravarCache(dados.url, buffer);
+      aoPronto(gltf.scene);
+    }, aoErro);
+  };
+
+  lerCache(dados.url).catch(function () { return null; }).then(function (salvo) {
+    if (id !== carga) return;
+    if (salvo && salvo.byteLength) {
+      enviar({ type: 'progress', etapa: 'cache', percent: 100 });
+      statusEl.textContent = '3. Abrindo copia local';
+      publicarBuffer(salvo, false);
+      return;
+    }
+    return baixarBytes(dados.url, aoProgresso).then(function (buffer) {
+      publicarBuffer(buffer, true);
+    });
+  }).catch(function (erro) {
+    aoErro(erro);
+  });
 }
 
 window.__receber = function (bruto) {
@@ -710,9 +796,9 @@ window.addEventListener('resize', tamanho);
 setTimeout(function () {
   if (!window.__threeOk) {
     var el = document.getElementById('status');
-    if (el) el.textContent = 'Three.js nao iniciou.\\nO WebView nao concluiu o import de https://unpkg.com';
+    if (el) el.textContent = 'Three.js nao iniciou.\\nConfira a conexao com a API em /vendor/three';
     try {
-      window.__enviar(JSON.stringify({ type: 'diag', etapa: 'three nao iniciou', extra: 'import unpkg nao concluiu' }));
+      window.__enviar(JSON.stringify({ type: 'diag', etapa: 'three nao iniciou', extra: 'import local nao concluiu' }));
     } catch (e) {}
   }
 }, 8000);
@@ -722,5 +808,9 @@ setTimeout(function () {
 
 export function htmlVisualizador(inicial) {
     const json = JSON.stringify(inicial || null).replace(/</g, '\\u003c');
-    return HTML_VISUALIZADOR.replace('window.__inicial = null;', 'window.__inicial = ' + json + ';');
+    const match = String((inicial && inicial.url) || '').match(/^(https?:\/\/[^/]+)/i);
+    const origem = match ? match[1] + '/' : '';
+    return HTML_VISUALIZADOR
+        .replace('window.__inicial = null;', 'window.__inicial = ' + json + ';')
+        .replace(/__ORIGEM__/g, origem);
 }

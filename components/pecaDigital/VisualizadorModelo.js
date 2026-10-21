@@ -16,6 +16,8 @@ class VisualizadorModelo extends Component {
     state = {
         erro: '',
         carregando: true,
+        progresso: 0,
+        etapa: '',
         fundoId: fundoViewerAtual().id,
         html: '',
     }
@@ -42,6 +44,8 @@ class VisualizadorModelo extends Component {
             this.setState({
                 carregando: true,
                 erro: '',
+                progresso: 0,
+                etapa: '',
                 html: htmlVisualizador(this.montarCena()),
             });
             return;
@@ -96,6 +100,13 @@ class VisualizadorModelo extends Component {
         if (data.type === 'gesture') {
             travarRolagem(!!data.active);
         }
+        if (data.type === 'progress') {
+            const progresso = data.percent || 0;
+            const etapa = data.etapa || 'download';
+            if (progresso !== this.state.progresso || etapa !== this.state.etapa) {
+                this.setState({ progresso: progresso, etapa: etapa });
+            }
+        }
         if (data.type === 'ready') {
             this.enviarCena();
         }
@@ -123,7 +134,7 @@ class VisualizadorModelo extends Component {
 
     render() {
         const { url, largura, altura } = this.props;
-        const { erro, carregando, fundoId, html } = this.state;
+        const { erro, carregando, progresso, etapa, fundoId, html } = this.state;
         const lado = largura;
         const fundo = fundosViewer.filter(item => item.id === fundoId)[0] || fundoViewerAtual();
 
@@ -153,7 +164,15 @@ class VisualizadorModelo extends Component {
                     {carregando ? (
                         <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: fundo.color }} pointerEvents="none">
                             <ActivityIndicator size="large" color={fundo.id === 'white' ? '#108ee9' : '#ffffff'} />
-                            <Text style={{ marginTop: 8, color: fundo.id === 'white' ? 'rgba(0,0,0,0.65)' : '#ffffff' }}>Carregando modelo 3D...</Text>
+                            <Text style={{ marginTop: 8, color: fundo.id === 'white' ? 'rgba(0,0,0,0.65)' : '#ffffff' }}>
+                                {etapa === 'cache'
+                                    ? 'Abrindo modelo salvo...'
+                                    : etapa === 'parse'
+                                        ? 'Preparando modelo 3D...'
+                                        : etapa === 'download'
+                                            ? (progresso > 0 ? 'Baixando modelo 3D... ' + progresso + '%' : 'Baixando modelo 3D...')
+                                            : 'Carregando modelo 3D...'}
+                            </Text>
                         </View>
                     ) : null}
                 </View>
