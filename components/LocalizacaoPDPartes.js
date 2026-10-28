@@ -4,42 +4,19 @@ import MidiaPeca from './pecaDigital/MidiaPeca';
 
 const windowWidth = Dimensions.get('window').width;
 
+const LocalizacaoPDPartes = ({ pecaFisica, pecasFisicas = [], exibirLabel = true, onClickParte }) => {
+    const id = pecaFisica && pecaFisica._id;
+    const peca = Array.isArray(pecasFisicas)
+        ? pecasFisicas.find(item => item && item._id == id)
+        : pecasFisicas[id];
 
-const LocalizacaoPDPartes = ({ parte, pecaFisica, pecasFisicas = [], exibirLabel = true, onClickParte }) => {
-
-    let pecasFisicasFiltradas = [];
-    Object.keys(pecasFisicas).map(key => {
-
-        let peca = JSON.parse(JSON.stringify(pecasFisicas[key]));
-        if (peca._id == pecaFisica._id) {
-            pecasFisicasFiltradas.push(peca);
-        }
-        /*
-        let pecaFiltrada = JSON.parse(JSON.stringify(pecasFisicas[key]));
-        pecaFiltrada.midias = [];
-        pecaFiltrada.localizacao = [];
- 
-        let pontos = [];
-        for (let image of peca.midias) {
-            let imageFiltrada = JSON.parse(JSON.stringify(image));
-            pontos = image.pontos.filter(ponto => ponto.parte._id == parte._id);
-            if (pontos && pontos.length > 0) {
-                pecaFiltrada.midias.push(imageFiltrada);
-            }
-            pontos = [];
-        }
-        if (pecaFiltrada.midias && pecaFiltrada.midias.length > 0) {
-            pecasFisicasFiltradas.push(pecaFiltrada);
-        }
-        */
-
-    });
-
-    //  pecasFisicasFiltradas = pecasFisicasFiltradas.filter(p => p.midias.length > 0);
+    if (!peca || !peca.midias) {
+        return <View />;
+    }
 
     return (
         <View>
-            {pecasFisicasFiltradas.map(peca => peca.midias.map((image, idx) =>
+            {peca.midias.map((image, idx) =>
                 <View accessible={true} key={(image._id || peca._id) + '-' + idx}>
                     <MidiaPeca
                         midia={image}
@@ -60,8 +37,9 @@ const LocalizacaoPDPartes = ({ parte, pecaFisica, pecasFisicas = [], exibirLabel
                         </Text>
                     }
                 </View>
-            ))}
-        </View>)
-}
+            )}
+        </View>
+    );
+};
 
-export default LocalizacaoPDPartes
+export default LocalizacaoPDPartes;

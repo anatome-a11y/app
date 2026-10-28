@@ -9,7 +9,7 @@ import Input from '../components/Input';
 import Instrucoes from '../components/Instrucoes';
 import LocalizacaoPD from '../components/LocalizacaoPD';
 import Container from '../Container';
-import { norm, pecaNoIndice } from '../utils';
+import { norm, numeroDaLocalizacao, pecaNoIndice } from '../utils';
 import Placar from './Placar';
 import Resultados from './Resultados';
 
@@ -77,14 +77,16 @@ class FormContainer extends React.Component {
         let labelLocalizacaoRelativa;
 
         if (localizacaoRelativa != null && screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital') {
-            Object.keys(pecasFisicas).map(key => {
-                let peca = JSON.parse(JSON.stringify(pecasFisicas[key]));
-                for (let image of peca.midias) {
-                    let pontoFiltrado = image.pontos.filter(ponto => ponto.parte._id == parte._id);
-                    if (pontoFiltrado.length > 0) {
-                        labelLocalizacaoRelativa = pontoFiltrado[0].label;
-                    }
-                }
+            const alvo = String(parte && parte._id);
+            pecasFisicas.forEach(peca => {
+                (peca.midias || []).forEach(image => {
+                    (image.pontos || []).forEach(ponto => {
+                        const id = ponto.parte && (ponto.parte._id || ponto.parte);
+                        if (String(id) === alvo && ponto.label != null && String(ponto.label) !== '') {
+                            labelLocalizacaoRelativa = ponto.label;
+                        }
+                    });
+                });
             });
         }
 
@@ -92,7 +94,7 @@ class FormContainer extends React.Component {
 
         const info = (screenProps.anatomp.tipoPecaMapeamento == 'pecaFisica' ? 'Para cada parte (isto é, sua localização) em cada peça física, selecione o nome da parte e em seguida pressione o botão "Próximo" para submeter' : 'Para cada parte (isto é, sua localização) em cada peça digital, informe o nome da parte e em seguida pressione o botão "Próximo" para submeter.');
 
-        const disabled = this.state.pesquisa.length == 0;
+        const disabled = String(this.state.pesquisa || '').trim().length == 0;
         const disabledVerificacao = timer == 0 || tentativas == maxTentativa;
 
         return (
@@ -168,21 +170,22 @@ class FormContainer extends React.Component {
     }
 
     onFind = pesquisa => {
-        this.setState({
-            pesquisa
-        }, () => {
-            const found = this.props.mainState.partes.find(c => {
-                return norm(c.nome) == norm(this.state.pesquisa)
-            });
-
-            if (found) {
-                this.onChange(found);
-            } else {
-                announceForAccessibility(`Parte não encontrada`)
+        const texto = pesquisa == null ? '' : String(pesquisa);
+        const partes = this.props.mainState.partes || [];
+        let found = null;
+        for (let i = 0; i < partes.length; i++) {
+            const nome = partes[i] && partes[i].nome;
+            if (nome && norm(nome) == norm(texto)) {
+                found = partes[i];
+                break;
             }
-
-            this.setState({ found })
-        })
+        }
+        this.setState({ pesquisa: texto, found: found });
+        if (found) {
+            this.onChange(found);
+        } else if (texto.trim()) {
+            this.props.onChangeValor(texto);
+        }
     }
 
 
@@ -228,7 +231,7 @@ class PraTreNom extends Component {
                 peca.partesNumeradas.push(
                     {
                         parte: mapa.parte,
-                        numero: loc.numero,
+                        numero: numeroDaLocalizacao(loc, peca.pf, mapa),
                         referenciaRelativa: loc.referenciaRelativa,
                         correcao: false
                     }

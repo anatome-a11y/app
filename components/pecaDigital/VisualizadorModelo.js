@@ -38,6 +38,22 @@ class VisualizadorModelo extends Component {
         }, 600);
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+        return nextProps.url !== this.props.url
+            || nextProps.nome !== this.props.nome
+            || nextProps.pontos !== this.props.pontos
+            || nextProps.modo !== this.props.modo
+            || nextProps.exibirLabel !== this.props.exibirLabel
+            || nextProps.largura !== this.props.largura
+            || nextProps.altura !== this.props.altura
+            || nextState.html !== this.state.html
+            || nextState.erro !== this.state.erro
+            || nextState.carregando !== this.state.carregando
+            || nextState.progresso !== this.state.progresso
+            || nextState.etapa !== this.state.etapa
+            || nextState.fundoId !== this.state.fundoId;
+    }
+
     componentDidUpdate(prev) {
         if (prev.url !== this.props.url || prev.nome !== this.props.nome) {
             this.carregou = false;
@@ -132,9 +148,26 @@ class VisualizadorModelo extends Component {
         definirFundoViewer(id);
     }
 
+    guardarWeb = web => {
+        this.web = web;
+    }
+
+    aoCarregar = () => {
+        this.enviarCena();
+    }
+
+    fonte = () => {
+        const html = this.state.html;
+        const baseUrl = origemDaUrl(this.props.url);
+        if (!this.fonteAtual || this.fonteAtual.html !== html || this.fonteAtual.baseUrl !== baseUrl) {
+            this.fonteAtual = { html: html, baseUrl: baseUrl };
+        }
+        return this.fonteAtual;
+    }
+
     render() {
-        const { url, largura, altura } = this.props;
-        const { erro, carregando, progresso, etapa, fundoId, html } = this.state;
+        const { largura, altura } = this.props;
+        const { erro, carregando, progresso, etapa, fundoId } = this.state;
         const lado = largura;
         const fundo = fundosViewer.filter(item => item.id === fundoId)[0] || fundoViewerAtual();
 
@@ -149,14 +182,14 @@ class VisualizadorModelo extends Component {
                     onTouchCancel={() => travarRolagem(false)}
                 >
                     <WebView
-                        ref={r => { this.web = r; }}
-                        source={{ html: html, baseUrl: origemDaUrl(url) }}
+                        ref={this.guardarWeb}
+                        source={this.fonte()}
                         style={{ width: lado, height: altura || lado, opacity: 0.99, backgroundColor: fundo.color }}
                         javaScriptEnabled={true}
                         domStorageEnabled={true}
                         scalesPageToFit={false}
                         scrollEnabled={false}
-                        onLoadEnd={() => this.enviarCena()}
+                        onLoadEnd={this.aoCarregar}
                         onError={() => this.setState({ carregando: false, erro: 'Não foi possível abrir o visualizador 3D.' })}
                         onMessage={this.onMessage}
                         mixedContentMode="always"

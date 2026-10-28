@@ -104,14 +104,16 @@ class _FormContainer extends React.Component {
         let labelLocalizacaoRelativa;
 
         if (localizacaoRelativa != null && screenProps.anatomp.tipoPecaMapeamento == 'pecaDigital') {
-            Object.keys(pecasFisicas).map(key => {
-                let peca = JSON.parse(JSON.stringify(pecasFisicas[key]));
-                for (let image of peca.midias) {
-                    let pontoFiltrado = image.pontos.filter(ponto => ponto.parte._id == parte._id);
-                    if (pontoFiltrado.length > 0) {
-                        labelLocalizacaoRelativa = pontoFiltrado[0].label;
-                    }
-                }
+            const alvo = String(parte && parte._id);
+            pecasFisicas.forEach(peca => {
+                (peca.midias || []).forEach(image => {
+                    (image.pontos || []).forEach(ponto => {
+                        const id = ponto.parte && (ponto.parte._id || ponto.parte);
+                        if (String(id) === alvo && ponto.label != null && String(ponto.label) !== '') {
+                            labelLocalizacaoRelativa = ponto.label;
+                        }
+                    });
+                });
             });
         }
 

@@ -2,7 +2,7 @@ import Toast from 'antd-mobile-rn/lib/toast';
 import React, { Component } from 'react';
 import { announceForAccessibility, focusOnView } from 'react-native-accessibility';
 import Container from '../Container';
-import { pecaNoIndice } from '../utils';
+import { numeroDaLocalizacao, pecaNoIndice, textoRespostaParte } from '../utils';
 import FormTreLoc from './FormTreLoc';
 import Resultados from './Resultados';
 
@@ -44,7 +44,7 @@ class PraTreloc extends Component {
             mapa.localizacao.forEach(loc => {
                 const peca = pecaNoIndice(pecasFisicas, loc);
                 if (!peca) return;
-                peca.partesNumeradas.push({ parte: mapa.parte, numero: loc.numero, referenciaRelativa: loc.referenciaRelativa })
+                peca.partesNumeradas.push({ parte: mapa.parte, numero: numeroDaLocalizacao(loc, peca, mapa), referenciaRelativa: loc.referenciaRelativa })
             })
         })
 
@@ -97,7 +97,7 @@ class PraTreloc extends Component {
         if (this.state.timer != 0 && nextState.timer <= 0) {
             clearInterval(this.timer)
             if (!this.bloqueado && nextState.count !== nextState.data.length) {
-                const numero = this.getRespostaCorreta(this.state.data[this.state.count]);
+                const numero = textoRespostaParte(this.state.data[this.state.count]);
                 this.avisarEAvancar(false, 'Tempo limite excedido!\nResposta correta:\nparte ' + numero, 'info');
             }
         }
@@ -198,7 +198,7 @@ class PraTreloc extends Component {
 
         const usadas = tentativas + 1;
         if (usadas >= chances) {
-            const numero = this.getRespostaCorreta(data[count]);
+            const numero = textoRespostaParte(data[count]);
             this.setState({ tentativas: chances });
             this.avisarEAvancar(false, 'Você errou.\nResposta correta:\nparte ' + numero, 'fail');
             return;
@@ -279,7 +279,7 @@ class PraTreloc extends Component {
                         const partesNumeradas = pecasFisicas[key].partesNumeradas;
                         var pn = partesNumeradas.find(pn => pn.parte._id == parte.referenciaRelativa.referencia._id)
                         if (pn != undefined) {
-                            verificaRefrenciaRelativa = pn.numero == item.valores[0];
+                            verificaRefrenciaRelativa = String(pn.numero) === String(item.valores[0]);
                             if (verificaRefrenciaRelativa) {
                                 return true;
                             }
@@ -292,10 +292,11 @@ class PraTreloc extends Component {
             }
         }
 
+        const resposta = item.valores[0] == null ? '' : String(item.valores[0]);
         if (item.modo == 'singular') {
-            return item.partes.find(p => p.numero == item.valores[0]) != undefined
+            return item.partes.find(p => String(p.numero) === resposta) != undefined
         } else {
-            return item.partes.every(p => item.valores.indexOf(p.numero) != -1)
+            return item.partes.every(p => item.valores.map(String).indexOf(String(p.numero)) != -1)
         }
     }
 
@@ -312,7 +313,7 @@ class PraTreloc extends Component {
                         const partesNumeradas = pecasFisicas[key].partesNumeradas;
                         var pn = partesNumeradas.find(pn => pn.parte._id == parte.referenciaRelativa.referencia._id)
                         if (pn != undefined) {
-                            verificaRefrenciaRelativa = pn.numero == item.valores[0];
+                            verificaRefrenciaRelativa = String(pn.numero) === String(item.valores[0]);
                             if (verificaRefrenciaRelativa) {
                                 return pn.numero;
                             }
@@ -325,8 +326,7 @@ class PraTreloc extends Component {
              }*/
         }
 
-        const numeros = (item.partes || []).map(parte => parte.numero).filter(numero => numero != null && String(numero) !== '');
-        return numeros.length ? numeros.join(', ') : '';
+        return textoRespostaParte(item);
     }
 
 
