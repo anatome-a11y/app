@@ -467,6 +467,25 @@ function destacar(pontos) {
       parteId: ponto.parteId || '',
       parteNome: ponto.parteNome || ''
     };
+    var chaves = [];
+    if (ponto.malhas && ponto.malhas.length) {
+      ponto.malhas.forEach(function (chave) {
+        if (chave && chaves.indexOf(String(chave)) === -1) chaves.push(String(chave));
+      });
+    }
+    if (ponto.malha && chaves.indexOf(String(ponto.malha)) === -1) chaves.push(String(ponto.malha));
+    var regiao = (ponto.recorte && ponto.recorte.length >= 3)
+      || (ponto.faces && ponto.faces.length)
+      || (ponto.traco && ponto.traco.length > 1);
+    if (!regiao && chaves.length) {
+      chaves.forEach(function (chave) {
+        var parte = malhas[chave];
+        if (!parte) return;
+        pintarMalhaInteira(parte, cor);
+        parte.userData.marcacao = marcacao;
+      });
+      return;
+    }
     var mesh = ponto.malha && malhas[ponto.malha];
     if (ponto.recorte && ponto.recorte.length >= 3) {
       criarRecorte(modelo, ponto.recorte, cor, marcacao);
@@ -501,7 +520,7 @@ function desenharPinos(dados) {
   var mostrarLabel = dados.exibirLabel !== false;
   (dados.pontos || []).forEach(function (ponto) {
     if (ponto == null || ponto.z == null) return;
-    var cor = (ponto.malha || (ponto.traco && ponto.traco.length > 1)) ? corDaParte(ponto.label) : corPadrao;
+    var cor = (ponto.label != null && String(ponto.label) !== '') ? corDaParte(ponto.label) : corPadrao;
     var el = criarPino(ponto, cor, modoPinos, mostrarLabel);
     var obj = new CSS2DObject(el);
     obj.position.set(Number(ponto.x), Number(ponto.y), Number(ponto.z));

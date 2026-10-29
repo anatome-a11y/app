@@ -53,6 +53,7 @@ export const pontos3d = pontos => {
             parteId: parteId,
             parteNome: parte && parte.nome ? String(parte.nome) : '',
             malha: ponto.malha ? String(ponto.malha) : '',
+            malhas: Array.isArray(ponto.malhas) ? ponto.malhas.map(item => String(item)).filter(Boolean) : [],
             faces: faces,
             recorte: recorte,
             traco: traco,
